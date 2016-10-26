@@ -33,7 +33,7 @@ npm start
 [Shadow Book 开源项目](https://github.com/rewgt/shadow-book)   
 [Shadow Slide 开源项目](https://github.com/rewgt/shadow-slide)
 
-### 版权
+### 版权（BSD开源协议）
 
 Copyright 2015, PINP.ME Development Group. All rights reserved.
 
