@@ -26,7 +26,7 @@ npm start
 
 ### 相关资源
 
-[Shadow Widget 中文版用户手册](https://rewgt.github.io/shadow-widget/doc_zh/)
+[Shadow Widget 中文版用户手册](https://rewgt.github.io/shadow-server/public/static/files/rewgt/doc/doc_zh/github_doc.html)
 
 [Shadow Server 开源项目](https://github.com/rewgt/shadow-server)   
 [Shadow Widget 开源项目](https://github.com/rewgt/shadow-widget)   
