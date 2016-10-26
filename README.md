@@ -26,12 +26,17 @@ npm start
 
 ### 相关资源
 
-[Shadow Widget 中文版用户手册](https://rewgt.github.io/shadow-server/public/static/files/rewgt/doc/doc_zh/github_doc.html)
+<a target="_blank" href="https://rewgt.github.io/shadow-server/public/static/files/rewgt/doc/doc_zh/github_doc.html">Shadow Widget 中文版用户手册</a>
 
-[Shadow Server 开源项目](https://github.com/rewgt/shadow-server)   
-[Shadow Widget 开源项目](https://github.com/rewgt/shadow-widget)   
-[Shadow Book 开源项目](https://github.com/rewgt/shadow-book)   
-[Shadow Slide 开源项目](https://github.com/rewgt/shadow-slide)
+&nbsp;
+
+<a target="_blank" href="https://github.com/rewgt/shadow-server">shadow-server 开源项目</a>
+
+<a target="_blank" href="https://github.com/rewgt/shadow-widget">shadow-widget 开源项目</a>
+
+<a target="_blank" href="https://github.com/rewgt/shadow-book">shadow-book 开源项目</a>
+
+<a target="_blank" href="https://github.com/rewgt/shadow-slide">shadow-slide 开源项目</a>
 
 ### 版权（BSD开源协议）
 
