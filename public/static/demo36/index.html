@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo36</title>
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'> 
+  <div :t=ScenePage>
+    <div :t=Div left='{0}' top='{0}'>Hello, world!</div>
+    <div :t=Panel left='{-0.4}' top='{-0.4}' width='{200}' height='{100}'>
+      <div :t=Panel width='{0.2}' style='background-color:#eee'></div>
+      <div :t=SplitDiv></div>
+      <div :t=Panel width='{-1}' style='background-color:#eee'></div>
+    </div>
+  </div>
+  
+  <div :t=ScenePage>
+    <div :t=Panel left='{-0.5}' top='{-0.5}' width='{0.9999}' height='{0.9999}'>
+      <div :t=Div>Hello, world!</div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

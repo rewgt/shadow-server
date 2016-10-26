@@ -1,0 +1,318 @@
+<!doctype html>
+<html>
+<head>
+<title>Online debugger</title>
+
+<script src="js/jquery-2.1.0.min.js"></script>
+<script src="codemirror/lib/codemirror.js"></script>
+<link rel="stylesheet" href="codemirror/lib/codemirror.css">
+<script src="codemirror/mode/javascript/javascript.js"></script>
+
+<style>
+.tool-bar {
+  width: 100%;
+  margin: 0px 0px 0px 4px;
+}
+.tool-bar > img {
+  margin: 4px 0px 4px 0px;
+  border: 0px solid rgba(0,0,0,0);
+  border-width: 0px 1px 1px 0px;
+  width: 25px;
+  height: 25px;
+  float: left;
+}
+.tool-bar > img:hover {
+  background-color: #fff;
+  border-color: #ccc;
+}
+
+.CodeMirror-code {
+  font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
+}
+
+#info-dlg {
+  display: none;
+  position: absolute;
+  opacity: 1;
+  background-color: #555;
+  width: 360px;
+  height: 100px;
+
+  color: #fff;
+  font-size: 22px;
+  z-index: 100;
+  
+  border-radius: 8px;
+  -o-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -webkit-border-radius: 8px;
+}
+#info-dlg.showing {
+  display: block;
+  -o-transition: -o-opacity 2s ease-in;
+  -moz-transition: -moz-opacity 2s ease-in;
+  -webkit-transition: -webkit-opacity 2s ease-in;
+  -ms-transition: -ms-opacity 2s ease-in;
+  transition: opacity 2s ease-in;
+}
+.info-img {
+  width: 60px;
+  height: 100%;
+  float: left;
+}
+.info-img.info-succ {
+  background: url('info_succ.png') no-repeat center;
+}
+.info-img.info-fail {
+  background: url('info_fail.png') no-repeat center;
+}
+.info-msg {
+  width: 300px;
+  height: 100%;
+  float: left;
+}
+.info-msg > table {
+  margin: 0px 0px 0px 10px;
+  width: 290px;
+  height: 100%;
+  vertical-align: middle;
+  overflow: hidden;
+}
+</style>
+</head>
+
+<body>
+
+<div id="editor-root" style="width:100%">
+  <div style="width:90%; height:100%; border:1px solid #ccc; float:left">
+  <textarea id="code-mirror" style="width:100%; height:100%"></textarea>
+  </div>
+  
+  <div style="width:32px; height:100%; background-color:#f7f7f7; border:0px solid #ccc; border-width:1px 1px 1px 0px; float:left"><div class="tool-bar"> 
+    <img name="update" title="Upload & apply (ctrl+alt+s,cmd+alt+s)" src="upload.png"><img name="fontsize" value="0" title="Toggle font size" src="fontsize.png"><img name="restore" title="load source file" src="rollback.png"><img name="save" title="Save source file (ctrl+s,cmd+s)" src="save.png">
+  </div></div>
+</div>
+
+<div id="info-dlg">
+  <div class="info-img"></div>
+  <div class="info-msg"><table><tr><td></td></tr></table><div>
+</div>
+
+<script type="text/javascript">
+(function() {
+  var uploadURL = '';
+  var downloadURL = '';
+  var useLocalStorage = false;
+  var defaultSrcFile = '';
+  
+  var ajaxErrDesc = function(res,errMethod) {
+    // res: {"readyState":4,"responseText":"...","responseJSON":{"message":"..."},"status":500,"statusText":"Internal Server Error"}
+    if (res.readyState < 4)
+      return res.statusText || 'request abort';
+    else {
+      var s = '';
+      if (errMethod && res.responseJSON) // if reply in json format, and json[errMethod] is err-desc
+        s = res.responseJSON[errMethod];
+      return s || (res.statusText? res.status+' ('+res.statusText+')': '') || ('error code:' + res.status);
+    }
+  };
+  
+  var dlgReEnter = 0;
+  var dlgNode = document.getElementById('info-dlg');
+  var showMsgInfo = function(sMsg,sImgCls) {
+    if (dlgReEnter > 0) {
+      alert(sMsg);  // avoid re-enter
+      return;
+    }
+    
+    dlgNode.style.left = Math.floor((window.innerWidth * 0.9 - 360) / 2) + 'px';
+    dlgNode.style.top = Math.floor((window.innerHeight - 100) / 2) + 'px';
+    
+    var imgNode = dlgNode.querySelector('.info-img');
+    if (sImgCls == 'info-succ' || sImgCls == 'info-fail') {
+      imgNode.classList.remove('info-succ');
+      imgNode.classList.remove('info-fail');
+      imgNode.classList.add(sImgCls);
+    }
+    var tdNode = dlgNode.querySelector('.info-msg td');
+    tdNode.innerHTML = sMsg.replace(/</gm,'&lt;').replace(/>/gm,'&gt;');
+    
+    dlgReEnter += 1;
+    dlgNode.classList.add('showing');
+    setTimeout( function() {
+      dlgNode.style.opacity = '0';
+      setTimeout( function() {
+        dlgNode.classList.remove('showing');
+        setTimeout( function() {
+          dlgNode.style.opacity = '1';
+          dlgReEnter -= 1;
+        },0);
+      },2500);
+    },2000);
+  };
+  var showSuccInfo = function(sMsg) {
+    showMsgInfo(sMsg,'info-succ');
+  };
+  var showErrorInfo = function(sMsg) {
+    showMsgInfo(sMsg,'info-fail');
+  };
+  
+  var iHi = Math.max(80,window.innerHeight - 26);
+  var rootNode = document.getElementById('editor-root');
+  rootNode.style.height = iHi + 'px';
+  
+  var myEditor = CodeMirror.fromTextArea(document.getElementById('code-mirror'),{
+    lineNumbers: true,
+    indentUnit: 2,
+    tabSize: 2,
+    indentWithTabs: false,
+    lineWrapping: false,
+    readOnly: false,
+    autofocus: true,
+    mode:  "javascript",
+  });
+  
+  var mirrorNode = document.querySelector('div.CodeMirror');
+  myEditor.setSize(null,iHi);
+  // myEditor.setValue('function test() {}');  // myEditor.getValue()
+  
+  var saveOrUpdate = function(sTask,sSrcFile) {
+    var sSrc = myEditor.getValue();
+    if (!sSrc) {
+      showErrorInfo('Source code is empty, ignore uploading');
+      return;
+    }
+    
+    if (useLocalStorage && window.localStorage)
+      window.localStorage.setItem('sources.'+sSrcFile,sSrc);
+    
+    $.ajax({ type: 'PUT', url: uploadURL,
+      // if request by data=JSON.stringify(), should send with:
+      //   headers: {'Content-Type':'application/json; charset=utf-8'}
+      // else, send data={} directly, default header is OK
+      data: {
+        name: sSrcFile,
+        src: sSrc,
+        apply: (sTask == 'update'?1:0),
+      },
+      
+      success: function(res) {
+        if (sTask == 'update')
+          showSuccInfo('save & apply successful');
+        else showSuccInfo('save soure file successful');
+      },
+      
+      error: function(res) {
+        var sDetail = ajaxErrDesc(res,'detail');
+        if (sDetail) console.log(sDetail);
+        showErrorInfo(ajaxErrDesc(res,'message'));
+      },
+    });
+  };
+  var loadSource = function(sSrcFile) {
+    $.ajax({ type: 'GET',
+      url: downloadURL,
+      data: {name:sSrcFile},
+      success: function(res) {
+        myEditor.setValue(res.src || '');
+        showSuccInfo('get source (' + sSrcFile + ') successful');
+      },
+      error: function(res) {
+        var sInfo = ajaxErrDesc(res,'message');
+        if (useLocalStorage && window.localStorage) {
+          if (confirm('Load source failed (' + sInfo + '), do you want load it from local storage?')) {
+            var sSrc = window.localStorage.getItem('sources.' + sSrcFile);
+            if (sSrc)
+              myEditor.setValue(sSrc);
+            else alert('No history source code yet!');
+          }
+        }
+        else showErrorInfo(sInfo);
+      },
+    });
+  };
+  
+  myEditor.on('keydown', function(cm,ev) {
+    if ((ev.ctrlKey || ev.metaKey) && ev.keyCode == 83) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      
+      if (!defaultSrcFile) {
+        defaultSrcFile = prompt('Input source file name','trunk.js') || '';
+        if (!defaultSrcFile) return;
+      }
+      if (ev.altKey)
+        saveOrUpdate('update',defaultSrcFile);   // ctrl+alt+s or cmd+alt+s
+      else saveOrUpdate('save',defaultSrcFile);  // ctrl+s or cmd+s
+    }
+  });
+  
+  $.ajax( { type: 'GET',
+    url: 'config.json',
+    success: function(res) {
+      uploadURL = res.upload_url || '';
+      downloadURL = res.download_url || '';
+      useLocalStorage = res.use_local_storage;
+      if (useLocalStorage && !window.localStorage) {
+        console.log('Warning: your browser not support local storage!');
+        useLocalStorage = false;
+      }
+      
+      mirrorNode.style.fontSize = (res.font_size || 16) + 'px';  // 16 20 14
+      myEditor.refresh();
+    },
+    // error: function(res) {},  // do nothing 
+  });
+  
+  var toolBar = document.querySelector('div.tool-bar');
+  toolBar.onclick = function(ev) {
+    var targ = ev.target;
+    if (targ.nodeName != 'IMG') return;
+    
+    var sName = targ.getAttribute('name');
+    if (sName == 'save' || sName == 'update') {
+      if (!uploadURL) {
+        alert("'upload_url' has not set in config.json!");
+        return;
+      }
+      saveOrUpdate(sName,defaultSrcFile);
+    }
+    else if (sName == 'restore') {
+      if (!downloadURL) {
+        alert("'download_url' has not set in config.json!");
+        return;
+      }
+      if (!defaultSrcFile) {
+        defaultSrcFile = prompt('Input source file name','trunk.js') || '';
+        if (!defaultSrcFile) return;
+      }
+      
+      var sExist = myEditor.getValue();
+      if (sExist && !confirm('Do you want load source code (' + defaultSrcFile + ')? it will overwrite current.'))
+        return;
+      loadSource(defaultSrcFile);
+    }
+    else if (sName == 'fontsize') {
+      var sTag = targ.getAttribute('value'), sSize='';
+      if (sTag == '1') {
+        sTag = '2';
+        sSize = '14px';
+      }
+      else if (sTag == '2') {
+        sTag = '0';
+        sSize = '16px';
+      }
+      else {
+        sTag = '1';
+        sSize = '20px';
+      }
+      targ.setAttribute('value',sTag);
+      mirrorNode.style.fontSize = sSize;
+      myEditor.refresh();
+    }
+  };
+})();
+</script>
+
+</body>
+</html>

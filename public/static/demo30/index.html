@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo30</title>
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'>
+  <div :t=Panel key='top' height='{null}'>
+    <div :t=Ul key='ul' width='{0.9999}' dual-data='{[{"name":"A","data":["item1","item2"]},{"name":"B","data":["test1","test2"]}]}' $$for='item in duals.data'>
+      <div :t=Li $key='"li_" + index' $html='item.name'></div>
+      <div :t=Ol $key='"ol_" + index' $for='item in item.data'>
+        <div :t=Li $key='"li_" + index' $html='item + " in " + item(-1).name'></div>
+      </div>
+    </div>
+    
+    <div :t=Ul key='ul2' width='{0.9999}' dual-data='{[{"name":"A","data":["item1","item2"]},{"name":"B","data":["test1","test2"]}]}' $$for='item in duals.data'>
+      <div :t=Li $key='"li_" + index' $html='item.name'></div>
+      <div :t=Ol $key='"ol_" + index' $data='item.data' $for='item in item.data'>
+        <div :t=Li $key='"li_" + index' $html='item + " == " + state("//ol_" + index(-1)).data[index]'></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex;
+
+});
+</script>
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

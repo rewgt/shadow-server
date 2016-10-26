@@ -1,0 +1,9 @@
+Span
+4.4.5.!span
+[ duals ]
+  klass: ''
+  style: {}
+  "html.": null
+  id__: 0
+  childNumId: 0
+  trigger: undefined

@@ -1,0 +1,7 @@
+Panel
+4.4.2.!panel
+[ props ]
+  className: 'rewgt-panel'
+[ method ]
+  isRow()
+  isReverse()

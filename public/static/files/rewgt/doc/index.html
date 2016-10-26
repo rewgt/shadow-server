@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Shadow Widget Online Document</title>
+
+<script>
+window.addEventListener('load', function(event) {
+
+var baseURL = '/app/files/rewgt/web/doc/';
+var bookURL_zh = { 'book1': 'doc_zh/#1.',
+  'book2': 'doc_zh/#2.',
+  'book3': 'doc_zh/#3.',
+  'book4': 'doc_zh/#4.',
+  'book5': 'doc_zh/#5.',
+};
+
+var bookNodes = document.querySelectorAll('#book-list a');
+for (var i=0,node; node=bookNodes[i]; i++) {
+  var sId = node.getAttribute('name'), sUrl = bookURL_zh[sId];
+  if (sUrl) node.setAttribute('href',baseURL+sUrl);
+} 
+
+//---------------------------------------
+var onlineHelpOpt = null;  // no use yet
+
+if (!window.parent || window.parent.window === window) return;
+window.addEventListener('message', function(msg) {
+  try {
+    if (typeof msg == 'object' && msg.data) {
+      msg = msg.data;
+      msg = JSON.parse(msg.slice(14)); // remove prefix '[PROJECT_NAME]'
+    }
+    else msg = null;
+  }
+  catch(e) {
+    msg = null;
+    console.log(e);
+  }
+  
+  if (msg instanceof Object && msg) {
+    if (msg.method == 'init') {  // msg.param: [taskId,inValue,bCss]
+      var data = msg.param[1];
+      if (typeof data == 'object') {
+        onlineHelpOpt = data;
+      }
+    }
+    else if (msg.method == 'close') {  // just close, no saving
+      var s = '[PROJECT_NAME]' + JSON.stringify({method:'closeDialog',param:[]});
+      window.parent.window.postMessage(s,'*');
+    }
+  }
+}, false);
+
+var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'onDialogLoad',param:[]});
+window.parent.window.postMessage(sCmd,'*');
+
+},false);
+</script>
+
+<style>
+html {
+  font-size: 16px;      /* base of rem */
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+#book-list li {
+  margin: 4px 0px;
+}
+</style>
+</head>
+
+<body style='background-color:#fff'>
+
+<h2>shadow-widget online document</h2>
+
+<ol id='book-list'>
+  <li><a name="book1" target="_blank">Introduce</a></li>
+  <li><a name="book2" target="_blank">Basic: Propgramming in web page</a></li>
+  <li><a name="book3" target="_blank">Advanced: Propgramming in formal project</a></li>
+  <li><a name="book4" target="_blank">APIs</a></li>
+  <li><a name="book5" target="_blank">Visualization design of GUI</a></li>
+</ol>
+
+</body>
+</html>

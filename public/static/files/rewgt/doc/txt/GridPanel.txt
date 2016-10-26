@@ -1,0 +1,8 @@
+GridPanel
+4.4.2.!grid_panel
+[ props ]
+  cellSpacing: undefined
+  sizes: [0.3,0.3,-1]
+[ duals ]
+  cellSpacing
+  sizes

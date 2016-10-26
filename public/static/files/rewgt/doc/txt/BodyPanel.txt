@@ -1,0 +1,4 @@
+BodyPanel
+4.4.2.!body_panel
+[ duals ]
+  innerSize: [window.innerWidth,window.innerHeight]

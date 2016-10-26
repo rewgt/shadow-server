@@ -1,0 +1,4 @@
+ScenePage
+4.4.2.!scene_page
+[ props ]
+  className: 'rewgt-panel rewgt-scene'

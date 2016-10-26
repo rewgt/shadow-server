@@ -1,0 +1,5 @@
+TablePanel
+4.4.2.!table_panel
+[ props ]
+  className: 'rewgt-unit rewgt-table'
+  height: null

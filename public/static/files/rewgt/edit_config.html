@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Configure</title>
+
+<script>
+window.addEventListener('load', function(event) {
+
+var configChanged = false;
+var configData = null;
+
+var bakSaveNode     = document.querySelector('#bak-save');
+var storageSizeNode = document.querySelector('#storage-size');
+var resEditingNode  = document.querySelector('#res-editing');
+var resTitleNode    = document.querySelector('#res-title');
+var resUrlNode      = document.querySelector('#res-url');
+var resAddNode      = document.querySelector('#res-add');
+
+function htmlEncode(s) {
+  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+}
+
+bakSaveNode.onchange = function(event) {
+  if (!configData) return;
+  configData.backupHTML = bakSaveNode.checked;
+  configChanged = true;
+};
+
+storageSizeNode.onchange = function(event) {
+  if (!configData) return;
+  var i = parseInt(storageSizeNode.value || '5');
+  if (isNaN(i)) {
+    i = 5;
+    alert('Please input number: 3 ~ 64');
+  }
+  i = Math.max(3,Math.min(64,i));
+  
+  configData.cacheSize = i;
+  configChanged = true;
+};
+
+resAddNode.onclick = function(event) {
+  if (!configData) return;
+  
+  var sTitle = resTitleNode.value.trim();
+  var sUrl = resUrlNode.value.trim();
+  if (!sTitle || !sUrl) {
+    alert('title or URL can not be empty!');
+    return;
+  }
+  
+  if (sTitle == 'property' || sTitle == 'resource') {
+    alert('Title (' + sTitle + ') is reserved, please take another one.');
+    return;
+  }
+  var oldItem = configData.resourcePages.find( function(item) { return item[0] == sTitle; });
+  if (oldItem) {
+    alert('Same title (' + sTitle + ') already exist!');
+    return;
+  }
+  
+  configData.resourcePages.push([sTitle,sUrl]);
+  refreshResPages();
+  configChanged = true;
+};
+
+function refreshResPages() {
+  if (!configData) return;
+  
+  // first, remove items
+  var ownerNode = resEditingNode.parentNode;
+  while (ownerNode.children.length) {
+    var node = ownerNode.children[0];
+    if (node === resEditingNode)
+      break;
+    else ownerNode.removeChild(node);
+  }
+  
+  // then, add every item
+  configData.resourcePages.forEach( function(item,idx) {
+    var sTitle = item[0], sUrl = item[1];
+    var node = document.createElement('p');
+    node.setAttribute('style','padding:0px 0px 0px 10px');
+    node.innerHTML = htmlEncode(sTitle) + ': <span class="res-path">' + htmlEncode(sUrl) + '</span>&nbsp;&nbsp;&nbsp;<button idx="' + idx + '">Remove</button>';
+    ownerNode.insertBefore(node,resEditingNode);
+    
+    node.querySelector('button').onclick = function(event) {
+      var sIdx = event.target.getAttribute('idx');
+      if (!sIdx) return;
+      
+      var idx = parseInt(sIdx);
+      if (configData && !isNaN(idx) && idx < configData.resourcePages.length) {
+        configChanged = true;
+        configData.resourcePages.splice(idx,1);
+        refreshResPages();
+      }
+    };
+  });
+}
+
+function initGui() {
+  if (!configData) return;
+  
+  bakSaveNode.checked = !!configData.backupHTML;
+  storageSizeNode.value = configData.cacheSize;
+  refreshResPages();
+  
+  configChanged = false;
+}
+
+if (!window.parent || window.parent.window === window) return;
+window.addEventListener('message', function(msg) {
+  try {
+    if (typeof msg == 'object' && msg.data) {
+      msg = msg.data;
+      msg = JSON.parse(msg.slice(14)); // remove prefix '[PROJECT_NAME]'
+    }
+    else msg = null;
+  }
+  catch(e) {
+    msg = null;
+    console.log(e);
+  }
+  
+  if (typeof msg == 'object') {
+    if (msg.method == 'init') {  // msg.param: [taskId,inValue,bCss]
+      var data = msg.param[1];
+      if (typeof data == 'object' && Array.isArray(data.resourcePages)) {
+        configData = data;
+        initGui();
+      }
+    }
+    else if (msg.method == 'close') {
+      var isClose = !!msg.param[0];
+      if (!configData) {
+        isClose = true;
+        configChanged = false;
+      }
+      else resAddNode.focus();  // try fire onchange event
+      
+      setTimeout( function() {
+        var s = '[PROJECT_NAME]' + JSON.stringify({method:'saveConfigData',param:[isClose,configChanged,configData]});
+        window.parent.window.postMessage(s,'*');
+      },0);
+    }
+  }
+}, false);
+
+var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'onDialogLoad',param:[]});
+window.parent.window.postMessage(sCmd,'*');
+}, false);
+</script>
+
+<style>
+body {
+  background-color: #fff;
+  line-height: 1.4;
+  font-size: 15px;
+  color: #222;
+}
+p {
+  margin: 6px 0px;
+}
+.cfg-title {
+  margin: 20px 0px 0px;
+}
+.res-path {
+  color: #888;
+}
+</style>
+</head>
+
+<body>
+
+<h3 class='cfg-title'>1. Backup when saving</h3>
+<p style='padding:0px 0px 0px 6px'><input id='bak-save' type='checkbox' checked><label for='bak-save'> Backup *.html.bak file before saving</label></p>
+
+<h3 class='cfg-title'>2. Available local storage size</h3>
+<p style='padding:0px 0px 0px 12px'><input id='storage-size' type='text' placeholder='5' style='width:24px'> M</p>
+<p style='padding:0px 0px 0px 10px; color:#888'>(please set same capacity in your web browser, undo-buffer is saved in LocalStorage)</p>
+
+<h3 class='cfg-title'>3. Resource pages</h3>
+<div>
+  <p id='res-editing' style='padding:0px 0px 0px 10px'>Title: <input id='res-title' type='text' style='width:60px'> &nbsp;&nbsp;URL: <input id='res-url' type='text' style='width:180px'> &nbsp;&nbsp;<button id='res-add'>Add</button></p>
+</div>
+<p style='padding:0px 0px 0px 10px; color:#888'>(Modification will take effect next time, i.e. after the page reloaded)</p>
+
+</body>
+</html>

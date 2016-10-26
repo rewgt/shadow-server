@@ -1,0 +1,5 @@
+Fieldset
+4.4.4.!noscript
+[ props ]
+  padding: [10,10,10,10]
+  borderWidth: [2,2,2,2]

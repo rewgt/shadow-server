@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Markdown information</title>
+
+<style>
+html {
+  font-size: 14px;
+}
+body {
+  margin: 2px;
+}
+
+.res-syntax {
+  width: 210px;  /* 300px */
+  height: 100%;
+  min-height: 20px;
+  margin-left: 2px;
+}
+div.res-syntax h2 {
+  font-family: "Lucida Grande","Helvetica Neue",Verdana,sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: -0.5em;
+}
+div.res-syntax h3 {
+  font-family: "Lucida Grande","Helvetica Neue",Verdana,sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  margin-bottom: 0.25em;
+  margin-top: 1.5em;
+}
+div.res-syntax p {
+  font-family: "Lucida Grande","Helvetica Neue",Verdana,sans-serif;
+  font-size: 12px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+div.res-syntax pre {
+  width: 94%;
+  line-height: 12px;
+  margin-top: 0px;
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  padding: 4px;
+}
+div.res-syntax code {
+  font-family: Consolas,Menlo,"Andale Mono","Lucida Console",Courier,monospace;
+  font-size: 11px;
+}
+</style>
+</head>
+
+<body style='background-color:#e8e8e8'>
+
+<div class="res-syntax" style="display:block; overflow-x:hidden; overflow-y:auto">
+  <h2><u>Markdown Rules</u></h2>
+  
+  <h3>Phrase Emphasis</h3>
+  <pre><code>*italic*&nbsp;&nbsp;&nbsp;**bold**<br>_italic_&nbsp;&nbsp;&nbsp;__bold__</code></pre>
+  
+  <h3>Links</h3>
+  <p>Inline:</p>
+  <pre><code>[desc](http://a.com/ "title")</code></pre>
+  <p>Reference-style label (titles are optional):</p>
+  <pre><code>use [desc][id] anywhere else<br>in doc, define the link:<br><br>[id]: http://a.com/ "title"</code></pre>
+  
+  <h3>Images</h3><p>Inline (titles are optional):</p>
+  <pre><code>![alt](/path/a.jpg "title")</code></pre>
+  <p>Reference-style:</p>
+  <pre><code>![alt][id]<br><br>[id]: /path/a.jpg "title"</code></pre>
+  
+  <h3>Headers</h3>
+  <p>Setext-style:</p>
+  <pre><code>Header 1<br>========<br><br>Header 2<br>--------</code></pre>
+  <p>atx-style (closing # are optional):</p>
+  <pre><code># Header 1 #<br><br>### Header 3 ###<br><br>###### Header 6</code></pre>
+  
+  <h3>Lists</h3>
+  <p>Ordered, without paragraphs:</p>
+  <pre><code>1.&nbsp;Foo<br>2.&nbsp;Bar</code></pre>
+  <p>Unordered, with paragraphs:</p>
+  <pre><code>*&nbsp;&nbsp;&nbsp;A list item.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;With multiple paragraphs.<br><br>*&nbsp;&nbsp;&nbsp;Bar</code></pre>
+  <p>You can nest them:</p>
+  <pre><code>*&nbsp;&nbsp;&nbsp;Abacus<br>&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;answer<br>*&nbsp;&nbsp;&nbsp;Bubbles<br>&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;&nbsp;bunk<br>&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;&nbsp;bupkis<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;BELITTLER<br>&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;burper<br>*&nbsp;&nbsp;&nbsp;Cunning</code></pre>
+  
+  <h3>Blockquotes</h3>
+  <pre><code>&gt; Email-style angle brackets<br>&gt;&nbsp;are used for blockquotes.<br><br>&gt;&nbsp;&gt;&nbsp;And, they can be nested.<br><br>&gt;&nbsp;### Header in blockquotes<br>&gt;<br>&gt;&nbsp;*&nbsp;You can quote a list.<br>&gt;&nbsp;*&nbsp;Etc.</code></pre>
+  
+  <h3>Code Spans</h3>
+  <pre><code>`&lt;code&gt;` spans are delimited<br>by backticks.<br><br>You can include literal<br>backticks like `` `this` ``.</code></pre>
+  
+  <h3>Preformatted Code Blocks</h3>
+  <p>Indent every line of a code block by at least 4 spaces or 1 tab.</p>
+  <pre><code>This is a normal paragraph.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;This is a preformatted<br>&nbsp;&nbsp;&nbsp;&nbsp;code block.</code></pre>
+  
+  <h3>Horizontal Rules</h3>
+  <p>Three or more dashes or asterisks:</p>
+  <pre><code>---<br><br>* * *<br><br>- - - -</code></pre>
+  
+  <h3>Manual Line Breaks</h3>
+  <p>End a line with two or more spaces:</p>
+  <pre><code>Roses are red,&nbsp;&nbsp;&nbsp;<br>Violets are blue.</code></pre>
+  
+  <h3>RefDiv reference (extended)</h3>
+  <pre><code>&lt;div class="rewgt-mdref" <br>path="/path/to/ref"&gt;&lt;/div&gt;</code></pre>
+  
+  <h3>Anchor for link (extended)</h3>
+  <pre><code>use [desc](#id) anywhere else<br>in doc, define the anchor:<br><br>&lt;a name="id"&gt;&lt;/a&gt;</code></pre>
+</div>
+
+</body>
+</html>

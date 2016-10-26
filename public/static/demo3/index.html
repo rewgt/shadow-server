@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo3</title>
+
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'>
+  <div :t=Panel width='{0.9999}' height='{0.9999}'>
+    <div :t=Panel klass='col-reverse' style='background-color:#eee' width='{120}' height='{0.9999}'>
+      <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>A</div></div>
+      <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>B</div></div>
+      <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>C</div></div>
+    </div>
+    <div :t=Panel klass='row-reverse' style='background-color:#e4e4e4' width='{-1}' height='{0.9999}'>
+      <div :t=Panel klass='row-reverse' style='border:1px solid #888' height='{120}' border-width='{[1,2,1,2]}'>
+        <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>1</div></div>
+        <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>2</div></div>
+        <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>3</div></div>
+      </div>
+      <div :t=Panel klass='reverse-row' style='border:1px solid #888' height='{120}' border-width='{[1,2,1,2]}'>
+        <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>1</div></div>
+        <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>2</div></div>
+        <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>3</div></div>
+      </div>
+      <div :t=Panel klass='row-reverse nowrap-default-wrap_reverse' style='border:1px solid #888' height='{120}' border-width='{[1,2,1,2]}'>
+        <div :t=Panel width='{100}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>1</div></div>
+        <div :t=Panel width='{-0.5}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>2</div></div>
+        <div :t=Panel width='{-0.5}' height='{100}' style='border:1px solid red' border-width='{1}'><div :t=P>3</div></div>
+      </div>
+    </div>
+  </div>  
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

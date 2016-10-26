@@ -1,0 +1,23 @@
+{
+  "name": "sample_dev3",
+  "version": "1.0.0",
+  "description": "Shadow widget sample project",
+  "main": "index.js",
+  "scripts": {
+    "start": "watchify index.js -v -o bundle.js -t [ babelify --presets [ es2015 react ] ]",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.13.2",
+    "babel-preset-react": "^6.11.1",
+    "babelify": "^7.3.0",
+    "watchify": "^3.7.0"
+  },
+  "dependencies": {
+    "react": "^15.0.0",
+    "react-dom": "^15.0.0",
+    "shadow-widget": "^0.0.1"
+  }
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo32</title>
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'>
+  <div :t=Panel key='top' height='{null}'>
+    <div :t=Div key='div' width='{0.9999}' dual-data='{{"name":"wayne","registed":true,"hasLogin":true}}' $for=''>
+      <div :t=P $if='duals.data.hasLogin' $html='duals.data.name + " has login!"'></div>
+      <div :t=P key='elel' $else=''>
+        <span :t=Span $html='"login for " + duals.data.name'></span><span :t=Br></span>
+        <span :t=Input placeholder='Input account'></span><span>&nbsp;&nbsp;</span>
+        <span :t=Input placeholder='Input password'></span>
+      </div>
+    </div>
+    
+    <!--
+    <div :t=Div key='div2' width='{0.9999}' dual-data='{{"name":"wayne","registed":true,"hasLogin":false}}' $for=''>
+      <div :t=P $if='duals.data.hasLogin' $html='duals.data.name + " has login!"'></div>
+      <div :t=P $elif='ex.isFalse(duals.data.registed)'>
+        <span :t=Button>regist account</span>
+      </div>
+      <div :t=P $else=''>
+        <span :t=Span $html='"login for " + duals.data.name'></span><span :t=Br></span>
+        <span :t=Input placeholder='Input account'></span><span>&nbsp;&nbsp;</span>
+        <span :t=Input placeholder='Input password'></span>
+      </div>
+    </div>  -->
+    
+    <!--
+    <div :t=Div key='div3' width='{0.9999}' dual-data='{5}' $for=''>
+      <div :t=P $if='duals.data == 1'>1</div>
+      <div :t=P $elif='duals.data == 2'>2</div>
+      <div :t=P $elif='duals.data == 3'>3</div>
+      <div :t=P $elif='duals.data == 4'>4</div>
+      <div :t=P $else=''>others</div>
+    </div>  -->
+    
+    <!--
+    <div :t=Div key='div4' width='{0.9999}' dual-data='{5}' $for=''>
+      <div :t=P $if='duals.data >= 1 && duals.data <= 4'>
+        <span :t=Span $if='duals.data >= 3'>
+          <span :t=Span $if='duals.data == 3'>3</span>
+          <span :t=Span $else=''>4</span>
+        </span>
+        <span :t=Span $elif='duals.data == 1'>1</span>
+        <span :t=Span $else=''>2</span>
+      </div>
+      <div :t=P $else=''>others</div>
+    </div>  -->
+  </div>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex;
+
+});
+</script>
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

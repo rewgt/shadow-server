@@ -1,0 +1,12 @@
+OptLi
+4.4.4.!opt_li
+[ props ]
+  data-checked: ''
+[ duals ]
+  isolated: false
+  recheckable: false
+  popOption: undefined
+  data-checked: ''
+[ method ]
+  fireTrigger()
+  setChecked(callback,isForce,newOpt)

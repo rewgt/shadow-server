@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Property editor</title>
+<script src="js/jsoneditor.js"></script>
+
+<style>
+body {
+  background-color: #e8e8e8;
+  margin: 1px;
+  padding: 0px;
+  font-size: 15px;
+}
+h1,h2,h3,h4,h5,h6 {
+  margin: 8px 0px 2px 0px;
+}
+p {
+  margin: 4px 0px 2px 0px;
+}
+
+div.row {
+  margin-bottom: 8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id='editor_holder'></div>
+<div id='editor_attrs' style='margin:10px 2px'></div>
+<div id='editor_helper' style='margin:10px 2px'></div>
+
+<script>
+
+var editor = null;
+var editorHolder = document.getElementById('editor_holder');
+var editorAttrs  = document.getElementById('editor_attrs');
+var editorHelper = document.getElementById('editor_helper');
+
+function htmlEncode(s) {
+  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+}
+
+editorHelper.addEventListener('click',function(event) {
+  if (event.target.nodeName != 'A') return;
+  var sUrl = editorHelper.getAttribute('path');
+  if (sUrl) window.open(sUrl,'_blank');
+},false);
+
+window.addEventListener('message', function(msg) {
+  var lastSchemaId = 0;
+  var lastRootAttr = [];
+  var editorReady  = false;
+  
+  function trySave() {
+    if (!window.parent || window.parent.window === window) return;
+    if (!editor || !editorReady) return;
+    
+    var sRet = '', errors = editor.validate();
+    if (errors.length) {
+      var sMsg = 'warning: validate JSON data failed.';
+      console.log(sMsg); console.log(errors);
+      sRet = '[PROJECT_NAME]' + JSON.stringify({method:'warning',param:[sMsg]});
+    }
+    else {
+      var value = editor.getValue();
+      if (value instanceof Object) {
+        lastRootAttr.forEach( function(item) {
+          if (!(item in value)) value[item] = undefined;  // set remove flag
+        });
+      }
+      sRet = '[PROJECT_NAME]' + JSON.stringify({method:'saveProp',param:[lastSchemaId,value]});
+    }
+    window.parent.window.postMessage(sRet,'*');
+  }
+  
+  try {
+    if (typeof msg == 'object' && msg.data) {
+      msg = msg.data;
+      msg = JSON.parse(msg.slice(14)); // remove prefix '[PROJECT_NAME]'
+    }
+    else msg = null;
+  }
+  catch(err) {
+    msg = null;
+    console.log(err);
+  }
+  
+  if (typeof msg == 'object') {
+    try {
+      if (msg.method == 'init') {    // msg.param = [cmdId,schema,opt,attrs]
+        var schema = msg.param[1], opt = msg.param[2], attrs = msg.param[3];
+        if (!schema || !opt) return;
+        if (editor) editor.destroy();
+        
+        if (Array.isArray(attrs))
+          editorAttrs.innerHTML = '<hr style="color:#fff" />Available properties:<br><span style="font-size:0.8em; font-style:italic; color:#666">' + htmlEncode(attrs.join(', ')) + '</span>';
+        else editorAttrs.innerHTML = '';
+        
+        var sUrl = '';
+        if (opt.name && opt.doc) {
+          sUrl = opt.doc;
+          if (sUrl.slice(-1) != '/') sUrl += '/';
+          sUrl += opt.name + '.html'
+          editorHelper.innerHTML = 'Online help: <a href="javascript:void(0)">' + htmlEncode(opt.name) + '</a>';
+        }
+        else editorHelper.innerHTML = '';
+        editorHelper.setAttribute('path',sUrl);
+        
+        lastSchemaId = msg.param[0];
+        editor = new JSONEditor(editorHolder,{schema:schema,theme:"html"});
+        editorReady = false;
+        
+        var currEditor = editor;
+        currEditor.on('ready', function() {
+          setTimeout( function() {
+            editorReady = true;
+          },300); // when page from 'none' to 'block', onReady and onChange come together, so delay it
+        });
+        setTimeout( function() {
+          if (currEditor !== editor) return;  // global value 'editor' maybe re-created
+          var value = currEditor.getValue();
+          if (value instanceof Object)
+            lastRootAttr = Object.getOwnPropertyNames(value);
+          else lastRootAttr = [];
+          currEditor.on('change',trySave); // delay setting to avoid take first-init as moidfication
+        },300);
+      }
+      else if (msg.method == 'clear') {
+        if (editor) {
+          editor.destroy();
+          editor = null;
+        }
+        editorAttrs.innerHTML = '';
+        editorHelper.setAttribute('path','');
+        editorHelper.innerHTML = '';
+      }
+      else if (msg.method == 'setVisible') {
+        var isShow = msg.param[0];
+        editorHolder.style.display = isShow? 'block': 'none';
+        editorAttrs.style.display  = isShow? 'block': 'none';
+        editorHelper.style.display = isShow? 'block': 'none';
+      }
+      // else, ignore
+    }
+    catch(err) { console.log(err); }
+  }
+},false);
+
+</script>
+
+</body>
+</html>

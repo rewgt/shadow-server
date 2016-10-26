@@ -1,0 +1,12 @@
+OptDiv
+4.4.3.!opt_div
+[ props ]
+  data-checked: ''
+[ duals ]
+  isolated: false
+  recheckable: false
+  popOption: undefined
+  data-checked: ''
+[ method ]
+  fireTrigger()
+  setChecked(callback,isForce,newOpt)

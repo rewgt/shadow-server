@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo19</title>
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'>
+  <div :t=Panel key='top'>
+    <div :t=NavPanel key='nav' width='{0.9999}' height='{200}'>
+      <div :t=Div key='msg' padding='{[0,6]}' style='display:none'>
+        <div :t=P>Hello, world!</div>
+      </div>
+      
+      <div :t=P key='opt'>
+        <span :t=OptButton key='btn' pop-option='{{"path":"./msg","width":0.7,"height":200,"bodyStyle":{"display":"block"}}}'>show hello</span>
+        <span :t=OptButton key='btn2' recheckable='{true}' trigger='["//btn"]'>trigger</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

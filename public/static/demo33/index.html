@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo33</title>
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'>
+  <div :t=Panel key='top' height='{null}'>
+    <div :t=TempDiv key='tmp_log'>
+      <div :t=P key='p' $width='duals.data.width' $height='duals.data.height'>
+        <span :t=Textarea $style='{width:"100%",height:"100%",resize:duals.data.resize}' $read-only='duals.data.readOnly'></span>
+      </div>
+    </div>
+    <div $='tmp_log.p' dual-data='{{"width":300,"height":200,"resize":"none","readOnly":""}}'></div>
+
+    <div :t=TempDiv key='tmp_log2'>
+      <div :t=P key='p' dual-data='{{"width":300,"height":200,"resize":"none","readOnly":""}}' $width='duals.data.width' $height='duals.data.height'>
+        <span :t=Textarea $style='{width:"100%",height:"100%",resize:duals.data.resize}' $read-only='duals.data.readOnly'></span>
+      </div>
+    </div>
+    <div $='tmp_log2.p' $trigger='{$merge:{readOnly:"readonly"}}'></div>
+    <div $='tmp_log2.p' $trigger='{$merge:{resize:"both"}}'></div>
+    
+    <div :t=TempDiv key='tmp'>
+      <div :t=P key='test' dual-income='{0}' dual-outgo='{0}' $html='"income = " + duals.income + ", outgo = " + duals.outgo'></div>
+      <div :t=P key='test2' dual-income='{0}' dual-outgo='{0}'>
+        <span :t=TempSpan key='tmp'><span :t=Span key='txt'>example</span></span>
+        <span $='tmp.txt' key='red' style='color:red'></span>
+      </div>
+    </div>
+    <div $='tmp.test' width='{0.9999}'></div>
+    <div $='tmp.test2' width='{0.9999}'></div>
+  </div>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex;
+
+});
+</script>
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

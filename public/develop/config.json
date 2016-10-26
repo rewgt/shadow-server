@@ -1,0 +1,6 @@
+{
+  "upload_url": "/develop/putsrc",
+  "download_url": "/develop/getsrc",
+  "font_size": 18,
+  "use_local_storage": true
+}

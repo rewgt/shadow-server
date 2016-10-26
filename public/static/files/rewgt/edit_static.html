@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Static text editor</title>
+
+<link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/popline/css/normalize.css" />
+<link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/css/base.css" />
+
+<link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/popline/css/font-awesome.css" />
+<link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/popline/themes/popclip.css" />
+<link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/popline/css/page.css" />
+
+<script src="/app/files/rewgt/web/popline/scripts/jquery.min.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/jquery.popline.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.link.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.blockquote.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.decoration.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.list.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.justify.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.blockformat.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.social.js"></script>
+<script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.backcolor.js"></script>
+
+<script>
+window.addEventListener('load', function(event) {
+  function loadCssModule(bCss,callback) {
+    var cssNum = bCss.length, loaded = 0;
+    if (cssNum) {
+      bCss.forEach( function(sUrl) {
+        var node = document.createElement('link');
+        if ('onload' in node) {
+          if (callback) {
+            node.onload = function(event) {
+              loaded += 1;
+              if (loaded >= cssNum) callback();
+            };
+          }
+          node.setAttribute('rel','stylesheet');
+          node.setAttribute('href',sUrl);
+          document.head.appendChild(node);
+        }
+        else {
+          node = document.createElement('img');
+          if (callback) {
+            node.onerror = function(event) {
+              loaded += 1;
+              if (loaded >= cssNum) callback();
+            };
+          }
+          node.setAttribute('src',sUrl);
+          document.body.appendChild(node);
+        }
+      });
+    }
+    else {
+      if (callback) callback();
+    }
+  }
+  
+  var cancelButton  = document.querySelector('#btn-cancel');
+  var poplineRadio  = document.querySelector('#pg-popline');
+  var htmlRadio     = document.querySelector('#pg-html');
+  var poplineEditor = document.querySelector('#txt-widget > div.editor');
+  var htmlEditor    = document.querySelector('#txt-html > textarea');
+  var poplineArea   = document.querySelector('#txt-widget');
+  var htmlArea      = document.querySelector('#txt-html');
+  
+  var taskId = 0, inValue = null, cssList = [];
+  
+  function initGui() {
+    var sHtml = inValue[0];  // sPath = inValue[1], sStaticId = inValue[2]
+    loadCssModule(cssList, function() {
+      poplineEditor.innerHTML = sHtml;
+    });
+  }
+  
+  function closeDialog(isClose,isCancel) {
+    var outValue = null, changed = true;
+    if (isCancel || !inValue)
+      changed = false;
+    else {
+      var sHtml;
+      if (poplineRadio.checked) {
+        sHtml = poplineEditor.innerHTML;
+        var iPos = sHtml.lastIndexOf('<br>');
+        if (iPos > 0) {
+          var sTail = sHtml.slice(iPos+4).trim();
+          if (sTail.search(/^<\/[a-z0-9]+>$/) == 0)  // such as: </span> </div>
+            sHtml = sHtml.slice(0,iPos) + sHtml.slice(iPos+4); // remove tail '<br>'
+        }
+      }
+      else sHtml = htmlEditor.value;
+      outValue = [sHtml,inValue[1],inValue[2]];
+    }
+    
+    var s = '[PROJECT_NAME]' + JSON.stringify({method:'onDialogExit',param:[isClose,changed,taskId,outValue]});
+    window.parent.window.postMessage(s,'*');
+  }
+  
+  cancelButton.onclick = function(event) {
+    closeDialog(true,true);
+  };
+  
+  function showPopline(isShow) {
+    if (isShow) {
+      htmlArea.style.display = 'none';
+      poplineArea.style.display = 'block';
+      poplineEditor.focus();
+      poplineEditor.innerHTML = htmlEditor.value;
+    }
+    else {
+      poplineArea.style.display = 'none';
+      htmlArea.style.display = 'block';
+      htmlEditor.focus();
+      htmlEditor.value = poplineEditor.innerHTML;
+    }
+  }
+  poplineRadio.onchange = function(event) {
+    var isPopline = event.target.checked;
+    showPopline(isPopline);
+  };
+  htmlRadio.onchange = function(event) {
+    var isPopline = !event.target.checked;
+    showPopline(isPopline);
+  };
+  poplineRadio.checked = true;  // set default checked
+  
+  document.execCommand('defaultParagraphSeparator', false, 'p');
+  $(poplineEditor).popline({position: "fixed"});  // 'fixed' or 'relative'
+  
+  if (!window.parent || window.parent.window === window) return;
+  window.addEventListener('message', function(msg) {
+    try {
+      if (typeof msg == 'object' && msg.data) {
+        msg = msg.data;
+        msg = JSON.parse(msg.slice(14)); // remove prefix '[PROJECT_NAME]'
+      }
+      else msg = null;
+    }
+    catch(e) {
+      msg = null;
+      console.log(e);
+    }
+    
+    if (typeof msg == 'object') {
+      if (msg.method == 'init') {
+        taskId = msg.param[0];
+        inValue = msg.param[1];
+        cssList = msg.param[2] || [];
+        initGui();
+      }
+      else if (msg.method == 'close') {
+        var isClose = !!msg.param[0];
+        closeDialog(isClose,false);
+      }
+    }
+  }, false);
+  
+  var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'onDialogLoad',param:[]});
+  window.parent.window.postMessage(sCmd,'*');
+},false);
+
+</script>
+
+<style>
+.editor {
+  width: 100%;
+  height: 100%;
+}
+#txt-widget {
+  margin: 0 0 0 1%;
+  width: 82%;
+  border: 1px dotted #eee;
+  min-height: 150px;
+}
+#txt-html {
+  margin: 0 0 0 1%;
+  width: 82%;
+}
+</style>
+</head>
+
+<body style='background-color:#fff; font-size:15px'>
+
+<div style='text-align:center; margin:10px; padding:0 16% 0 0'>
+  <input type='radio' name='page' id='pg-popline' checked> <label for='pg-popline'>Popline</label>&nbsp;&nbsp;&nbsp;
+  <input type='radio' id='pg-html' name='page'> <label for='pg-html'>HTML</label>&nbsp;<span style='margin:0px 30px'>&nbsp;</span>
+  <button id='btn-cancel'>Cancel</button>
+</div>
+
+<div id='txt-widget' style='display:block'>
+  <div class='editor' contenteditable='true'></div>
+</div>
+
+<div id='txt-html' style='display:none'>
+  <textarea style='width:100%; min-height:150px; font-family:"Courier New",Verdana,monospace'></textarea>
+</div>
+
+</body>
+</html>

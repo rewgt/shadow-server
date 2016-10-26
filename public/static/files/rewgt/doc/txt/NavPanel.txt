@@ -1,0 +1,7 @@
+NavPanel
+4.4.2.!nav_panel
+[ method ]
+  setChecked(key,callback)
+  getChecked()
+  fireChecked(key,callback)
+  canNavigateTo(key)

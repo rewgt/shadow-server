@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo20</title>
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'>
+  <div :t=Panel key='top'>
+    <div :t=NavPanel key='nav' width='{0.9999}' height='{200}'>
+      <div :t=P key='opt'>
+        <span :t=Span key='txt' dual-data='{["text",0]}'>example </span>
+        <span :t=OptButton key='trigger' recheckable='{true}' trigger='[["//txt",{"$set":["new text",ex.time()]}]]'>trigger</span>
+      </div>
+      
+      <div :t=P key='log' width='{0.9999}'>
+        <span :t=OptButton key='test' recheckable='{true}' trigger='[["//test",{$set:ex.log("clicked")}]]'>Test</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex;
+
+main['.body.top.nav.btn.a'] = {
+  componentDidMount: function() {
+    this._componentDidMount(this);
+    
+    this.listen('data-checked', function(value,oldValue) {
+      console.log('data-checked =',value);
+    });
+  },
+};
+
+});
+</script>
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

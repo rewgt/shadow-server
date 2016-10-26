@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Markdown content</title>
+<script src="/app/files/rewgt/web/js/marked.min.js"></script>
+
+<style>
+html {
+  font-size: 16px;      /* base of rem */
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+code {
+  font-family: 'Courier New', Verdana, monospace;
+  font-size: 0.875em;
+}
+
+.rewgt-static > * {
+  margin: 0.75rem 0px;
+}
+.rewgt-static pre {
+  padding: 6px;
+  border: 1px solid #f0f0f0;
+  background-color: #f8f8f8;
+  line-height: 1;
+}
+.rewgt-static blockquote {
+  padding-left: 1.25rem;
+}
+.rewgt-static h1, .rewgt-static h2, .rewgt-static h3, .rewgt-static h4, .rewgt-static h5, .rewgt-static h6 {
+  margin: 1.875rem 0px 1rem;
+}
+.rewgt-static strong {
+  color: #800;
+}
+</style>
+</head>
+
+<body>
+<div class="rewgt-static"></div>
+
+<script>
+
+function getUrlParam(s) {
+  var dRet = {}, b = s.split('&');
+  b.forEach( function(item) {
+    if (!item) return;
+    var b2 = item.split('='), sName = b2[0].trim();
+    if (sName)
+      dRet[sName] = (b2[1] || '').trim();
+  });
+  return dRet;
+}
+
+function getAsynRequest(sUrl,callback) {  // callbac must passed
+  var xmlHttp = null;
+  if (window.XMLHttpRequest)      // Firefox, Opera, IE7, etc
+    xmlHttp = new XMLHttpRequest();
+  else if (window.ActiveXObject)  // IE6, IE5
+    xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+  
+  if (xmlHttp) {
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4) { // 4 is "loaded"
+        if (xmlHttp.status == 200)   // success save
+          callback(null,xmlHttp.responseText);
+        else callback(new Error('XMLHttpRequest failed'));
+        xmlHttp = null;
+      }
+    };
+    xmlHttp.open('GET',sUrl,true);
+    xmlHttp.send(null);
+  }
+}
+
+(function() {
+  var param = getUrlParam(window.location.search.slice(1));
+  var sUrl = param.url || '';
+  if (sUrl) {
+    sUrl = decodeURIComponent(sUrl);
+    getAsynRequest(sUrl, function(err,sMd) {
+      if (err)
+        console.log(err);
+      else {
+        try {
+          document.querySelector('.rewgt-static').innerHTML = marked(sMd);
+        }
+        catch(err) {
+          console.log('conver MD file failed!');
+        }
+      }
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

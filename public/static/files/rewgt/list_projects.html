@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>List projects</title>
+
+<script>
+window.addEventListener('load', function(event) {
+
+var projectList   = null;  // [sCateProj, ...]
+var templateNames = null;  // [[fileName,sTitle],...]
+
+var pagesLastNode  = document.querySelector('#pages-last');
+var btnExpandNode  = document.querySelector('#btn-expand');
+var tempListNode   = document.querySelector('#temp-list');
+var dragFromNode   = document.querySelector('#drag-from-res');
+var sampleHtmlNode = document.querySelector('#sample-file');
+var headTagsNode   = document.querySelector('#head-tags');
+var fileNameNode   = document.querySelector('#file-name');
+var createProjNode = document.querySelector('#create-proj');
+var openNewNode    = document.querySelector('#open-new');
+
+function htmlEncode(s) {
+  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+}
+
+function location__(href) {
+  var location = document.createElement('a');
+  location.href = href;
+  if (location.host == '')
+    location.href = location.href;
+  return location;
+}
+
+function getAsynRequest(sUrl,callback) {  // callback must passed
+  var xmlHttp = null;
+  if (window.XMLHttpRequest)      // Firefox, Opera, IE7, etc
+    xmlHttp = new XMLHttpRequest();
+  else if (window.ActiveXObject)  // IE6, IE5
+    xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+  
+  if (xmlHttp) {
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4) { // 4 is "loaded"
+        if (xmlHttp.status == 200)   // success save
+          callback(null,xmlHttp.responseText);
+        else callback(new Error('XMLHttpRequest failed'));
+        xmlHttp = null;
+      }
+    };
+    xmlHttp.open('GET',sUrl,true);
+    xmlHttp.send(null);
+  }
+}
+
+function postAsynRequest(sUrl,data,callback) {  // callback must passed, only support JSON post
+  var xmlHttp = null;
+  if (window.XMLHttpRequest)      // Firefox, Opera, IE7, etc
+    xmlHttp = new XMLHttpRequest();
+  else if (window.ActiveXObject)  // IE6, IE5
+    xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+  
+  if (xmlHttp) {
+    var sJson = JSON.stringify(data);
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4) { // 4 is "loaded"
+        if (xmlHttp.status == 200)   // success save
+          callback(null,xmlHttp.responseText);
+        else callback(new Error('XMLHttpRequest failed'));
+        xmlHttp = null;
+      }
+    };
+    xmlHttp.open('POST',sUrl,true);
+    xmlHttp.setRequestHeader('Content-Type','application/json; charset=utf-8');
+    xmlHttp.send(sJson);
+  }
+}
+
+function initGui() {
+  if (!Array.isArray(projectList)) return;
+  
+  projectList.forEach( function(item,idx) {
+    var tr = document.createElement('tr');
+    var tdA = document.createElement('td');
+    tdA.innerHTML = htmlEncode(item);
+    tr.appendChild(tdA);
+    var tdB = document.createElement('td');
+    if (idx == 0) tdB.setAttribute('style','width:10px');
+    tr.appendChild(tdB);
+    var tdC = document.createElement('td');
+    tr.appendChild(tdC);
+    
+    var btn = document.createElement('button');
+    btn.innerHTML = 'View';
+    btn.setAttribute('fname',item);
+    btn.onclick = function(event) {
+      var sProj = event.target.getAttribute('fname');
+      if (!sProj) return;
+      if (sProj.slice(-1) != '/') sProj += '/';  // default open index.html
+      window.open(sProj,'_blank');
+    }
+    tdC.appendChild(btn);
+    
+    var btn2 = document.createElement('button');
+    btn2.innerHTML = 'Edit';
+    btn2.setAttribute('fname',item);
+    btn2.onclick = function(event) {
+      var sProj = event.target.getAttribute('fname');
+      if (!sProj) return;
+      if (sProj.slice(-1) != '/') sProj += '/';
+      
+      var sUrl = sProj + '$creator';
+      window.open(sUrl,'_blank');
+    }
+    tdC.appendChild(btn2);
+
+    pagesLastNode.parentNode.insertBefore(tr,pagesLastNode);
+  });
+}
+
+btnExpandNode.onclick = function(event) {
+  if (!Array.isArray(projectList)) return;
+  
+  getAsynRequest('/rewgt/$utils?cmd=list_template', function(err,sJson) {
+    if (err) {
+      alert('Query template failed.');
+      return;
+    }
+    
+    try {
+      var bRet = JSON.parse(sJson);
+      if (Array.isArray(bRet)) {
+        tempListNode.innerHTML = '';
+        
+        bRet.forEach( function(item,idx) {
+          var sFile = item[0], sTitle = item[1];
+          
+          var pNode = document.createElement('p');
+          pNode.setAttribute('style','margin-left:4px');
+          var pgNode = document.createElement('input');
+          pgNode.setAttribute('type','radio');
+          pgNode.setAttribute('name','temp-page');
+          pgNode.setAttribute('fname',sFile);
+          pgNode.setAttribute('id','page-' + idx);
+          if (idx == 0) pgNode.setAttribute('checked','true');
+          pNode.appendChild(pgNode);
+          labNode = document.createElement('label');
+          labNode.setAttribute('for','page-' + idx);
+          labNode.innerHTML = htmlEncode(sTitle) + ' <span style="color:#888">(' + htmlEncode(sFile) + ')</span>';
+          pNode.appendChild(labNode);
+          
+          pNode.onclick = function(event) {
+            var sName = event.target.nodeName;
+            if (sName == 'INPUT' || sName == 'LABEL')
+              sampleHtmlNode.value = '';
+          };
+          tempListNode.appendChild(pNode);
+        });
+        
+        tempListNode.parentNode.style.display = 'block';
+      }
+    }
+    catch(e) { }
+  });
+};
+
+sampleHtmlNode.ondrop = function(event) {
+  var s = event.dataTransfer.getData('text/plain');
+  if (!s) {
+    s = event.dataTransfer.getData('text/uri-list');
+    if (s) {
+      var b = s.split('\n'), bOut = [];
+      b.forEach( function(item) {
+        item = item.trim();
+        if (item && item.trim[0] != '#') bOut.push(item);
+      });
+      if (bOut.length)
+        s = bOut[0];  // only get first one uri
+    }
+  }
+  
+  if (s) {
+    var loc = location__(s);
+    if (loc.protocol == window.location.protocol && loc.host == window.location.host) {
+      s = loc.pathname;
+      if (s[0] != '/') s = '/' + s;  // avoid bug of IE
+    }
+    sampleHtmlNode.value = s;
+    event.preventDefault();
+    
+    var b = tempListNode.querySelectorAll('input');
+    for (var i=0,item; item=b[i]; i+= 1) {
+      item.checked = false;
+    }
+  }
+}
+
+createProjNode.onclick = function(event) {
+  if (!Array.isArray(projectList)) return;
+
+  var sNewFile = fileNameNode.value.trim();
+  if (sNewFile && sNewFile.slice(-1) == '/') sNewFile = sNewFile.slice(0,-1);
+  if (!sNewFile) {
+    alert('Project name can not be empty.');
+    return;
+  }
+  if (sNewFile[0] != '/') sNewFile = '/' + sNewFile;
+  
+  var sNewFile_ = sNewFile.toUpperCase(), hasExist = false;
+  projectList.forEach( function(item) {
+    if (item) {
+      if (item.slice(-1) == '/') item = item.slice(0,-1);
+      if (item.toUpperCase() == sNewFile_)
+        hasExist = true;
+    }
+  });
+  if (hasExist) {
+    alert('Project (' + sNewFile + ') already exists.');
+    return;
+  }
+  
+  var sHead = headTagsNode.value.trim(), sTempFile = sampleHtmlNode.value.trim();
+  if (sTempFile) {
+    var loc = location__(sTempFile);
+    sTempFile = loc.pathname;
+    if (sTempFile[0] != '/') sTempFile = '/' + sTempFile;  // avoid bug of IE
+  }
+  else {
+    var b = tempListNode.querySelectorAll('input');
+    for (var i=0,item; item=b[i]; i+= 1) {
+      if (item.checked) {
+        sTempFile = item.getAttribute('fname');
+        break;
+      }
+    }
+  }
+  if (!sTempFile) return;  // fatal error, imposible
+  
+  postAsynRequest(sNewFile + '/$utils?cmd=create_page',{
+    source: sTempFile,
+    name: 'index.html',
+    head: sHead,
+  }, function(err,sInfo) {
+    if (err) {
+      if (sInfo)
+        alert('Failed: ' + sInfo);
+      else alert('Create ' + sNewFile + '/index.html failed.');
+      console.log(err);
+    }
+    else {
+      alert('Create new project successful.');
+      openNewNode.innerHTML = 'Open ' + htmlEncode(sNewFile);
+      openNewNode.setAttribute('fname',sNewFile);
+      openNewNode.style.display = 'inline';
+    }
+  });
+};
+
+openNewNode.onclick = function(event) {
+  if (!Array.isArray(projectList)) return;
+  
+  var sProj = event.target.getAttribute('fname');
+  if (!sProj) return;
+  if (sProj.slice(-1) != '/') sProj += '/';
+  
+  var sUrl = sProj + '$creator';  // default open index.html
+  window.open(sUrl,'_blank');
+};
+
+if (!window.parent || window.parent.window === window) return;
+
+window.addEventListener('message', function(msg) {
+  try {
+    if (typeof msg == 'object' && msg.data) {
+      msg = msg.data;
+      msg = JSON.parse(msg.slice(14)); // remove prefix '[PROJECT_NAME]'
+    }
+    else msg = null;
+  }
+  catch(e) {
+    msg = null;
+    console.log(e);
+  }
+  
+  if (msg instanceof Object && msg) {
+    if (msg.method == 'init') { // msg.param: [taskId,inValue,bCss,fromHome]
+      var data = msg.param[1], fromHome = msg.param[3];
+      if (!fromHome) {          // not come from homepage
+        dragFromNode.style.visibility = 'visible';
+        dragFromNode.style.height = '';
+      }
+      
+      if (Array.isArray(data)) {
+        projectList = data;
+        initGui();
+      }
+    }
+    else if (msg.method == 'close') {  // just close, no saving
+      var s = '[PROJECT_NAME]' + JSON.stringify({method:'closeDialog',param:[]});
+      window.parent.window.postMessage(s,'*');
+    }
+  }
+}, false);
+
+var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'onDialogLoad',param:[]});
+window.parent.window.postMessage(sCmd,'*');
+}, false);
+
+</script>
+
+<style>
+body {
+  background-color: #fff;
+  line-height: 1.4;
+  font-size: 15px;
+  color: #222;
+}
+p {
+  margin: 6px 0px;
+}
+.cfg-title {
+  margin: 20px 0px 0px;
+}
+.sub-title {
+  margin: 10px 0px 6px;
+}
+</style>
+</head>
+
+<body>
+
+<h3 class='cfg-title'>All projects</h3>
+<table style='margin-left:10px'>
+  <tr id='pages-last'><td>&nbsp;</td><td></td><td></td></tr>
+</table>
+
+<h3 class='cfg-title' style='margin-top:2px'>Create new project <button id='btn-expand'>v</button></h3>
+<div style='margin-left:8px; display:none'>
+  <h4 class='sub-title'>Select template</h4>
+  <div id='temp-list'></div>
+  <div id='drag-from-res' style='visibility:hidden; height:0px'>
+    <h4 class='sub-title'>Or, copy from exist file <span style='font-weight:400'>(drag &amp; drop *.html file from resource area)</span></h4>
+    <p><input id='sample-file' type='text' style='width:360px'></p>
+  </div>
+  <h4 class='sub-title'>Head tags <span style='font-weight:400; color:#888'>(such as: &lt;title&gt;, &lt;meta&gt;, &lt;link&gt;)</span></h4>
+  <p><textarea id='head-tags' style='width:360px; height:80px' placeholder='<title>description</title>'></textarea></p>
+  <h4 class='sub-title'>Project name <span style='font-weight:400; color:#888'>(such as: /MyProject, /$$Category/project)</span></h4>
+  <p><input id='file-name' type='text' style='width:360px' placeholder='/$$Category/$$SubCategory/project'></p>
+  <p><button id='create-proj'>Create project</button>&nbsp;<button id='open-new' style='display:none'>Open</button></p>
+</div>
+
+</body>
+</html>

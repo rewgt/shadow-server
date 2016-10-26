@@ -1,0 +1,91 @@
+@mixin rounded-corners($radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  -ms-border-radius: $radius;
+  -o-border-radius: $radius;
+  border-radius: $radius;
+}
+
+@mixin line-gradient($colors...) {
+  background: -moz-linear-gradient(top, $colors);
+  background: -webkit-linear-gradient(top, $colors);
+  background: -o-linear-gradient(top, $colors);
+  background: -ms-linear-gradient(top, $colors);
+  background: linear-gradient(to bottom, $colors); 
+}
+
+@mixin box-shadow($shadow...) {
+  -webkit-box-shadow: $shadow;
+  -moz-box-shadow:    $shadow;
+  box-shadow:         $shadow;
+}
+
+@mixin placeholder($color) {
+}
+
+$font-size: 24px;
+.popline {
+  position: absolute;
+  height: 54px;
+  line-height: 54px;
+  @include rounded-corners(6px);
+  @include box-shadow(0px 2px 8px rgba(0, 0, 0, 0.75));
+  @include line-gradient(#2CA6F8 0%, #2B8AE2 100%);
+  opacity: 0.95;
+  display: none;
+  margin: 0;
+  list-style: none;
+  padding: 0px 5px;
+  font-family: Arial, Helvetica, "Hiragino Sans GB", sans-serif;
+  text-rendering: optimizeLegibility;
+  white-space: nowrap;
+  li {
+    color: white;
+    font-size: $font-size;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 18px;
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
+    @media screen and (-webkit-min-device-pixel-ratio:0) {
+      i { font-weight: bold; }
+    }
+    .text {
+      font-size: $font-size * 1.1;
+    }
+  }
+  .hover {
+    @include line-gradient(rgba(44,166,248,0.40) 0%, #2B8AE2 100%);
+    @include box-shadow(inset 0px 0px 8px rgba(0, 0, 0, 0.75));
+  }
+  .boxed {
+    padding: 0 9px;
+  }
+  .lighter {
+    font-weight: lighter;
+  }
+  .subbar {
+    display: none;
+    list-style: none;
+    padding: 0;
+  }
+  .textfield {
+    border: none;
+    height: 54px;
+    font-size: 24px;
+    padding: 0 10px;
+    @include box-shadow(inset 0px 0px 6px 0px rgba(0,0,0,0.30));
+    background: rgba(74,74,74,0.15);
+    color: #FFFFFF;
+    line-height: 31px;
+    margin-left: 10px;
+    display: none;
+    outline: none;
+    width: 300px;
+  }
+  .textfield::-webkit-input-placeholder { color: #EEE; }
+  .textfield:-moz-placeholder { color: #EEE; }
+  .textfield::-moz-placeholder { color: #EEE; }
+  .textfield:-ms-input-placeholder { color: #EEE; }
+}

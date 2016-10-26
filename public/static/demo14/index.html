@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="pinp:template" page="Panel" content="/app/files/rewgt/web/templates/Panel">
+<meta property="pinp:template" page="P" content="/app/files/rewgt/web/templates/P">
+<meta property="pinp:template" page="Span" content="/app/files/rewgt/web/templates/Span">
+<meta property="pinp:template" page="Linker" content="/app/files/rewgt/web/templates/Linker">
+<meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
+<meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
+<title>shadow-widget demo14</title>
+
+</head>
+<body>
+
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div :t=BodyPanel key='body'>
+  <div :t=Panel key='top'>
+    <div :t=P key='p' width='{0.9999}'>
+      <span :t=Input type='button' key='add' dual-data='{[]}' value='Add item'></span>
+      <span :t=Br></span>
+      <span :t=Span key='text'></span>
+    </div>
+  </div>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex;
+
+main['.body.top.p.add'] = {
+  getInitialState: function() {
+    var state = this._getInitialState(this);
+    
+    this.defineDual('id__', function(value,oldValue) { // setter is called at the beginning of render()
+      var self = this;
+      if (oldValue == 1) {   // it is first render()
+        setTimeout( function() {
+          self.duals.data = ['item1'];
+        },0); // first-render run before componentDidMount(), so delay 0 second
+      }
+    });
+    
+    return state;
+  },
+  
+  componentDidMount: function() {
+    this._componentDidMount(this);
+    
+    var outComp = W.W('.body.top.p.text').component;
+    this.listen('data', function(value,oldValue) {
+      if (!outComp.isHooked) return;
+      outComp.duals['html.'] = value.join(', ');
+    });
+  },
+  
+  $onClick: function(event) {
+    var num = this.duals.data.length + 1;
+    this.duals.data = ex.update(this.duals.data,{$push:['item'+num]});
+  },
+};
+
+});
+</script>
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+html {
+  font-size: 16px;      /* base of rem */
+}
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.doc-body {
+  width: 100%;
+  height: 100%;
+}
+.doc-body > * {
+  margin: 4px;
+}
+.doc-body > ul {
+  list-style-type: none;
+  padding: 0px 0px 0px 20px;
+}
+.doc-body li {
+  margin: 2px 0px;
+  line-height: 1.2;
+}

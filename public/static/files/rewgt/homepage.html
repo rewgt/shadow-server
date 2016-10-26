@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Shadow Widget</title>
+</head>
+
+<body style='background-color:#f4f4f4'>
+
+<div style='position:absolute; left:0px; top:0px; width:42px; height:100%; background-color:#e8e8e8; z-index:3020'>
+  <div style='position:relative; left:6px; top:3px; line-height:1.2; width:100%; height:116px'>
+    <img name='menu' title='Main menu' src='/app/files/rewgt/web/res/menu.png' style='width:24px; height:24px; border:1px solid #e8e8e8;'>
+  </div>
+</div>
+
+<ul id='menu-list' style='position:absolute; z-index:3022; display:none; cursor:default; left:30px; top:30px; min-width:60px; background-color:#f4f4f4; border:1px solid #eee; margin:0px; padding:2px; line-height:1.4; border-radius:4px; box-shadow:-2px 4px 4px rgba(0,0,0,0.2); list-style:none; -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none'>
+  <li name='list_prj' style='padding:0px 8px'>List projects</li>
+  <li name='show_doc' style='padding:0px 8px'>Online document</li>
+</ul>
+
+<div style='position:absolute; z-index:3020; left:42px; top:0px; width:100%; height:100%; overflow:hidden'>
+  <iframe name='main-frame' border='0' frameborder='0' style='width:100%; height:100%; border:0px solid #ccc'></iframe>
+</div>
+
+<script>
+(function() {
+  var menuBtn = document.querySelector('img[name="menu"]');
+  var mainMenuArea = document.getElementById('menu-list');
+  var bodyFrame = document.querySelector('iframe[name="main-frame"]');
+  
+  function getAsynRequest(sUrl,callback) {  // callback must passed
+    var xmlHttp = null;
+    if (window.XMLHttpRequest)      // Firefox, Opera, IE7, etc
+      xmlHttp = new XMLHttpRequest();
+    else if (window.ActiveXObject)  // IE6, IE5
+      xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+    
+    if (xmlHttp) {
+      xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4) { // 4 is "loaded"
+          if (xmlHttp.status == 200)   // success save
+            callback(null,xmlHttp.responseText);
+          else callback(new Error('XMLHttpRequest failed'));
+          xmlHttp = null;
+        }
+      };
+      xmlHttp.open('GET',sUrl,true);
+      xmlHttp.send(null);
+    }
+  }
+  
+  function onWinResize(event) {
+    bodyFrame.parentNode.style.width = (window.innerWidth - 42) + 'px';
+  }
+  window.addEventListener('resize',onWinResize,false);
+  
+  menuBtn.onmouseover = function(event) {
+    menuBtn.style.borderColor = '#f8f8f8 #aaa #aaa #f8f8f8';
+  };
+  menuBtn.onmouseout = function(event) {
+    menuBtn.style.borderColor = '#e8e8e8';
+  };
+  menuBtn.onclick = function(event) {
+    event.stopPropagation();
+    mainMenuArea.showMenu(event.clientX,event.clientY);
+  };
+  
+  mainMenuArea.showMenu = function(iX,iY) {
+    mainMenuArea.style.left = iX + 'px';
+    mainMenuArea.style.top = iY + 'px';
+    mainMenuArea.style.display = 'block';
+  };
+  mainMenuArea.hideMenu = function() {
+    mainMenuArea.style.display = 'none';
+  };
+  document.addEventListener('click', function(event) {
+    mainMenuArea.hideMenu();
+  },false);
+  
+  mainMenuArea.onmouseover = function(event) {
+    var targ = event.target;
+    if (targ.nodeName == 'LI') {
+      targ.style.backgroundColor = 'blue';
+      targ.style.color = 'white';
+    }
+  };
+  mainMenuArea.onmouseout = function(event) {
+    var targ = event.target;
+    if (targ.nodeName == 'LI') {
+      targ.style.backgroundColor = '';
+      targ.style.color = '';
+    }
+  };
+  
+  function menuItemClick(sName) {
+    if (sName == 'list_prj') {
+      getAsynRequest('/rewgt/$utils?cmd=list_project', function(err,sJson) {
+        if (err) {
+          alert('warning: query project failed.');
+          return;
+        }
+        
+        try {
+          var bProj = JSON.parse(sJson);
+          if (Array.isArray(bProj)) {
+            bodyFrame.initDialog = function() {
+              var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:[0,bProj,[],true]}); // true means from homepage
+              bodyFrame.contentWindow.postMessage(sCmd,'*');
+            };
+            bodyFrame.src = '/app/files/rewgt/web/list_projects.html';
+          }
+        }
+        catch(e) { }  // ignore error
+      });
+    }
+    else if (sName == 'show_doc') {
+      bodyFrame.initDialog = function() {
+        var optData = {}; // not used yet
+        var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:[0,optData]});
+        bodyFrame.contentWindow.postMessage(sCmd,'*');
+      };
+      bodyFrame.src = '/app/files/rewgt/web/doc/index.html';
+    }
+  };
+  
+  mainMenuArea.onclick = function(event) {
+    mainMenuArea.style.display = 'none';
+    
+    var targ = event.target;
+    if (targ.nodeName == 'LI') {
+      var sName = targ.getAttribute('name');
+      menuItemClick(sName);
+    }
+  };
+  
+  window.addEventListener('message', function(msg) {
+    try {
+      if (typeof msg == 'object' && msg.data) {
+        msg = msg.data;
+        msg = JSON.parse(msg.slice(14)); // remove prefix '[PROJECT_NAME]'
+      }
+      else msg = null;
+    }
+    catch(e) {
+      msg = null;
+      console.log(e);
+    }
+    
+    if (typeof msg == 'object') {
+      if (msg.method == 'onDialogLoad') {
+        if (bodyFrame.initDialog) bodyFrame.initDialog();
+      }
+    }
+  },false);
+  
+  setTimeout( function() {
+    onWinResize();
+    menuItemClick('list_prj');
+  },0);
+})();
+</script>
+
+</body>
+</html>

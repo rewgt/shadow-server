@@ -1,0 +1,385 @@
+html {
+  font-size: 16px;      /* base of rem */
+}
+body {
+  font-family: Arial,Helvetica,'sans-serif',STHeiti;
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.4;
+  margin: 0;
+  padding: 0.5rem;      /* 8px */
+}
+
+code {
+  font-family: 'Courier New', Verdana, monospace;
+  font-size: 0.875em;   /* 14px, em, not rem */
+}
+
+.large-small-default {
+  font-size: 1.125rem;  /* 18px, according to S5 */
+}
+.small-default-large {
+  font-size: 0.875rem;  /* 14px, according to S5 */
+}
+.default-large-small {
+/* font-size: 1rem; */  /* 16px, according to S5 */
+}
+
+h1, h2 {
+  margin: 0.625rem 0;   /* 10px */
+  padding: 0;
+}
+h3, h4 {
+  margin: 0.5rem 0;
+  padding: 0;
+}
+h5, h6 {
+  margin: 0.375rem 0;   /* 6px */
+  padding: 0;
+}
+
+p, ul {
+  margin: 0.375rem 0;   /* 6px 0 */
+}
+
+ul {
+  padding-left: 1.25rem; /* 20px */
+}
+
+h1, .S1 {
+  font-size: 3.625rem;  /* 58px */
+}
+h2, .S2 {
+  font-size: 2.75rem;   /* 44px */
+}
+h3, .S3 {
+  font-size: 2rem;      /* 32px */
+}
+h4, .S4 {
+  font-size: 1.5rem;    /* 24px */
+}
+h5, .S5 {
+  font-size: 1rem;      /* 16px */
+}
+h6, .S6 {
+  font-size: 0.875rem;  /* 14px */
+}
+
+.noselect-txt {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+h1.large-small-default, .S1.large-small-default {
+  font-size: 4.25rem;   /* 68px */
+}
+h2.large-small-default, .S2.large-small-default {
+  font-size: 3.125rem;  /* 50px */
+}
+h3.large-small-default, .S3.large-small-default {
+  font-size: 2.5rem;    /* 40px */
+}
+h4.large-small-default, .S4.large-small-default {
+  font-size: 1.875rem;  /* 30px */
+}
+h5.large-small-default, .S5.large-small-default {
+  font-size: 1.125rem;  /* 18px */
+}
+h6.large-small-default, .S6.large-small-default {
+  font-size: 1rem;      /* 16px */
+}
+
+h1.small-default-large, .S1.small-default-large {
+  font-size: 3rem;      /* 48px */
+}
+h2.small-default-large, .S2.small-default-large {
+  font-size: 2.25rem;   /* 36px */
+}
+h3.small-default-large, .S3.small-default-large {
+  font-size: 1.5rem;    /* 24px */
+}
+h4.small-default-large, .S4.small-default-large {
+  font-size: 1.125rem;  /* 18px */
+}
+h5.small-default-large, .S5.small-default-large {
+  font-size: 0.875rem;  /* 14px */
+}
+h6.small-default-large, .S6.small-default-large {
+  font-size: 0.75rem;   /* 12px */
+}
+
+.rewgt-unit {
+  border: 0px solid transparent;
+  
+  /* flex-item */
+  flex: 0 0 auto;   /* same to 'none' */
+  -ms-flex-item-align: auto;
+  align-self: auto; /* not support box */
+}
+
+.rewgt-inline {
+}
+.rewgt-scene {
+  position: absolute;
+  z-index: -1000;
+}
+
+.rewgt-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+.rewgt-center > * {
+  position: absolute;
+}
+
+.rewgt-panel {
+  border: 0px solid transparent;
+  overflow: hidden;
+  
+  /* flex-container */
+  display: -webkit-box;
+  display: -moz-box;
+  display: -o-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  
+  -moz-box-orient: horizontal;
+  -webkit-box-orient: horizontal;
+  -o-box-orient: horizontal;
+  -moz-box-direction: normal;
+  -webkit-box-direction: normal;
+  -o-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  
+  -moz-box-lines: multiple;
+  -webkit-box-lines: multiple;
+  -o-box-lines: multiple;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  
+  -moz-box-pack: start;
+  -webkit-box-pack: start;
+  -o-box-pack: start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  
+  -moz-box-align: start;
+  -webkit-box-align: start;
+  -o-box-align: start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+  
+  -ms-flex-line-pack: start;
+  align-content: flex-start; /* not support box */
+  
+  /* flex-item */
+  flex: 0 0 auto;
+  -ms-flex-item-align: auto;
+  align-self: auto; /* not support box */
+}
+
+.rewgt-panel.row-reverse {
+  -moz-box-orient: horizontal;
+  -webkit-box-orient: horizontal;
+  -o-box-orient: horizontal;
+  -moz-box-direction: normal;
+  -webkit-box-direction: normal;
+  -o-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+.rewgt-panel.reverse-row {
+  -moz-box-orient: horizontal;
+  -webkit-box-orient: horizontal;
+  -o-box-orient: horizontal;
+  -moz-box-direction: reverse;
+  -webkit-box-direction: reverse;
+  -o-box-direction: reverse;
+  -ms-flex-direction: row-reverse;
+  flex-direction: row-reverse;
+}
+.rewgt-panel.col-reverse {
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
+  -o-box-orient: vertical;
+  -moz-box-direction: normal;
+  -webkit-box-direction: normal;
+  -o-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+.rewgt-panel.reverse-col {
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
+  -o-box-orient: vertical;
+  -moz-box-direction: reverse;
+  -webkit-box-direction: reverse;
+  -o-box-direction: reverse;
+  -ms-flex-direction: column-reverse;
+  flex-direction: column-reverse;
+}
+
+.rewgt-panel.nowrap-default-wrap_reverse { /* default is wrap */
+  -moz-box-lines: single;
+  -webkit-box-lines: single;
+  -o-box-lines: single;
+  -ms-flex-wrap: none;
+  flex-wrap: nowrap;
+}
+.rewgt-panel.wrap_reverse-nowrap-default {
+  -moz-box-lines: multiple;
+  -webkit-box-lines: multiple;
+  -o-box-lines: multiple;
+  -ms-flex-wrap: wrap-reverse;
+  flex-wrap: wrap-reverse; /* not support box */
+}
+
+.rewgt-panel.justify_center-end-default { /* default is flex-start */
+  -moz-box-pack: center;
+  -webkit-box-pack: center;
+  -o-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+.rewgt-panel.end-default-justify_center { /* default is flex-start */
+  -moz-box-pack: end;
+  -webkit-box-pack: end;
+  -o-box-pack: end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+}
+
+.rewgt-panel.content_center-end-stretch-default { /* default is flex-start */
+  -ms-flex-line-pack: center;
+  align-content: center;   /* not support box */
+}
+.rewgt-panel.end-stretch-default-content_center {
+  -ms-flex-line-pack: end;
+  align-content: flex-end; /* not support box */
+}
+.rewgt-panel.stretch-default-content_center-end {
+  -ms-flex-line-pack: stretch;
+  align-content: stretch;  /* not support box */
+}
+
+.rewgt-panel.items_center-end-stretch-default { /* default is flex-start */
+  -moz-box-align: center;
+  -webkit-box-align: center;
+  -o-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+.rewgt-panel.end-stretch-default-items_center {
+  -moz-box-align: end;
+  -webkit-box-align: end;
+  -o-box-align: end;
+  -ms-flex-align: end;
+  align-items: flex-end;
+}
+.rewgt-panel.stretch-default-items_center-end {
+  -moz-box-align: stretch;
+  -webkit-box-align: stretch;
+  -o-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+}
+
+.rewgt-panel.self_center-start-end-stretch-default, .rewgt-unit.self_center-start-end-stretch-default { /* default is auto */
+  -ms-flex-item-align: center;
+  align-self: center; /* not support box */
+}
+.rewgt-panel.start-end-stretch-default-self_center, .rewgt-unit.start-end-stretch-default-self_center {
+  -ms-flex-item-align: start;
+  align-self: flex-start; /* not support box */
+}
+.rewgt-panel.end-stretch-default-self_center-start, .rewgt-unit.end-stretch-default-self_center-start {
+  -ms-flex-item-align: end;
+  align-self: flex-end; /* not support box */
+}
+.rewgt-panel.stretch-default-self_center-start-end .rewgt-unit.stretch-default-self_center-start-end {
+  -ms-flex-item-align: stretch;
+  align-self: stretch;  /* not support box */
+}
+
+.rewgt-table {
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  border: 0px solid gray;
+  table-layout: auto;
+}
+.rewgt-table td, .rewgt-table th {
+  margin: 0;
+  padding: 0;
+  border: 0px solid gray;
+/*  overflow: hidden;  */
+}
+
+/* ---- single property ----- */
+.align_center-right-default {
+  text-align: center;
+}
+.right-default-align_center {
+  text-align: right;
+}
+
+.overflow_auto {
+  overflow: hidden;
+}
+.overflow_hidden {
+  overflow: hidden;
+}
+.overflow_visible {
+  overflow: visible;
+}
+.auto-hidden-visible {
+  overflow: auto;
+}
+.hidden-visible-auto {
+  overflow: hidden;
+}
+.visible-auto-hidden {
+  overflow: visible;
+}
+.x_auto-hidden-visible {
+  overflow-x: auto;
+}
+.hidden-visible-x_auto {
+  overflow-x: hidden;
+}
+.visible-x_auto-hidden {
+  overflow-x: visible;
+}
+.y_auto-hidden-visible {
+  overflow-y: auto;
+}
+.hidden-visible-y_auto {
+  overflow-y: hidden;
+}
+.visible-y_auto-hidden {
+  overflow-y: visible;
+}
+
+.default-square-circle {
+  list-style: disc;
+}
+.square-circle-default {
+  list-style: square;
+}
+.circle-default-square {
+  list-style: circle;
+}
+.decimal-alpha-roman {
+  list-style: decimal;
+}
+.alpha-roman-decimal {
+  list-style: upper-alpha;
+}
+.roman-decimal-alpha {
+  list-style: upper-roman;
+}

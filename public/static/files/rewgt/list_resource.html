@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Empty page</title>
+<style>
+.noselect-txt {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+body {
+  background-color: #e8e8e8;
+  margin: 3px;
+  font-size: 14px;
+  color: #222;
+  line-height: 1.6;
+}
+
+.tool-btn, .tool-img {
+  padding: 0px 1px 1px 0px;
+  border: 1px solid rgba(0,0,0,0);
+  width: 16px;
+  height: 16px;
+}
+.tool-btn:hover {
+  border-color: #fff #aaa #aaa #fff;
+}
+
+#file-list td, #file-list th {
+  padding: 0px;
+  cursor: default;
+}
+
+.thumb-item {
+  width: 90px;
+  margin: 2px;
+}
+.thumb-item:hover {
+  outline: 1px dotted red;
+}
+</style>
+</head>
+
+<body>
+
+<div style='width:100%; height:100%; overflow-x:hidden; overflow-y:auto'>
+<table id='file-list' class='noselect-txt' style='width:100%; margin:0px; padding:0px; border:0px; border-spacing:0px; border-collapse:collapse; table-layout:auto; line-height:0.9'>
+  <tr id='filelist-title'>
+    <th style='width:20px'><img class='tool-btn' title='refresh' src='res/refresh.png'></th>
+    <th style='text-align:left'>
+      <img class='tool-btn' title='current directory' style='display:none' src='res/home_page.png'>
+      <span style='display:inline; margin:10px 12px; height:0px'></span>
+      <span style='position:relative; left:36px; top:1px; vertical-align:super'></span>
+    </th>
+  </tr>
+  <tr id='goto-uplevel'>
+    <td><img class='tool-img' src='res/file_up.png'></td><td>..</td>
+  </tr>
+</table>
+
+<div id='widget-list' style='width:100%; background-color:#fff; border-radius:3px; margin:6px 0px; text-align:center'>
+</div>
+
+</div>
+
+<div id='preview-img' style='display:none; position:absolute; background-color:#fff; left:80px; top:40px; width:130px; outline:1px solid #ccc'>
+  <img draggable='true' style='width:100%'>
+</div>
+
+<div id='open-md' style='display:none; position:absolute; top:0px; right:8px'>
+  <button>view</button>
+</div>
+
+<script>
+(function() {
+
+var fileTBodyNode  = null;
+var titleTdNode    = null;
+var uplevelTrNode  = null;
+var widgetListNode = null;
+var previewImgNode = null;
+var viewMdFileNode = null;
+var homeImgNode    = null;
+var homeSpanNode   = null;
+var titleSpanNode  = null;
+
+var inputJson    = null;
+var hasProjBase  = false;
+var sWorkDirUrl  = '';
+var sLastListUrl = '';
+
+function htmlEncode(s) {
+  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+}
+
+function getUrlParam(s) {
+  var dRet = {}, b = s.split('&');
+  b.forEach( function(item) {
+    if (!item) return;
+    var b2 = item.split('='), sName = b2[0].trim();
+    if (sName)
+      dRet[sName] = (b2[1] || '').trim();
+  });
+  return dRet;
+}
+
+function location__(href) {
+  var location = document.createElement('a');
+  location.href = href;
+  if (location.host == '')
+    location.href = location.href;
+  return location;
+}
+
+function getAsynRequest(sUrl,callback) {  // callbac must passed
+  var xmlHttp = null;
+  if (window.XMLHttpRequest)      // Firefox, Opera, IE7, etc
+    xmlHttp = new XMLHttpRequest();
+  else if (window.ActiveXObject)  // IE6, IE5
+    xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+  
+  if (xmlHttp) {
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4) { // 4 is "loaded"
+        if (xmlHttp.status == 200)   // success save
+          callback(null,xmlHttp.responseText);
+        else callback(new Error('XMLHttpRequest failed'));
+        xmlHttp = null;
+      }
+    };
+    xmlHttp.open('GET',sUrl,true);
+    xmlHttp.send(null);
+  }
+}
+
+function updateInputJson(sUrl) {
+  getAsynRequest(sUrl, function(err,sJson) {
+    var sErr = '';
+    if (err) {
+      sErr = 'Request failed';
+      console.log('request failed: ' + sUrl);
+      console.log(err);
+    }
+    else {
+      try {
+        inputJson = JSON.parse(sJson);
+      }
+      catch(e) {
+        sErr = 'Invalid JSON';
+        console.log('parse JSON failed: ' + e);
+      }
+    }
+    
+    // reset GUI
+    titleSpanNode.innerHTML = '';
+    uplevelTrNode.style.display = 'none';
+    while (fileTBodyNode.children.length >= 3) {
+      fileTBodyNode.removeChild(fileTBodyNode.children[2]);
+    }
+    widgetListNode.innerHTML = '';
+    previewImgNode.style.display = 'none';
+    viewMdFileNode.style.display = 'none';
+    
+    // update content
+    if (sErr)
+      titleSpanNode.innerHTML = sErr;
+    else setupByJson();
+  });
+  
+  function setupByJson() {
+    // step 1: setup title, uplevel
+    var showGoHome = false;
+    if (sWorkDirUrl && sLastListUrl) {
+      if (sLastListUrl.indexOf('/files/') != 0)
+        showGoHome = true;
+    }
+    if (showGoHome) { // show go home button
+      homeImgNode.style.display = 'inline';
+      homeSpanNode.style.display = 'none';
+    }
+    else {
+      homeImgNode.style.display = 'none';
+      homeSpanNode.style.display = 'inline';
+    }
+    titleSpanNode.innerHTML = htmlEncode(inputJson.title || '');
+    titleSpanNode.setAttribute('title',inputJson.path); // inputJson.path must be string
+    uplevelTrNode.style.display = inputJson.atTop? 'none': 'table-row';
+    
+    // step 2: setup folders
+    (inputJson.folders || []).forEach( function(item) {
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      var img = document.createElement('img');
+      img.setAttribute('class','tool-img');
+      img.setAttribute('src','res/file_folder.png');
+      td.appendChild(img);
+      tr.appendChild(td);
+      
+      var td2 = document.createElement('td');
+      td2.innerHTML = htmlEncode(item);
+      tr.appendChild(td2);
+      
+      tr.setAttribute('data-name',item);
+      tr.addEventListener('dblclick',sublevelOnDbClick,false);
+      fileTBodyNode.appendChild(tr);
+    });
+    
+    // step 3: setup files
+    (inputJson.files || []).forEach( function(item) {
+      var sName = item[0], sMeta = item[1], sUrl = item[2], template = item[3], preview = item[4];
+      var tr = document.createElement('tr');
+      
+      var td = document.createElement('td');
+      var img = document.createElement('img');
+      img.setAttribute('class','tool-img');
+      img.setAttribute('src',sUrl);
+      img.setAttribute('draggable','true');
+      img.ondragstart = fileDragStart;
+      img.ondragend = fileDragEnd;
+      td.appendChild(img);
+      tr.appendChild(td);
+      
+      var td2 = document.createElement('td');
+      td2.innerHTML = htmlEncode(sName);
+      tr.appendChild(td2);
+      
+      tr.setAttribute('data-name',sName);
+      tr.setAttribute('data-type',sMeta);
+      if (template) tr.template = template; // template data
+      if (preview) tr.preview = preview;    // preview data
+      tr.addEventListener('click',fileOnClick,false);
+      fileTBodyNode.appendChild(tr);
+    });
+    
+    // step 4: setup templates
+    (inputJson.templates || []).forEach( function(item) {
+      var sTitle, jsonSvg = item.slice(-9) == '.json.svg';
+      var img, sUrl = inputJson.path? inputJson.path + '/' + item: item;
+      if (jsonSvg) {
+        sTitle = item.slice(0,-9);
+        img = document.createElement('div');
+        var objNode = document.createElement('object');
+        objNode.onload = function(event) {
+          var gNode = objNode.contentDocument.querySelector('g');
+          if (gNode) {
+            var sJson = gNode.getAttribute('_widget') || '';
+            if (sJson && sJson[0] == '{' && sJson.slice(-1) == '}') {
+              gNode.removeAttribute('_widget');
+              try {
+                img.wdgtJson = JSON.parse(sJson);
+              }
+              catch(e) { console.log(e); }
+            }
+          }
+        };
+        objNode.setAttribute('data',sUrl);
+        objNode.setAttribute('type','image/svg+xml');
+        objNode.setAttribute('style','width:100%; pointer-events:none;');
+        img.setAttribute('data-src',sUrl);
+        img.setAttribute('style','display:inline-block; line-height:0;');
+        img.appendChild(objNode);
+      }
+      else {
+        var b = item.split('.');
+        b.pop();
+        sTitle = b.join('.');
+        img = document.createElement('img');
+        img.setAttribute('src',sUrl);
+      }
+      img.setAttribute('title',sTitle);
+      img.setAttribute('class','thumb-item');
+      img.setAttribute('draggable','true');
+      img.ondragstart = thumbDragStart;
+      img.ondragend = thumbDragEnd;
+      widgetListNode.appendChild(img);
+    });
+  }
+}
+
+function refreshOnClick(event) {
+  event.stopPropagation();  
+  if (sWorkDirUrl && sLastListUrl) {
+    var sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
+    updateInputJson(sUrl);
+  }
+}
+
+function goHomeOnClick(event) {
+  event.stopPropagation();  
+  if (hasProjBase && sWorkDirUrl)
+    updateInputJson(sWorkDirUrl);
+}
+
+function uplevelOnDbClick(event) {
+  event.stopPropagation();
+  if (!inputJson || inputJson.atTop) return;
+  
+  if (sWorkDirUrl && sLastListUrl) {
+    var s = sLastListUrl;
+    if (s.slice(-1) == '/') s = s.slice(0,-1);
+    var b = s.split('/');
+    if (b.length >= 2) {
+      b.pop();
+      s = b.join('/');
+      sLastListUrl = s || '/';
+    }
+    else sLastListUrl = '/';
+    
+    var sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
+    updateInputJson(sUrl);
+  }
+}
+
+function sublevelOnDbClick(event) {
+  event.stopPropagation();
+  
+  if (sWorkDirUrl && sLastListUrl) {
+    var targ = event.target, node = null;
+    while (targ) {
+      if (targ === document.body) break;
+      if (targ.nodeName == 'TR') {
+        node = targ;
+        break;
+      }
+      targ = targ.parentNode;
+    }
+    
+    var sName = node && node.getAttribute('data-name');
+    if (!sName) return;
+    
+    if (sLastListUrl.slice(-1) == '/')
+      sLastListUrl += sName;
+    else sLastListUrl += '/' + sName;
+    var sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
+    updateInputJson(sUrl);
+  }
+}
+
+function fileOnClick(event) {
+  event.stopPropagation();
+  
+  var targ = event.target, node = null;
+  while (targ) {
+    if (targ.nodeName == 'TR') {
+      node = targ;
+      break;
+    }
+    targ = targ.parentNode;
+  }
+  if (!node) return;
+  
+  var sName = node.getAttribute('data-name');
+  if (!sName) return;
+  
+  var sMeta = node.getAttribute('data-type') || '';
+  if (sMeta == 'text/x-markdown') {
+    var sUrl = inputJson.path? inputJson.path + '/' + sName: sName;
+    var rect = node.getBoundingClientRect();
+    viewMdFileNode.style.top = (rect.top - 1) + 'px';
+    viewMdFileNode.style.display = 'block';
+    viewMdFileNode.setAttribute('mdsrc',sUrl);
+  }
+  else if (sMeta.indexOf('image/') == 0) {
+    var rect = node.getBoundingClientRect();
+    var sUrl = inputJson.path? inputJson.path + '/' + sName: sName;
+    var img = previewImgNode.querySelector('img');
+    if (img.getAttribute('src') == sUrl && img.complete)
+      imgOnLoad();
+    else {
+      img.onload = imgOnLoad;
+      img.setAttribute('title',sName);
+      img.setAttribute('src',sUrl);
+      img.setAttribute('data-name',sName);
+      img.setAttribute('data-type',sMeta);
+    }
+  }
+  
+  function imgOnLoad(event) {
+    var wd = Math.min(320,document.body.clientWidth - 80), hi = img.naturalHeight / img.naturalWidth * wd;
+    previewImgNode.style.top   = Math.floor(rect.top + rect.height/2 - hi/2) + 'px';
+    previewImgNode.style.left  = (document.body.clientWidth - wd + 2) + 'px';
+    previewImgNode.style.width = wd + 'px';
+    previewImgNode.style.display = 'block';
+  }
+}
+
+var currDragNode_ = null;
+
+function fileDragStart(event) {
+  if (!inputJson) return;
+  
+  var targ = event.target;
+  while (targ) {
+    if (targ === document.body) return;
+    if (targ.nodeName == 'TR')
+      break;
+    targ = targ.parentNode;
+  }
+  if (!targ) return;
+  
+  // targ.template, targ.preview not used yet
+  var sName = targ.getAttribute('data-name'), sMeta = targ.getAttribute('data-type');
+  if (!sName || !sMeta) return;
+  var sUrl = inputJson.path || '';
+  if (sUrl && sUrl.slice(-1) != '/')
+    sUrl += '/' + sName;
+  else sUrl += sName;
+  sUrl = location__(sUrl).href;
+  
+  currDragNode_ = targ;
+  event.dataTransfer.setData('text/plain',sUrl);
+  event.dataTransfer.setData('text/uri-list',sUrl);
+  if (sMeta.indexOf('image/') == 0) {
+    var opt = {dragType:'image', dataType:sMeta, dragUrl:sUrl};
+    event.dataTransfer.setData('application/json',JSON.stringify(opt));
+  }
+  var imgNode = targ.querySelector('img');
+  if (imgNode)
+    event.dataTransfer.setDragImage(imgNode,0,0);
+}
+
+function fileDragEnd(event) {
+  currDragNode_ = null;
+  if (window.parent && window.parent.window !== window) {
+    var s = '[PROJECT_NAME]' + JSON.stringify({method:'dragEnd',param:['file']});
+    window.parent.window.postMessage(s,'*');
+  }
+}
+
+function thumbDragStart(event) {
+  var targ = event.target, isJsonSvg = true;
+  if (targ.nodeName == 'IMG')
+    isJsonSvg = false;
+  else {
+    while (targ) {
+      if (targ === document.body) return;
+      if (targ.nodeName == 'DIV' && targ.classList.contains('thumb-item'))
+        break;
+      targ = targ.parentNode;
+    }
+  }
+  if (!targ) return;
+  
+  var sUrl = targ.getAttribute(isJsonSvg?'data-src':'src') || '';
+  if (!sUrl) return;
+  
+  currDragNode_ = targ;
+  var opt = {dragType:'template', dragUrl:sUrl};
+  if (isJsonSvg) opt.option = targ.wdgtJson || {};
+  event.dataTransfer.setData('text/plain',sUrl);
+  event.dataTransfer.setData('application/json',JSON.stringify(opt));
+  event.dataTransfer.setDragImage(targ,0,0);
+}
+
+function thumbDragEnd(event) {
+  currDragNode_ = null;
+  if (window.parent && window.parent.window !== window) {
+    var s = '[PROJECT_NAME]' + JSON.stringify({method:'dragEnd',param:['template']});
+    window.parent.window.postMessage(s,'*');
+  }
+}
+
+window.addEventListener('load', function(event) {
+  var param = getUrlParam(window.location.search.slice(1));
+  var sPrjBase = decodeURIComponent(param.base || '');
+  if (sPrjBase && sPrjBase.slice(-1) == '/') sPrjBase = sPrjBase.slice(0,-1);
+  var sUrl = decodeURIComponent(param.url || ''), needJump = false;
+  if (!sUrl) {
+    if (sPrjBase)
+      sUrl = sPrjBase; // default list resouce of current project
+    else sUrl = '/app/files/rewgt/web/templates';
+  }
+  else {
+    if (sUrl.slice(-5) == '.html') {
+      setTimeout( function() {
+        window.open(sUrl+(param.base?'?base='+param.base:''),'_self');
+      },0);
+      return;
+    }
+  }
+  
+  fileTBodyNode  = document.querySelector('#file-list tbody');
+  uplevelTrNode  = document.querySelector('#goto-uplevel');
+  widgetListNode = document.querySelector('#widget-list');
+  previewImgNode = document.querySelector('#preview-img');
+  viewMdFileNode = document.querySelector('#open-md');
+  
+  // define preview image dragging event
+  var previewImg_ = previewImgNode.querySelector('img');
+  previewImg_.ondragstart = function(event) {
+    if (!inputJson) return;
+    
+    var targ = event.target, sUrl = '';
+    if (targ.nodeName == 'IMG') {
+      var sName = targ.getAttribute('data-name'), sMeta = targ.getAttribute('data-type');
+      if (sName && sMeta) {
+        sUrl = inputJson.path || '';
+        if (sUrl && sUrl.slice(-1) != '/')
+          sUrl += '/' + sName;
+        else sUrl += sName;
+        sUrl = location__(sUrl).href;
+      }
+    }
+    if (!sUrl) return;
+    
+    currDragNode_ = targ;
+    var opt = {dragType:'image', dataType:sMeta, dragUrl:sUrl};
+    opt.clientWidth = targ.naturalWidth || 0;
+    opt.clientHeight = targ.naturalHeight || 0;
+    event.dataTransfer.setData('text/plain',sUrl);
+    event.dataTransfer.setData('text/uri-list',sUrl);
+    event.dataTransfer.setData('application/json',JSON.stringify(opt));
+    event.dataTransfer.setDragImage(targ,0,0);
+  };
+  previewImg_.ondragend = function(event) {
+    currDragNode_ = null;
+    if (window.parent && window.parent.window !== window) {
+      var s = '[PROJECT_NAME]' + JSON.stringify({method:'dragEnd',param:['image']});
+      window.parent.window.postMessage(s,'*');
+    }
+  };
+  
+  viewMdFileNode.addEventListener('click', function(event) {
+    var targ = event.target;
+    if (!targ || targ.parentNode !== viewMdFileNode) return;
+    event.stopPropagation();
+    
+    var sUrl = viewMdFileNode.getAttribute('mdsrc') || '';
+    if (sUrl) window.open('/app/files/rewgt/web/show_md.html?url='+encodeURIComponent(sUrl),'_blank');
+  },false);
+  
+  // initial config
+  var b = document.querySelectorAll('#filelist-title th');
+  if (b.length >= 2) {
+    b[0].addEventListener('click',refreshOnClick,false);
+    titleTdNode = b[1];
+    
+    homeImgNode = titleTdNode.querySelector('img');
+    homeImgNode.addEventListener('click',goHomeOnClick,false);
+    var nodes = titleTdNode.querySelectorAll('span');
+    homeSpanNode = nodes[0];
+    titleSpanNode = nodes[1];
+  }
+  uplevelTrNode.addEventListener('dblclick',uplevelOnDbClick,false);
+  previewImgNode.addEventListener('click', function(event) {
+    event.stopPropagation();
+  },false);
+  document.addEventListener('click', function(event) {
+    previewImgNode.style.display = 'none';
+    viewMdFileNode.style.display = 'none';
+  },false);
+  
+  hasProjBase = !!sPrjBase;
+  sWorkDirUrl = sPrjBase? sPrjBase + '/$list': '/files/$list';
+  sWorkDirUrl += '?base=' + encodeURIComponent(sPrjBase || '');
+  sLastListUrl = sUrl;
+  sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
+  updateInputJson(sUrl);
+},false);
+
+})();
+</script>
+
+</body>
+</html>

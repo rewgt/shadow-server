@@ -1,0 +1,14 @@
+# Node.JS specifics
+
+npm-debug.log
+node_modules
+
+# MacOSX specifics
+
+.DS_Store
+
+# product specifics
+
+*.bak
+
+public/static/files/rewgt/config/config.json
