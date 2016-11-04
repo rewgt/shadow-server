@@ -580,7 +580,7 @@ main.$$onLoad.push( function(callback) {
       var bComp = targObj.$gui.comps, bDelay = [];
       bComp.forEach( function(child) {
         if (!child) return;
-        var sKey = creator.getElementKey(child);
+        var sKey = utils.keyOfElement(child);
         if (!sKey || sKey == '$pop') return;
         
         var item = targ[sKey];
@@ -645,7 +645,7 @@ main.$$onLoad.push( function(callback) {
       var bComp = targObj.$gui.comps, bDelay = [];
       bComp.forEach( function(child) {
         if (!child) return;
-        var sKey = creator.getElementKey(child);
+        var sKey = utils.keyOfElement(child);
         if (!sKey || sKey == '$pop') return;
         
         var item = targ[sKey];
@@ -712,7 +712,7 @@ main.$$onLoad.push( function(callback) {
       var bComp = targObj.$gui.comps || [];
       bComp.forEach( function(child) {
         if (child) {
-          var sKey = creator.getElementKey(child);
+          var sKey = utils.keyOfElement(child);
           if (sKey[0] == '$') return;
           
           var childObj = targ[sKey];
@@ -741,7 +741,7 @@ main.$$onLoad.push( function(callback) {
       bComp.forEach( function(child) {
         if (!child) return;
         
-        var sKey = creator.getElementKey(child), childObj = sKey && targ[sKey];
+        var sKey = utils.keyOfElement(child), childObj = sKey && targ[sKey];
         childObj = childObj && childObj.component;
         if (!childObj) return;
         
@@ -1014,7 +1014,7 @@ main.$$onLoad.push( function(callback) {
     
     // delete '$key' or 'key', then and new element
     var nextEle = gui.comps[idx+1];
-    var nextEleKey = nextEle && creator.getElementKey(nextEle);
+    var nextEleKey = nextEle && utils.keyOfElement(nextEle);
     ownerObj.setChild('-'+sOrgKey, function() {
       hasBind = true;
       if (nextEleKey)  // insert new '$key'
@@ -1267,7 +1267,7 @@ main.$$onLoad.push( function(callback) {
           utils.instantShow('warning: link path is empty.'); // just warning, continue adding
       }
       
-      var sSrcKey = creator.getElementKey(srcEle), srcNotNamed = (parseInt(sSrcKey)+'') == sSrcKey;
+      var sSrcKey = utils.keyOfElement(srcEle), srcNotNamed = (parseInt(sSrcKey)+'') == sSrcKey;
       var needCopy = false;
       if (srcNotNamed)
         needCopy = true;
@@ -1452,7 +1452,7 @@ main.$$onLoad.push( function(callback) {
         }
       }
       
-      var sSrcKey = creator.getElementKey(srcEle), srcNotNamed = (parseInt(sSrcKey)+'') == sSrcKey;
+      var sSrcKey = utils.keyOfElement(srcEle), srcNotNamed = (parseInt(sSrcKey)+'') == sSrcKey;
       var needCopy = false;
       if (srcNotNamed)
         needCopy = true;
@@ -1530,6 +1530,8 @@ main.$$onLoad.push( function(callback) {
     
     var dStyle = Object.assign({},compObj.state.style);
     dStyle.zIndex = iLevel + '';
+    if (compObj.props.style)
+      compObj.props.style.zIndex = dStyle.zIndex; // for saving, element.props.style === compObj.props.style
     succ = true;
     compObj.setState({style:dStyle},doCallback);
   };
@@ -1775,7 +1777,7 @@ main.$$onLoad.push( function(callback) {
     var compNum = gui.comps.length, nextKey = '';
     for (var i=idx+1; i < compNum; i+=1) {
       var item = gui.comps[i];
-      var tmpKey = item && creator.getElementKey(item);
+      var tmpKey = item && utils.keyOfElement(item);
       if (!tmpKey) continue;
       if (tmpKey != oldLnkId) {
         nextKey = tmpKey;
@@ -1852,7 +1854,7 @@ main.$$onLoad.push( function(callback) {
         srcEle = comps[idx++];
         
         while (idx < comps.length) {
-          var tmpEle = comps[idx++], tmpKey = tmpEle && creator.getElementKey(tmpEle);
+          var tmpEle = comps[idx++], tmpKey = tmpEle && utils.keyOfElement(tmpEle);
           if (!tmpKey) continue;
           if (tmpKey != oldLnkId) {
             nextKey = tmpKey;
@@ -1920,7 +1922,7 @@ main.$$onLoad.push( function(callback) {
         
         var oldLnkId = typeof keyid == 'string' && keyid[0] == '$'? keyid: '$'+keyid;
         while (idx < comps.length) {
-          var tmpEle = comps[idx++], tmpKey = tmpEle && creator.getElementKey(tmpEle);
+          var tmpEle = comps[idx++], tmpKey = tmpEle && utils.keyOfElement(tmpEle);
           if (!tmpKey) continue;
           if (tmpKey != oldLnkId) {
             nextKey = tmpKey;
@@ -2001,7 +2003,7 @@ main.$$onLoad.push( function(callback) {
     topObj = topObj && topObj.component;
     if (topObj) {
       topObj.$gui.comps.forEach( function(child) {
-        var sKey = child && creator.getElementKey(child);
+        var sKey = child && utils.keyOfElement(child);
         if (sKey && sKey != '$pop') {
           if (child.props['isTemplate.']) return;
           if (child.props['isScenePage.'])
@@ -2020,7 +2022,7 @@ main.$$onLoad.push( function(callback) {
       var x1_ = Math.min(x1,x2), y1_ = Math.min(y1,y2), x2_ = Math.max(x1,x2), y2_ = Math.max(y1,y2);
       pageObj.$gui.comps.forEach( function(child) {
         if (!child) return;
-        var subKey = creator.getElementKey(child), childObj = subKey && subKey[0] != '$' && wdgt[subKey];
+        var subKey = utils.keyOfElement(child), childObj = subKey && subKey[0] != '$' && wdgt[subKey];
         childObj = childObj && childObj.component;
         if (childObj) {
           var node = ReactDOM.findDOMNode(childObj);
@@ -2276,7 +2278,7 @@ main.$$onLoad.push( function(callback) {
         sLnkPath = spanLnk || unitLnk;  // sLnkPath can be empty
       }
       
-      var needCopy = false, sSourKey = creator.getElementKey(srcEle);
+      var needCopy = false, sSourKey = utils.keyOfElement(srcEle);
       if (!sSourKey)
         needCopy = true;
       else {
@@ -2310,7 +2312,7 @@ main.$$onLoad.push( function(callback) {
     if (obj) {
       var comps = obj.$gui.comps, iLen = comps.length;
       for (var i=0; i < iLen; i += 1) {
-        var child = comps[i], sKey = child && creator.getElementKey(child);
+        var child = comps[i], sKey = child && utils.keyOfElement(child);
         if (sKey) {
           if (onlyNormal && sKey[0] == '$') continue;
           var subWdgt = wdgt[sKey], subObj = subWdgt && subWdgt.component;

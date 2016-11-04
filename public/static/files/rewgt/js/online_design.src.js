@@ -2055,7 +2055,17 @@ window.addEventListener('load', function(event) {
       if (succ) {
         var newSelect = '';
         if (retNode) {
-          if (retNode.parentNode.parentNode === rootNode && retNode.style.position == 'absolute')
+          if (retNode.classList.contains('rewgt-scene')) {
+            var sName = getKeyFromNode_(retNode);
+            if (sName) {
+              showRootPage(sName,false, function() {
+                var b = getWidgetPath(retNode);
+                if (b) newSelect = b[0];
+                setSelectByNode(retNode,false,false);
+              });
+            }
+          }
+          else if (retNode.parentNode.parentNode === rootNode && retNode.style.position == 'absolute')
             unselectWidget();    // can refresh page thumbnail, restore last absolute showing
           else {
             if (nodeChanged) {
@@ -3023,6 +3033,7 @@ window.addEventListener('load', function(event) {
       var items = [], iMax = 0, iMin = 0, maxNode = null, minNode = null, maxNum = 0, minNum = 0;
       for (var i=0,child; child=sceneNode.children[i]; i++) {
         var iLevel = parseInt(child.style.zIndex) || 0;
+        if (iLevel >= 1000) iLevel -= 2000;
         if (i == 0) {
           iMax = iLevel; maxNode = child;
           iMin = iLevel; minNode = child;
@@ -4261,12 +4272,24 @@ window.addEventListener('load', function(event) {
   
   var checkReadyNum_ = 0;
   hookReadyEvent( function() {
-    if (rootNode.onlyScenePage && rootNode.onlyScenePage())
-      switchPageList();  // show thumbnail list
     if (typeof W == 'object' && W.$main) {
       W.$main.inDesign = true;
       if (rootNode.keyOfNode)
         getKeyFromNode_ = rootNode.keyOfNode;
+    }
+    
+    if (rootNode.onlyScenePage && rootNode.onlyScenePage()) {
+      switchPageList();  // show thumbnail list
+      
+      var bdNode = rootNode.topmostNode();
+      if (!bdNode) return;
+      for (var i=0,node; node=bdNode.children[i]; i++) {
+        if (node.classList.contains('rewgt-scene')) { // try show first ScenePage
+          var sName = getKeyFromNode_(node);
+          if (sName) showRootPage(sName,false);
+          return;
+        }
+      }
     }
   });
   
