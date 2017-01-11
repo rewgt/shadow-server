@@ -3,10 +3,10 @@ OptLi
 [ props ]
   data-checked: ''
 [ duals ]
-  isolated: false
-  recheckable: false
+  isolated: ''
+  recheckable: ''
   popOption: undefined
   data-checked: ''
 [ method ]
   fireTrigger()
-  setChecked(callback,isForce,newOpt)
+  setChecked(callback,newOpt)

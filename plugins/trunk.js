@@ -343,6 +343,7 @@ rootRouter.regist('GET','/:project/*', function(req,res,next) {
     return;
   }
   
+  var savedSeg = '';
   if (sProj == 'app') {
     var iPos = sPath.indexOf('/');
     if (iPos > 0) {          // /app/files/proj/...
@@ -354,6 +355,7 @@ rootRouter.regist('GET','/:project/*', function(req,res,next) {
         }
       }
       else {
+        savedSeg = sPath.slice(0,iPos);     // record for log error
         sPath = sPath.slice(iPos); // ignore user segment: /app/user/cate_proj/version/...
         var b = utils.scanCategory(sPath);  // sPath: /cate_proj/ver/file
         if (b) {
@@ -401,7 +403,7 @@ rootRouter.regist('GET','/:project/*', function(req,res,next) {
     if (fs.existsSync(sFile) && sFile.indexOf(config.USER_PATH) == 0 && main.returnStaticFile(sFile,res))
       return;
   }
-  res.status(404).send('can not find file: ' + path.join(sProj,sPath));
+  res.status(404).send('can not find file: ' + path.join('/',sProj,savedSeg,sPath));
 });
 
 };  // end of M.onload()

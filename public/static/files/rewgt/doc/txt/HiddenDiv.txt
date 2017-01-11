@@ -1,0 +1,5 @@
+HiddenDiv
+4.4.3.!hidden_div
+[ props ]
+  width: null
+  minHeight: 0

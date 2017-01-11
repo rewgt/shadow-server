@@ -23,6 +23,14 @@
 <script src="/app/files/rewgt/web/popline/scripts/plugins/jquery.popline.backcolor.js"></script>
 
 <script>
+function location__(href) {
+  var location = document.createElement('a');
+  location.href = href;
+  if (location.host == '')
+    location.href = location.href;
+  return location;
+}
+
 window.addEventListener('load', function(event) {
   function loadCssModule(bCss,callback) {
     var cssNum = bCss.length, loaded = 0;
@@ -125,6 +133,102 @@ window.addEventListener('load', function(event) {
     showPopline(isPopline);
   };
   poplineRadio.checked = true;  // set default checked
+  
+  function transferHasType(transfer,sType) { // transfer.types.contains() for firefox, but not for chrome
+    if (!transfer.types) return false;
+    var i, iLen = transfer.types.length;
+    for (i=0; i < iLen; i += 1) {
+      if (transfer.types[i] == sType) return true;
+    }
+    return false;
+  }
+
+  function adjustPath(sUrl) {
+    var appBase = location__('./').pathname;
+    if (appBase[0] != '/') appBase = '/' + appBase; // avoid bug of IE10
+    var urlPath = location__(sUrl).pathname;
+    if (urlPath[0] != '/') urlPath = '/' + urlPath;
+    if (urlPath.startsWith(appBase))
+      urlPath = urlPath.slice(appBase.length);
+    return urlPath;
+  }
+  
+  function isOrContainsNode(ancestor,node) {
+    while (node) {
+      if (node === document) return false;
+      if (node === ancestor) return true;
+      node = node.parentNode;
+    }
+    return false;
+  }
+  
+  poplineArea.ondrop = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  poplineEditor.addEventListener('drop', function(event) {
+    if (transferHasType(event.dataTransfer,'application/json')) {
+      var sUrl, dOpt = null, sJson = event.dataTransfer.getData('application/json') || '{}';
+      try {
+        dOpt = JSON.parse(sJson);
+      }
+      catch(e) { console.log(e); }
+      
+      if (dOpt && dOpt.dragType == 'image' && (sUrl=dOpt.dragUrl)) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        var range, sel = null;
+        if (window.getSelection)
+          sel = window.getSelection();
+        else if (document.selection)
+          sel = document.selection.createRange();
+        if (sel && (range=sel.getRangeAt(0)) && isOrContainsNode(poplineEditor,range.startContainer)) {
+          var urlPath = adjustPath(sUrl), sHint = urlPath.split('/').pop();
+          var imgNode = document.createElement('img');
+          imgNode.setAttribute('alt',sHint);
+          imgNode.setAttribute('src',urlPath);
+          
+          range.deleteContents();
+          range.insertNode(imgNode);
+        }
+      }
+    }
+  },false);
+  
+  htmlEditor.addEventListener('drop', function(event) {
+    if (transferHasType(event.dataTransfer,'application/json')) {
+      var sUrl, dOpt = null, sJson = event.dataTransfer.getData('application/json') || '{}';
+      try {
+        dOpt = JSON.parse(sJson);
+      }
+      catch(e) { console.log(e); }
+      
+      if (dOpt && dOpt.dragType == 'image' && (sUrl=dOpt.dragUrl)) {
+        var urlPath = adjustPath(sUrl);
+        var sStyle = '', sHint = urlPath.split('/').pop();
+        if (typeof dOpt.clientWidth == 'number')
+          sStyle = '" style="width:' + dOpt.clientWidth + 'px; height:' + dOpt.clientHeight + 'px';
+        urlPath = '<img alt="' + sHint + sStyle + '" src="' + urlPath + '">';
+        
+        event.preventDefault();
+        event.stopPropagation();
+        
+        var startPos = this.selectionStart;
+        if (typeof startPos == 'number') {
+          var s = this.value;
+          this.value = s.slice(0,startPos) + urlPath + s.slice(this.selectionEnd);
+          this.selectionEnd = this.selectionStart = startPos + urlPath.length;
+        }
+        else if (document.selection) { // IE
+          this.focus();
+          var sel = document.selection.createRange();
+          sel.text = urlPath;
+        }
+        else this.value += urlPath;
+      }
+    }  
+  },false);
   
   document.execCommand('defaultParagraphSeparator', false, 'p');
   $(poplineEditor).popline({position: "fixed"});  // 'fixed' or 'relative'

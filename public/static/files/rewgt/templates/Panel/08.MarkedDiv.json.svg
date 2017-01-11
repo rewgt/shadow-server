@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width='90' height='60' viewport='0 0 90 60' version='1.1' xmlns='http://www.w3.org/2000/svg'>
-<g _widget='{"name":"MarkedDiv","widget":["MarkedDiv",{"mark":"Title%0A-----%0A%0A**Markdown%20text**%0A","klass":"default-large-small visible-auto-hidden default-self_center-start-end-stretch"}],"scene":["MarkedDiv",{"width":500,"mark":"Title%0A-----%0A%0A**Markdown%20text**%0A","klass":"default-large-small visible-auto-hidden"}]}' stroke='#222' stroke-width='1'>
+<g _widget='{"name":"MarkedDiv","widget":["MarkedDiv",{"width":500,"html.":"Title\n-----\n\n**Markdown text**\n","klass":"default-large-small visible-auto-hidden default-self_center-start-end-stretch"}]}' stroke='#222' stroke-width='1'>
   <text x='50%' y='50%' dy='0.3em' font-size='14' text-anchor='middle'>MarkedDiv</text>
 </g>
 </svg>

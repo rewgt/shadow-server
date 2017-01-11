@@ -1,4 +1,11 @@
 MarkedDiv
 4.4.3.!marked_div
+[ props ]
+  width: null
+  minWidth: 20
+  noShow: ''
 [ duals ]
-  mark: ''
+  nodes: []
+  colSpan: undefined
+  rowSpan: undefined
+  tdStyle

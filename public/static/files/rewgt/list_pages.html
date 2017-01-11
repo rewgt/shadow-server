@@ -21,7 +21,7 @@ var createPageNode = document.querySelector('#create-page');
 var openNewNode    = document.querySelector('#open-new');
 
 function htmlEncode(s) {
-  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function location__(href) {
@@ -127,6 +127,28 @@ function initGui() {
   });
 }
 
+window.removeHistoryHtml = function(event) {
+  event.stopPropagation();
+  
+  var sFile = '', pNode = event.target.parentNode;
+  pNode = pNode && pNode.parentNode;
+  sFile = pNode && pNode.getAttribute('fname');
+  if (!sFile) return;
+  
+  if (!projPageInfo || !projPageInfo.currProj) return;
+  var currPrjUrl = projPageInfo.currProj;
+  if (currPrjUrl.slice(-1) != '/') currPrjUrl += '/';
+  
+  postAsynRequest(currPrjUrl + '$utils?cmd=del_history',{source:sFile}, function(err,sInfo) {
+    if (err) {
+      if (sInfo)
+        alert('Failed: ' + sInfo);
+      console.log(err);
+    }
+    else pNode.parentNode.removeChild(pNode);
+  });
+};
+
 btnExpandNode.onclick = function(event) {
   if (!projPageInfo || !projPageInfo.currProj) return;
   var currPrjUrl = projPageInfo.currProj;
@@ -139,25 +161,33 @@ btnExpandNode.onclick = function(event) {
     }
     
     try {
-      var bRet = JSON.parse(sJson);
-      if (Array.isArray(bRet)) {
+      var bTmp, bRet = JSON.parse(sJson);
+      if (!Array.isArray(bRet) || bRet.length != 2) return;
+      
+      if (Array.isArray(bTmp=bRet[0])) {
+        var iFixed = bTmp.length;
+        bRet = bTmp.concat(bRet[1]);
         tempListNode.innerHTML = '';
         
         bRet.forEach( function(item,idx) {
-          var sFile = item[0], sTitle = item[1];
+          var sFile = item[0], sTitle = item[1], sRmvHtml = '';
+          
+          if (idx >= iFixed)  // can not remove first template
+            sRmvHtml = '&nbsp;&nbsp;<button onclick="removeHistoryHtml(event)">remove</button>';
           
           var pNode = document.createElement('p');
+          pNode.setAttribute('fname',sFile);
+          
           pNode.setAttribute('style','margin-left:4px');
           var pgNode = document.createElement('input');
           pgNode.setAttribute('type','radio');
           pgNode.setAttribute('name','temp-page');
-          pgNode.setAttribute('fname',sFile);
           pgNode.setAttribute('id','page-' + idx);
           if (idx == 0) pgNode.setAttribute('checked','true');
           pNode.appendChild(pgNode);
           labNode = document.createElement('label');
           labNode.setAttribute('for','page-' + idx);
-          labNode.innerHTML = htmlEncode(sTitle) + ' <span style="color:#888">(' + htmlEncode(sFile) + ')</span>';
+          labNode.innerHTML = htmlEncode(sTitle) + ' <span style="color:#888">(' + htmlEncode(sFile) + ')</span>' + sRmvHtml;
           pNode.appendChild(labNode);
           
           pNode.onclick = function(event) {
@@ -234,6 +264,10 @@ createPageNode.onclick = function(event) {
   }
   
   var sHead = headTagsNode.value.trim(), sTempFile = sampleHtmlNode.value.trim();
+  if (sHead) {
+    if (sHead.search(/(?:<title|<meta|<link|<script|<style)(>|\s)/gi) < 0)
+      sHead = '<title>' + htmlEncode(sHead) + '</title>';
+  }
   if (sTempFile) {
     var loc = location__(sTempFile);
     sTempFile = loc.pathname;
@@ -243,7 +277,7 @@ createPageNode.onclick = function(event) {
     var b = tempListNode.querySelectorAll('input');
     for (var i=0,item; item=b[i]; i+= 1) {
       if (item.checked) {
-        sTempFile = item.getAttribute('fname');
+        sTempFile = item.parentNode.getAttribute('fname');
         break;
       }
     }
@@ -348,12 +382,12 @@ p {
 
 <h3 class='cfg-title' style='margin-top:2px'>Create new page <button id='btn-expand'>v</button></h3>
 <div style='margin-left:8px; display:none'>
-  <h4 class='sub-title'>Select template</h4>
+  <h4 class='sub-title'>Select history template</h4>
   <div id='temp-list'></div>
   <h4 class='sub-title'>Or, copy from exist file <span style='font-weight:400'>(drag &amp; drop *.html file from resource area)</span></h4>
   <p><input id='sample-file' type='text' style='width:360px'></p>
-  <h4 class='sub-title'>Head tags <span style='font-weight:400; color:#888'>(such as: &lt;title&gt;, &lt;meta&gt;, &lt;link&gt;)</span></h4>
-  <p><textarea id='head-tags' style='width:360px; height:80px' placeholder='&lt;title&gt;description&lt;/title&gt;'></textarea></p>
+  <h4 class='sub-title'>Title <span style='font-weight:400; color:#888'>(input title, or describe &lt;title&gt;, &lt;meta&gt;, &lt;link&gt;)</span></h4>
+  <p><textarea id='head-tags' style='width:360px; height:80px'></textarea></p>
   <h4 class='sub-title'>File name</h4>
   <p><input id='file-name' type='text' style='width:360px'></p>
   <p><button id='create-page'>Create HTML page</button>&nbsp;<button id='open-new' style='display:none'>Open</button></p>

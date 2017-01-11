@@ -33,6 +33,7 @@ Widget
 [ method ]
   defineDual(attr,setFn,initValue)
   undefineDual(attr)
+  setEvent(eventSet)
   listen(attr,targComp,sMethod)
   unlisten(attr,targComp,sMethod)
   getHtmlNode()
@@ -43,7 +44,7 @@ Widget
   nextSibling()
   fullClone(props)
   setChild(...)
-  reRender(callback)
+  reRender(callback,data)
   willResizing(width,height,inPending)
 [ auto-as-duals ]
   accept  acceptCharset  accessKey  actionv allowFullScreen

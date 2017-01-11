@@ -40,11 +40,12 @@ function getAsynRequest(sUrl,callback) {  // callbac must passed
   var nodes = document.querySelectorAll('div.doc-body'), count = 0;
   for (var i=0,node; node=nodes[i]; i++) {
     var src = node.getAttribute('src');
-    if (src) fillContent(node,src,++count == 1);
+    var base = node.getAttribute('base') || '';
+    if (src) fillContent(node,src,base,++count == 1);
   }
   
-  function fillContent(node,sUrl,isFirst) {
-    getAsynRequest(sUrl, function(err,sTxt) {
+  function fillContent(node,sUrl,baseDir,isFirst) {
+    getAsynRequest(baseDir+sUrl, function(err,sTxt) {
       if (err) {
         console.log(err);
         return;
@@ -60,7 +61,7 @@ function getAsynRequest(sUrl,callback) {  // callbac must passed
         var aNode = document.createElement('a');
         aNode.setAttribute('class','shadow-cls');
         aNode.setAttribute('target','_blank');
-        aNode.setAttribute('href',sBase + sHash);
+        aNode.setAttribute('href',baseDir+sBase+sHash);
         aNode.textContent = sName;
         h3Node.appendChild(aNode);
         node.appendChild(h3Node);

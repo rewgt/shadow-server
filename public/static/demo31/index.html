@@ -9,31 +9,32 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo31</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top' height='{null}'>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top' height='{null}'>
     <!-- no filter, no sort -->
-    <div :t=Ol key='ul' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data'>
-      <div :t=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
+    <div $=Ol key='ul' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data'>
+      <div $=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
     </div>
     
     <!-- filter, no sort -->
-    <div :t=Ol key='ul2' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data, $item.age > 32'>
-      <div :t=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
+    <div $=Ol key='ul2' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data, $item.age > 32 && $index < 2'>
+      <div $=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
     </div>
 
     <!-- filter, sort -->
-    <div :t=Ol key='ul3' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data, $item.age > 32, "age"'>
-      <div :t=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
+    <div $=Ol key='ul3' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data, $item.age > 32, "age"'>
+      <div $=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
     </div>
     
     <!-- no filter, sort -->
-    <div :t=Ol key='ul4' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data, "age", "name", -1'>
-      <div :t=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
+    <div $=Ol key='ul4' width='{0.9999}' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}' $$for='item in duals.data, "age", "name", -1'>
+      <div $=Li $key='"li_" + index' $html='item.name + ", " + item.age'></div>
     </div>
   </div>
 </div>

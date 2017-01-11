@@ -15,12 +15,12 @@
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top'>
-    <div :t=P key='p' width='{0.9999}'>
-      <span :t=Textarea key='input' placeholder='Input markdown' style='width:300px; height:100px'></span>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top'>
+    <div $=P key='p' width='{0.9999}'>
+      <span $=Textarea key='input' placeholder='Input markdown' style='width:300px; height:100px'></span>
     </div>
-    <div :t=MarkedDiv klass='auto-hidden-visible' key='markdown' width='{0.9999}' height='{200}'></div>
+    <pre $=MarkedDiv klass='auto-hidden-visible' key='markdown' width='{0.9999}' height='{200}'></pre>
   </div>
 </div>
 </div>
@@ -54,7 +54,7 @@ main['.body.top.markdown'] = {
     var inputMark = W.W('.body.top.p.input').component, self = this;
     inputMark.listen('textValue', function(value,oldValue) {
       if (!self.isHooked) return;
-      self.duals.mark = escape(value);
+      self.duals['html.'] = value;
     });
   },
 };
@@ -63,7 +63,7 @@ main['.body.top.markdown'] = {
 main['.body.top.markdown'] = {
   onTextValue: function(value,oldValue) {
     // no need check this.isHooked
-    this.duals.mark = escape(value);
+    this.duals['html.'] = value;
   },
   
   componentDidMount: function() {
@@ -79,7 +79,7 @@ main['.body.top.markdown'] = {
     var state = this._getInitialState(this);
     this.defineDual('markOrg', function(value,oldValue) {
       this.state.markOrg = value;
-      this.duals.mark = escape(value);
+      this.duals['html.'] = value;
     });
     return state;
   },

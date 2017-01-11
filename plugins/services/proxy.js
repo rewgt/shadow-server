@@ -65,13 +65,14 @@ main.pluginServices['$proxy'] = [function(req,res,sCateProj,sServPath) { // sCat
             var sPath = sItem.slice(iPos);      // remove: /app/xxx
             var b = utils.scanCategory(sPath);  // sPath:  /cate_proj/ver/file
             if (b) {
-              var sTmp = b[1];
-              if (sTmp.startsWith('web/')) {
-                sItem = b[0] + sTmp.slice(4);
+              var sTmp2, sTmp = b[1], iPos2 = sTmp.indexOf('/web/');
+              if (iPos2 > 0 && (sTmp2=sTmp.slice(0,iPos2)).indexOf('/') == -1) {
+                sItem = b[0] + sTmp2 + sTmp.slice(iPos2+4);
                 sFile = path.join(config.STATIC_DIR,sItem);
                 if (!fs.existsSync(sFile))
                   sFile = path.join(config.USER_DIR,sItem);
               }
+              // else, invalid path
             }
             // else, invalid path
           }

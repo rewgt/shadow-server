@@ -24,18 +24,18 @@
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top'>
-    <div :t=NavPanel key='nav' width='{0.9999}' height='{200}'>
-      <div :t=P key='p' width='{0.9999}'>
-        <span :t=OptButton klass='ctrl-page' name='page' key='a' data-checked='1'>page A</span>
-        <span :t=OptButton klass='ctrl-page' name='page' key='b'>page B</span>
-        <span :t=OptButton klass='ctrl-page' name='page' key='c'>page C</span>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top'>
+    <div $=NavPanel key='nav' width='{0.9999}' height='{200}'>
+      <div $=P key='p' width='{0.9999}'>
+        <span $=OptButton klass='ctrl-page' name='page' key='a' data-checked='1'>page A</span>
+        <span $=OptButton klass='ctrl-page' name='page' key='b'>page B</span>
+        <span $=OptButton klass='ctrl-page' name='page' key='c'>page C</span>
       </div>
       
-      <div :t=GroundDiv key='a'>It is page A</div>
-      <div :t=GroundDiv key='b'> It is page B</div>
-      <div :t=GroundDiv key='c'> It is page C</div>
+      <div $=GroundDiv key='a'>It is page A</div>
+      <div $=GroundDiv key='b'> It is page B</div>
+      <div $=GroundDiv key='c'> It is page C</div>
     </div>
   </div>
 </div>
@@ -54,7 +54,7 @@ var main = W.$main, utils = W.$utils, ex = W.$ex;
 main['.body.top.nav.p.a'] = {
   $onClick: function(event) {
     var button_b = this.componentOf('./p.b');
-    console.log(button_b.duals['html.']);
+    console.log('./p.b:', button_b.duals['html.']);
   },
 };
 

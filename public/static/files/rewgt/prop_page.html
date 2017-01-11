@@ -40,7 +40,7 @@ var editorAttrs  = document.getElementById('editor_attrs');
 var editorHelper = document.getElementById('editor_helper');
 
 function htmlEncode(s) {
-  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 editorHelper.addEventListener('click',function(event) {
@@ -65,13 +65,13 @@ window.addEventListener('message', function(msg) {
       sRet = '[PROJECT_NAME]' + JSON.stringify({method:'warning',param:[sMsg]});
     }
     else {
-      var value = editor.getValue();
+      var value = editor.getValue(), bRmv = [];
       if (value instanceof Object) {
         lastRootAttr.forEach( function(item) {
-          if (!(item in value)) value[item] = undefined;  // set remove flag
+          if (!value.hasOwnProperty(item)) bRmv.push(item);
         });
       }
-      sRet = '[PROJECT_NAME]' + JSON.stringify({method:'saveProp',param:[lastSchemaId,value]});
+      sRet = '[PROJECT_NAME]' + JSON.stringify({method:'saveProp',param:[lastSchemaId,value,bRmv]});
     }
     window.parent.window.postMessage(sRet,'*');
   }
@@ -102,6 +102,11 @@ window.addEventListener('message', function(msg) {
         var sUrl = '';
         if (opt.name && opt.doc) {
           sUrl = opt.doc;
+          if (opt.baseUrl && !sUrl.startsWith('http:') && !sUrl.startsWith('https:') && sUrl[0] != '/') {
+            if (opt.baseUrl.slice(-1) == '/')
+              sUrl = opt.baseUrl + sUrl;
+            else sUrl = opt.baseUrl + '/' + sUrl;
+          }
           if (sUrl.slice(-1) != '/') sUrl += '/';
           sUrl += opt.name + '.html'
           editorHelper.innerHTML = 'Online help: <a href="javascript:void(0)">' + htmlEncode(opt.name) + '</a>';

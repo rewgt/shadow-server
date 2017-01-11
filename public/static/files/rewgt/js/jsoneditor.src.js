@@ -1885,7 +1885,7 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
     this.refreshValue();
     
     if(initial) this.is_dirty = false;
-    else if(this.jsoneditor.options.show_errors === "change") this.is_dirty = true;
+    else if(this.jsoneditor.options.show_errors === 'change') this.is_dirty = true;
     
     if(this.adjust_height) this.adjust_height(this.input);
 
@@ -3109,6 +3109,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     if(typeof value !== "object" || Array.isArray(value)) value = {};
 
     // First, set the values for all of the defined properties
+    var removeAny = false;  // added by wayne at 2016/11/18
     $each(this.cached_editors, function(i,editor) {
       // Value explicitly set
       if(typeof value[i] !== "undefined") {
@@ -3118,6 +3119,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
       // Otherwise, remove value unless this is the initial set or it's required
       else if(!initial && !self.isRequired(editor)) {
         self.removeObjectProperty(i);
+        removeAny = true;  // remove property should also notify changing
       }
       // Otherwise, set the value to the default
       else {
@@ -3134,7 +3136,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     
     this.refreshValue();
     this.layoutEditors();
-    this.onChange();
+    this.onChange(removeAny);
   },
   showValidationErrors: function(errors) {
     var self = this;
@@ -4105,7 +4107,6 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
 
     self.refreshValue();
     if(numrows_changed || initial) self.refreshRowButtons();
-
     self.onChange();
           
     // TODO: sortable

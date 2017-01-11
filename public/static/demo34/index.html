@@ -9,31 +9,32 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo34</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top' height='{null}'>
-    <div :t=TempPanel key='tmp'>
-      <div :t=NavPanel key='markdown' klass='col-reverse' dual-data='{{"width":0.9999,"height":150,"mark":"Markdown%0A--------"}}' $width='duals.data.width' $height='duals.data.height'>
-        <div :t=P width='{0.9999}' key='toolbar' height='{28}' margin='{0}' padding='{2}'>
-          <span :t=OptButton key='preview' data-checked='1'>Preview</span>
-          <span :t=OptButton key='editor'>Editor</span>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top' height='{null}'>
+    <div $=TempPanel key='tmp'>
+      <div $=NavPanel key='markdown' klass='col-reverse' dual-data='{{"width":0.9999,"height":150,"mark":"Markdown\n--------"}}' $width='duals.data.width' $height='duals.data.height'>
+        <div $=P width='{0.9999}' key='toolbar' height='{32}' margin='{0}' padding='{2}'>
+          <span $=OptButton key='preview' data-checked='1'>Preview</span>
+          <span $=OptButton key='editor'>Editor</span>
         </div>
-        <div :t=GroundPanel key='preview' width='{0.9999}' height='{-1}'>
-          <div :t=MarkedDiv $mark='duals.data.mark'></div>
+        <div $=GroundPanel key='preview' width='{0.9999}' height='{-1}'>
+          <pre $=MarkedDiv $html='duals.data.mark'></pre>
         </div>
-        <div :t=GroundPanel key='editor' width='{0.9999}' height='{-1}'>
-          <div :t=P key='p' width='{0.9999}' height='{0.9999}'>
-            <span :t=Textarea key='txt' style='width:90%; height:82%; resize:none' $value='ex.unescape(state.data.mark)'></span>
+        <div $=GroundPanel key='editor' width='{0.9999}' height='{-1}'>
+          <div $=P key='p' width='{0.9999}' height='{0.9999}'>
+            <span $=Textarea key='txt' style='width:90%; height:82%; resize:none' $value='state.data.mark'></span>
           </div>
         </div>
       </div>
     </div>
     
-    <div $='tmp.markdown' key='md' $trigger='{$merge:{height:300}}'></div>
+    <div $='//tmp.markdown' key='md' $trigger='["",{$merge:{height:300}}]'></div>
   </div>
 </div>
 </div>
@@ -52,7 +53,7 @@ main['.body.top.tmp.markdown.editor.p.txt'] = {
   $onChange: function(event) {
     var duals = this.componentOf('./').duals, s = event.target.value;
     this.setState({value:s});
-    duals.data = ex.update(duals.data,{$merge:{mark:escape(s)}});
+    duals.data = ex.update(duals.data,{$merge:{mark:s}});
   },
 };
 

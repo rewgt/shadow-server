@@ -47,6 +47,7 @@ main.pluginServices['$list'] = [function(req,res,sCateProj,sServPath) { // sCate
     return;
   }
   
+  var appWebRoot = false;
   var sTargDir, sUrl = req.query.url || '';
   if (!sUrl) {
     sTargDir = sDir;
@@ -72,8 +73,13 @@ main.pluginServices['$list'] = [function(req,res,sCateProj,sServPath) { // sCate
           var b = utils.scanCategory(sTmp);  // sTmp:   /cate_proj/ver/file
           if (b) {
             sTmp = b[1];
-            if (sTmp.startsWith('web/'))
-              sUrl = '/' + b[0] + sTmp.slice(4);
+            var sTmp2,b2, sTmp = b[1], iPos2 = sTmp.indexOf('/web/');
+            if (iPos2 > 0 && (sTmp2=sTmp.slice(0,iPos2)).indexOf('/') == -1)
+              sUrl = '/' + b[0] + sTmp2 + sTmp.slice(iPos2+4);
+            else if ((b2=sTmp.split('/')).length == 2 && b2[1] == 'web') {
+              sUrl = '/' + b[0] + b2[0];
+              appWebRoot = true;
+            }
             else succ = false;
           }
           else succ = false;
@@ -103,7 +109,7 @@ main.pluginServices['$list'] = [function(req,res,sCateProj,sServPath) { // sCate
   
   // step 2: analyse target path is topmost or not
   var atTop = false;
-  if (sUrl == '/files/rewgt/templates' || sUrl == '/')
+  if (sUrl == '/files/rewgt/templates' || sUrl == '/' || appWebRoot)
     atTop = true;  // can not go uplevel of system templates folder
   
   var bFolder = [], bFile = [], bTemplate = [];

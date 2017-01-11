@@ -5,6 +5,14 @@
 <title>Property editor</title>
 
 <script>
+function location__(href) {
+  var location = document.createElement('a');
+  location.href = href;
+  if (location.host == '')
+    location.href = location.href;
+  return location;
+}
+
 window.addEventListener('load', function(event) {
   function loadCssModule(bCss,callback) {
     var cssNum = bCss.length, loaded = 0;
@@ -47,6 +55,67 @@ window.addEventListener('load', function(event) {
   var editorInfo = document.getElementById('edit-info');
   var editorButtons = document.querySelectorAll('#edit-btn > button');
   var cancelBtn = editorButtons[2];
+  
+  function transferHasType(transfer,sType) { // transfer.types.contains() for firefox, but not for chrome
+    if (!transfer.types) return false;
+    var i, iLen = transfer.types.length;
+    for (i=0; i < iLen; i += 1) {
+      if (transfer.types[i] == sType) return true;
+    }
+    return false;
+  }
+  
+  editor.addEventListener('drop', function(event) {
+    var insTxt = '';
+    
+    if (transferHasType(event.dataTransfer,'application/json')) {
+      var sUrl, dOpt = null, sJson = event.dataTransfer.getData('application/json') || '{}';
+      try {
+        dOpt = JSON.parse(sJson);
+      }
+      catch(e) { console.log(e); }
+      
+      if (dOpt && dOpt.dragType == 'image' && (sUrl=dOpt.dragUrl)) {
+        var appBase = location__('./').pathname;
+        if (appBase[0] != '/') appBase = '/' + appBase; // avoid bug of IE10
+        var urlPath = location__(sUrl).pathname;
+        if (urlPath[0] != '/') urlPath = '/' + urlPath;
+        if (urlPath.startsWith(appBase))
+          insTxt = urlPath.slice(appBase.length);
+        else insTxt = urlPath;
+      }
+    }
+    else if (transferHasType(event.dataTransfer,'text/uri-list')) {
+      var sUrl = event.dataTransfer.getData('text/uri-list') || '';
+      if (sUrl) {
+        var appBase = location__('./').pathname;
+        if (appBase[0] != '/') appBase = '/' + appBase; // avoid bug of IE10
+        var urlPath = location__(sUrl).pathname;
+        if (urlPath[0] != '/') urlPath = '/' + urlPath;
+        if (urlPath.startsWith(appBase))
+          insTxt = urlPath.slice(appBase.length);
+        else insTxt = urlPath;
+      }
+    }
+    
+    if (insTxt) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      var startPos = this.selectionStart;
+      if (typeof startPos == 'number') {
+        var s = this.value;
+        this.value = s.slice(0,startPos) + insTxt + s.slice(this.selectionEnd);
+        this.selectionEnd = this.selectionStart = startPos + insTxt.length;
+      }
+      else if (document.selection) { // IE
+        this.focus();
+        var sel = document.selection.createRange();
+        sel.text = insTxt;
+      }
+      else this.value += insTxt;
+    }
+  },false);
   
   var editorInfoId_ = 0;
   editorButtons[0].onclick = function(event) {  // 'Check JSON' button

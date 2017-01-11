@@ -9,21 +9,22 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo28</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top' height='{null}'>
-    <div :t=Div key='hello' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
-      <div :t=P key='p' width='{0.9999}'>
-        <span :t=Input key='name' $value='duals.data.name + " " + duals.data.lastName' read-only='readonly'></span>
-        <span :t=Br></span>
-        <span :t=Span key='txt' $html='"Hello, " + duals.data.name'></span>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top' height='{null}'>
+    <div $=Div key='hello' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
+      <div $=P key='p' width='{0.9999}'>
+        <span $=Input key='name' $value='duals.data.name + " " + duals.data.lastName' read-only='readonly'></span>
+        <span $=Br></span>
+        <span $=Span key='txt' $html='"Hello, " + duals.data.name'></span>
       </div>
     </div>
-    <div $='hello.p' dual-data='{{"name":"Hillary","lastName":"Clinton"}}'></div>
+    <div $='//hello.p' dual-data='{{"name":"Hillary","lastName":"Clinton"}}'></div>
   </div>
 </div>
 </div>

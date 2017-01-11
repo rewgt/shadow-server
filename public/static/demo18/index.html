@@ -14,13 +14,13 @@
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top'>
-    <div :t=P key='toolbar'>
-      <span :t=Button key='test'>Test</span>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top'>
+    <div $=P key='toolbar'>
+      <span $=Button key='test'>Test</span>
     </div>
-    <div :t=Div key='msg' padding='{[0,6]}' style='display:none'>
-      <div :t=P>Hello, world!</div>
+    <div $=Div key='msg' padding='{[0,6]}' style='display:none'>
+      <div $=P>Hello, world!</div>
     </div>
   </div>
 </div>
@@ -36,8 +36,6 @@ var ReactDOM = require('react-dom');
 var W = require('shadow-widget');
 var main = W.$main, utils = W.$utils, ex = W.$ex;
 
-var popWin = W.$popWin;
-
 var popOption = { width:0.7, height:200,
   bodyStyle: {display:'block', backgroundColor:'#eee'},
 };
@@ -45,7 +43,7 @@ var popOption = { width:0.7, height:200,
 main['.body.top.toolbar.test'] = {
   $onClick: function(event) {
     var ele = this.elementOf('.body.top.msg');
-    popWin.showWindow(ele,popOption, function() {
+    utils.popWin.showWindow(ele,popOption, function() {
       console.log('popup window has shown, opened =',popOption.opened);
     });
   },

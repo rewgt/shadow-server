@@ -9,27 +9,28 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo29</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top' height='{null}'>
-    <div :t=Div key='div' dual-data='{["item1","item2","item3"]}' $for=''>
-      <div :t=Ul width='{0.9999}' $for='item in duals.data'>
-        <div :t=Li $key='"li_" + index' $html='item + ", " + index + " of " + count'></div>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top' height='{null}'>
+    <div $=Div key='div' dual-data='{["item1","item2","item3"]}' $for=''>
+      <div $=Ul width='{0.9999}' $for='item in duals.data'>
+        <div $=Li $key='"li_" + index' $html='item + ", " + index + " of " + count'></div>
       </div>
     </div>
 
-    <div :t=Div key='div2' dual-test='{1}' dual-data='{["item1","item2","item3"]}' $for=''>
-      <div :t=Ul width='{0.9999}' $test='duals.test + 1' $for='item in duals.data'>
-        <div :t=Li $key='"li_" + index' $html='duals.test + "," + duals(-1).test'></div>
+    <div $=Div key='div2' dual-test='{1}' dual-data='{["item1","item2","item3"]}' $for=''>
+      <div $=Ul width='{0.9999}' $test='duals.test + 1' $for='item in duals.data'>
+        <div $=Li $key='"li_" + index' $html='duals.test + "," + duals(-1).test'></div>
       </div>
     </div>
     
-    <div :t=Ul key='ul' width='{0.9999}' dual-data='{["item1","item2","item3"]}' $$for='item in duals.data'>
-      <div :t=Li $key='"li_" + index' $html='duals.data[index] + "," + duals(-1).data[index]'></div>
+    <div $=Ul key='ul' width='{0.9999}' dual-data='{["item1","item2","item3"]}' $$for='item in duals.data'>
+      <div $=Li $key='"li_" + index' $html='duals.data[index] + "," + duals(-1).data[index]'></div>
     </div>
   </div>
 </div>

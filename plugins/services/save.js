@@ -50,11 +50,46 @@ main.pluginServices['$save'] = [function(req,res,sCateProj,sServPath) { // sCate
       }
       
       try {
+        var sHead = dBody.head || '';
+        if (sHead && typeof sHead == 'string') {  // try replace head segment
+          var idxA = sHtml.search(/<head>/gi), idxB = sHtml.search(/<\/head>/gi);
+          if (idxA >= 0 && idxB > idxA)
+            sHtml = sHtml.slice(0,idxA) + '<head>\n' + sHead + (sHead.slice(-1) == '\n'?'':'\n') + sHtml.slice(idxB);
+        }
+        
         var iPosA = sHtml.indexOf(sContentFlagA), iPosB = -1;
         if (iPosA > 0) {
           iPosB = sHtml.indexOf(sContentFlagB,iPosA);        
           if (iPosB > 0) {  // iPosA must large than 0
-            var sNewBody = '\n<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">\n' + sBody + '</div>\n';
+            var bDepend = null, sDepend = dBody.depend || '';
+            if (sDepend) {
+              try {
+                bDepend = JSON.parse(sDepend);
+                if (!Array.isArray(bDepend)) bDepend = null;
+              }
+              catch(e) {
+                console.log('invalid JSON (depend) for command: $save');
+              }
+            }
+            
+            sDepend = '';
+            if (bDepend) {
+              bDepend.forEach( function(item) {
+                var sType = item[0], sSrc = item[1], sId = item[2] || '';
+                if (sId) sId = ' id="' + sId + '"';
+                if (sType == 'css')
+                  sDepend += '<link rel="stylesheet"' + sId + ' href="' + sSrc + '" />\n';
+                else if (sType == 'shared-css')
+                  sDepend += '<link rel="stylesheet"' + sId + ' shared="true" href="' + sSrc + '" />\n';
+                else if (sType == 'js')
+                  sDepend += '<script' + sId + ' src="' + sSrc + '"></script>\n';
+                else if (sType == 'inline-js')
+                  sDepend += '<script' + sId + '>\n' + sSrc + '\n</script>\n';
+              });
+            }
+            if (sDepend) sDepend = '<div id="react-resource">\n' + sDepend + '</div>\n';
+            
+            var sNewBody = '\n<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">\n' + sBody + '</div>\n' + sDepend;
             sHtml = sHtml.slice(0,iPosA + sContentFlagA.length) + sNewBody + sHtml.slice(iPosB);
             fs.writeFileSync(sFile,sHtml,'utf-8');
           }

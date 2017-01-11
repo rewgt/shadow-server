@@ -1,0 +1,180 @@
+/* slide_style.css */
+
+body {
+  -webkit-touch-callout: none;
+  
+  tap-highlight-color: transparent;
+  -o-tap-highlight-color: transparent;
+  -moz-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-font-smoothing: antialiased;
+  -ms-font-smoothing: antialiased;
+  -o-font-smoothing: antialiased;
+}
+
+article.rewgt-scene {
+  background-color: white;
+
+  -o-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+
+  border-radius: 10px;
+  -o-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+
+  border: 0px solid rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: left 0.4s ease-out;
+}
+
+.wdgt-pgctrl {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAXBAMAAADJv2OxAAAAMFBMVEX///+ZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZnHHh8xAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAAAdElEQVQI12NgAAH2v2CKsf83mJb8vxBEMe3/KQCitf83gLn3n4Flff8FgCjW90/A3Pw/BiBK4v0lMHf+bwUw/R/CZVj/SwBq5kaIQD1UAfv7yxCBuH8OYJrl/VWIgM3/AjDNdP45REDq/0SI+9b/gghw/AUAn68l+4HFkZUAAAAASUVORK5CYII=");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.wdgt-pgctrl.right {
+  -o-transform: scaleX(-1);
+  -moz-transform: scaleX(-1);
+  -webkit-transform: scaleX(-1);
+  -ms-transform: scaleX(-1);
+  transform:scaleX(-1);
+}
+
+.prebuild-1 {
+  -webkit-transition: all 0.4s ease-out;
+  -moz-transition: all 0.4s ease-out;
+  -ms-transition: all 0.4s ease-out;
+  -o-transition: all 0.4s ease-out;
+  transition: all 0.4s ease-out;
+}
+.prebuild-2 {
+  -webkit-transition: all 0.7s ease-out;
+  -moz-transition: all 0.7s ease-out;
+  -ms-transition: all 0.7s ease-out;
+  -o-transition: all 0.7s ease-out;
+  transition: all 0.7s ease-out;
+}
+.prebuild-3 {
+  -webkit-transition: all 1s ease-out;
+  -moz-transition: all 1s ease-out;
+  -ms-transition: all 1s ease-out;
+  -o-transition: all 1s ease-out;
+  transition: all 1s ease-out;
+}
+.prebuild-4 {
+  -webkit-transition: all 1.6s ease-out;
+  -moz-transition: all 1.6s ease-out;
+  -ms-transition: all 1.6s ease-out;
+  -o-transition: all 1.6s ease-out;
+  transition: all 1.6s ease-out;
+}
+.prebuild-5 {
+  -webkit-transition: all 2.8s ease-out;
+  -moz-transition: all 2.8s ease-out;
+  -ms-transition: all 2.8s ease-out;
+  -o-transition: all 2.8s ease-out;
+  transition: all 2.8s ease-out;
+}
+
+.postbuild-1 {
+  -webkit-transition: all 0.4s ease-in;
+  -moz-transition: all 0.4s ease-in;
+  -ms-transition: all 0.4s ease-in;
+  -o-transition: all 0.4s ease-in;
+  transition: all 0.4s ease-in;
+}
+.postbuild-2 {
+  -webkit-transition: all 0.7s ease-in;
+  -moz-transition: all 0.7s ease-in;
+  -ms-transition: all 0.7s ease-in;
+  -o-transition: all 0.7s ease-in;
+  transition: all 0.7s ease-in;
+}
+.postbuild-3 {
+  -webkit-transition: all 1s ease-in;
+  -moz-transition: all 1s ease-in;
+  -ms-transition: all 1s ease-in;
+  -o-transition: all 1s ease-in;
+  transition: all 1s ease-in;
+}
+.postbuild-4 {
+  -webkit-transition: all 1.6s ease-in;
+  -moz-transition: all 1.6s ease-in;
+  -ms-transition: all 1.6s ease-in;
+  -o-transition: all 1.6s ease-in;
+  transition: all 1.6s ease-in;
+}
+.postbuild-5 {
+  -webkit-transition: all 2.8s ease-in;
+  -moz-transition: all 2.8s ease-in;
+  -ms-transition: all 2.8s ease-in;
+  -o-transition: all 2.8s ease-in;
+  transition: all 2.8s ease-in;
+}
+
+.build > * {
+  -o-transition: opacity 0.5s ease-in-out 0.2s;
+  -moz-transition: opacity 0.5s ease-in-out 0.2s;
+  -webkit-transition: opacity 0.5s ease-in-out 0.2s;
+  -ms-transition: opacity 0.5s ease-in-out 0.2s;
+  transition: opacity 0.5s ease-in-out 0.2s;
+}
+.build > .to-build {
+  opacity: 0;
+}
+.translucent-default.build > .to-build {
+  opacity: 0.4;
+}
+
+#react-container.no-trans article.rewgt-scene {
+  -o-transition: none;
+  -moz-transition: none;
+  -webkit-transition: none;
+  -ms-transition: none;
+  transition: none;
+}
+
+#react-container.no-ground article.rewgt-scene {
+  background-color: rgba(0,0,0,0);
+}
+
+#react-container[__design__="1"] article.rewgt-scene,
+#react-container.no-frame article.rewgt-scene,
+article.rewgt-scene.no-frame {
+  overflow: visible;
+  
+  border-radius: 0px;
+  -o-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  
+  border: 0px none transparent;
+  box-shadow: none;
+  transition: none;
+}
+
+.rewgt-goto {
+  width: 24px;
+  height: 24px;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAS1BMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADmYDp0AAAAGHRSTlMAAgNpcgaZ9ngUo/UTAQUYqBa7urjK/HN1R69NAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAALEgAACxIB0t1+/AAAAE9JREFUKM9jYKA3YGTCLs7EzMKKVYKVjZ0DuwwnFzfJMjxIMrx8rAjAxC8AlxHkEhJGABFRMXZxXvwSOI3CaTkxzsUljjNIcAYizmCnEQAANO8FTz6VCNYAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTUtMDgtMDdUMDg6MjE6NDYrMDg6MDAKK19CAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE1LTA4LTA3VDA4OjIxOjQ2KzA4OjAwe3bn/gAAAABJRU5ErkJggg==');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
+}
+
+.rewgt-timer {
+  width: 28px;
+  height: 28px;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAKvSURBVDjLTdNfaNV1GMfx1znntz9nc1ue7GLnQJqsDs0xWIfC1BoM5lZMJKF1IzRIIvsPaVJ4FdKoudLIu8qkblqU2IzmZpJYSsLPC0lvGkKSW3N1nPPM45rb6eKczT53z5fP+/v9PA/PN5KBu3RZL+eIM+bR7l0L3vYjYh612TK/OGqKACv12aQSGz3lkkAbotqcdNtKBzSjx6Cd/ogla32kW4CsPU4qKPO7EYPOyJk3bdYGcYE16g0HOnWBrB0Oudcm7RrUYtqoEYMOWrBXAl06A2tVI+sNX3ve6x4QUVTKg7q8ZJ8vFPRLqLY2cL1k/06f55Sb8rPf9OBzTTZI26/ZbvRLuB5L5rToNaDXdlHHvaLfTx437kUDTktq8LAa+41J+jCSiUm5oscBFQ7ZaRJ8ZsE2cI8+z5r1soNSrkTDeZfVe02FE3aZDCGqRrUIIZN2OaHCq+pdDuejGejQJKfPRKndqCpx0VI1oU9Okw4yoohpE3HWKcKiJbgDhHDKWRFtYkRRI40xdWSKQI2Eu9VSOqkzhrSaIlClDt2+lSqFaNeo2ZMle8o3ulGnqggUFDDjL3MlYEZemResAnMmzCz6opjxDw7b6moJGLLFlx7xgRW4aqvDyJopAjdcRKOyYouhcNZx272v0x5xlGnEBTcWIw2b01IcW1EhOe/Y7T7L0aHFnGEFImRY4Yh1znnG6NJoZQgsM6XBVx5y2mZ/h2IkuemaJ6yS9qtsUlJydXK5axbccr+PPWbam84xLsa4JKNi1klrddOfag3Y4qhKT9tnvVnv+dRCyOLuZ4jb4S1x/7rokg4cs1qjcnm99soXoy5+FhmajQjExd1RXt5t7c4vdhYs2WlVbpu8jdZIIOuCYXGfaHU+UxpG8L/bUoZ875YfSq/k5RVUGlpaGfwHh0DWF1J7V6YAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTMtMTItMzFUMTA6MDg6NTgrMDg6MDCfQ8xDAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDEzLTEyLTMxVDEwOjA4OjU4KzA4OjAw7h50/wAAAABJRU5ErkJggg==');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
+}
+#react-container[__design__="1"] .rewgt-timer {
+  visibility: visible;
+}

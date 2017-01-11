@@ -102,26 +102,27 @@ main.pluginServices['$utils'] = [function(req,res,sCateProj,sServPath) { // sCat
       }
     }
     else if (sCmd == 'list_project') {
-      var bDir = [config.STATIC_DIR,config.USER_DIR], bRet = [];
-      bDir.forEach( function(sDir) {
+      var bDir = [config.STATIC_DIR,config.USER_DIR], bRet = [[],[]];
+      bDir.forEach( function(sDir,idx) {
         if (!fs.existsSync(sDir)) return;
         
-        var b = fs.readdirSync(sDir);
+        var b = fs.readdirSync(sDir), bOut = bRet[idx];
         b.forEach( function(item) {
           if (item[0] == '.') return;
           
           var sPath = path.join(sDir,item), st = fs.lstatSync(sPath);
           if (st.isDirectory()) {
             if (item.slice(0,2) == '$$')
-              tryScanCateProj(bRet,sDir,item,'');
+              tryScanCateProj(bOut,sDir,item,'');
             else {
               if (fs.existsSync(path.join(sPath,'index.html')))
-                bRet.push('/' + item);
+                bOut.push('/' + item);
             }
           }
         });
+        bOut.sort();
       });
-      bRet.sort();
+      
       res.json(bRet);
       return;
     }
@@ -148,29 +149,27 @@ main.pluginServices['$utils'] = [function(req,res,sCateProj,sServPath) { // sCat
         }
       }
       
-      var bRet = systemSamples.slice(0), bSample = config.historySamples || [];
+      var bHistory = [], bSample = config.historySamples || [];
       bSample.forEach( function(item) {
         var ss = item[0];
-        if (bRet.findIndex( function(item2) { return item2[0] == ss; } ) < 0)
-          bRet.push(item);
+        if (systemSamples.findIndex( function(item2) { return item2[0] == ss; } ) < 0)
+          bHistory.push(item);
       });
-      res.json(bRet);
+      res.json([systemSamples,bHistory]);
       return;
     }
   }
   else if (req.method == 'POST') {
     var dBody = req.body;
     if (sCmd == 'create_page' && typeof dBody == 'object' && dBody.source && dBody.name) {
-      var sDir = path.join(config.STATIC_DIR,sCateProj);
-      if (!fs.existsSync(sDir)) {
-        sDir = path.join(config.USER_DIR,sCateProj);
+      if (dBody.name.slice(-5).toLowerCase() == '.html') {
+        var sDir = path.join(config.STATIC_DIR,sCateProj);
         if (!fs.existsSync(sDir)) {
-          if (dBody.name == 'index.html') // create new project
+          sDir = path.join(config.USER_DIR,sCateProj);
+          if (!fs.existsSync(sDir))
             recursiveMkDir(config.USER_DIR,sCateProj);
-          else sDir = '';
         }
-      }
-      if (sDir && dBody.name.slice(-5).toLowerCase() == '.html') {
+        
         var sSrcFile, sTarFile = path.join(sDir,dBody.name), sSrcSample = dBody.source || '';
         if (sSrcSample && sSrcSample[0] != '/') sSrcSample = '/' + sSrcSample;
         
@@ -242,6 +241,38 @@ main.pluginServices['$utils'] = [function(req,res,sCateProj,sServPath) { // sCat
             },0);
           }
         }
+        return;
+      }
+    }
+    else if (sCmd == 'del_history' && typeof dBody == 'object' && dBody.source) {
+      var bNewHist = config.historySamples;
+      if (Array.isArray(bNewHist)) {
+        var iPos = bNewHist.findIndex( function(item) {
+          return item[0] === dBody.source;
+        });
+        if (iPos >= 0) bNewHist.splice(iPos,1);
+      }
+      else bNewHist = config.historySamples = [];
+      
+      var dNewCfg = {  // re-assign, avoid saving unknown key
+        cacheSize:  config.cacheSize || 5,
+        backupHTML: !!config.backupHTML,
+        resourcePages: config.resourcePages || [],
+        historySamples: bNewHist,
+      };
+      
+      var succ = false;
+      Object.assign(config,dNewCfg);
+      var cfgFile = path.join(config.FILES_DIR,'rewgt/config/config.json');
+      try {
+        fs.writeFileSync(cfgFile,JSON.stringify(dNewCfg),'utf-8');
+        succ = true;
+      }
+      catch(e) {
+        console.log('warning: save rewgt/config/config.json failed');
+      }
+      if (succ) {
+        res.json({result:'OK'});
         return;
       }
     }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width='90' height='60' viewport='0 0 90 60' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+<g _widget='{"name":"rewgt/shadow-slide/step1","widget":[["P",{"width":400,"height":240,"margin":0,"klass":"S4 default-large-small p1-p2-p3-p0 visible-auto-hidden","style":{"zIndex":"-999"}}],["Canvas",{"klass":"round_mask-big round0-default-round2 no_shadow-lb-rb-rt-lt","style":{"width":"100%","height":"100%","background":"url(/app/rewgt/shadow-slide/web/output/background.jpg) no-repeat center","backgroundSize":"contain"}}]]}' stroke='#222' stroke-width='1'>
+  <text x='50%' y='50%' dy='0.3em' font-size='12' text-anchor='middle'>Background</text>
+</g>
+</svg>

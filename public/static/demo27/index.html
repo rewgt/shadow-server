@@ -9,37 +9,38 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo27</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top' height='{null}'>
-    <div :t=P key='hello' width='{0.9999}' $for=''>
-      <span :t=OptButton isolated='{true}' recheckable='{true}' dual-data='{0}' trigger='[["//a",{$set:ex.time()}]]' key='a'>A</span>
-      <span :t=OptButton isolated='{true}' recheckable='{true}' dual-data='{0}' trigger='[["//b",{$set:ex.time()}]]' key='b'>B</span>
-      <span :t=Br></span>
-      <span :t=Span $html='any: duals("a").data + "," + duals("b").data'></span>
-      <span :t=Br></span>
-      <span :t=Span $html='all: duals("a").data + "," + duals("b").data' key='log'></span>
-      <span :t=Br></span>
-      <span :t=Span $html='strict: duals("a").data + "," + duals("b").data'></span>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top' height='{null}'>
+    <div $=P key='hello' width='{0.9999}' $for=''>
+      <span $=OptButton isolated='1' recheckable='1' dual-data='{0}' fire-type='onsite' $trigger='["",{$set:ex.time()}]' key='a'>A</span>
+      <span $=OptButton isolated='1' recheckable='1' dual-data='{0}' fire-type='onsite' $trigger='["",{$set:ex.time()}]' key='b'>B</span>
+      <span $=Br></span>
+      <span $=Span $html='any: duals("a").data + "," + duals("b").data'></span>
+      <span $=Br></span>
+      <span $=Span $html='all: duals("a").data + "," + duals("b").data' key='log'></span>
+      <span $=Br></span>
+      <span $=Span $html='strict: duals("a").data + "," + duals("b").data'></span>
     </div>
     
-    <div :t=P key='hello2' width='{0.9999}' $for=''>
-      <span :t=OptButton isolated='{true}' recheckable='{true}' dual-data='{0}' trigger='[["//a",{$set:ex.time()}]]' key='a'>A</span>
-      <span :t=OptButton isolated='{true}' recheckable='{true}' dual-data='{0}' trigger='[["//b",{$set:ex.time()}]]' key='b'>B</span>
-      <span :t=Br></span>
-      <span :t=Span $html='all:(duals("a").data,duals("b").data,ex.log("here"),"")'></span>
+    <div $=P key='hello2' width='{0.9999}' $for=''>
+      <span $=OptButton isolated='1' recheckable='1' dual-data='{0}' fire-type='onsite' $trigger='["",{$set:ex.time()}]' key='a'>A</span>
+      <span $=OptButton isolated='1' recheckable='1' dual-data='{0}' fire-type='onsite' $trigger='["",{$set:ex.time()}]' key='b'>B</span>
+      <span $=Br></span>
+      <span $=Span $html='all:(duals("a").data,duals("b").data,ex.log("here"),"")'></span>
     </div>
     
-    <div :t=P key='sync' width='{0.9999}' $for='' dual-data='{{"a":{},"b":{},"c":{}}}'>
-      <span :t=OptButton isolated='{true}' recheckable='{true}' trigger='[["//",ex.tagValue({a:{$set:{value:true}}})]]' key='a'>A</span>
-      <span :t=OptButton isolated='{true}' recheckable='{true}' trigger='[["//",ex.tagValue({b:{value:{$set:true}}})]]' key='b'>B</span>
-      <span :t=OptButton isolated='{true}' recheckable='{true}' trigger='[["//",ex.tagValue({$merge:{c:{value:true}}})]]' key='c'>C</span>
-      <span :t=Br></span>
-      <span :t=Span $html='ex.tagFired(duals.data,"a","b","c")? duals.data.a.value + "," + duals.data.b.value + "," + duals.data.c.value: "none"' key='log'></span>
+    <div $=P key='sync' width='{0.9999}' $for='' dual-data='{{"a":{},"b":{},"c":{}}}'>
+      <span $=OptButton isolated='1' recheckable='1' fire-type='onsite' $trigger='["//",ex.tagValue({a:{$set:{value:true}}})]' key='a'>A</span>
+      <span $=OptButton isolated='1' recheckable='1' fire-type='onsite' $trigger='["//",ex.tagValue({b:{value:{$set:true}}})]' key='b'>B</span>
+      <span $=OptButton isolated='1' recheckable='1' fire-type='onsite' $trigger='["//",ex.tagValue({$merge:{c:{value:true}}})]' key='c'>C</span>
+      <span $=Br></span>
+      <span $=Span $html='ex.tagFired(duals.data,"a","b","c")? duals.data.a.value + "," + duals.data.b.value + "," + duals.data.c.value: "none"' key='log'></span>
     </div>
   </div>
 </div>

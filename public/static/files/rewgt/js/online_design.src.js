@@ -70,8 +70,10 @@ var clipTextSelectId = 0;
 
 // common APIs
 //------------
-function htmlEncode(s) {
-  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+function htmlEncode(s,hasQuote) {
+  var s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if (hasQuote) s = s.replace(/"/g,'&quot;');  // "
+  return s;
 }
 
 function location__(href) {
@@ -169,7 +171,7 @@ var backupIdFrom_ = (new Date()).valueOf() - 1000; // ignore undo when backupId 
 var backupTaskId_ = 0;     // 0 means current no delay-backup task, otherwise exists pending task
 var backupLastUndoId_ = 0; // 0 means last operation is not undo
 
-var dTemplateTools_ = {};  // {toolId:['mono/all',sBaseUrl,bTool],vendorProj:false}
+var dTemplateTools_ = {};  // {toolId:['mono/all',bTool,withOrigin],vendorProj:false} // tool.baseUrl has added
 
 var getKeyFromNode_ = function(node) { return '' };
 
@@ -193,12 +195,13 @@ function segmentOfToolId(sOptid) {
 }
 
 function checkToolConfig(optid,bRetInfo) {
-  var b = Array.isArray(optid)? sOptid: segmentOfToolId(optid+'');
+  var b = Array.isArray(optid)? optid: segmentOfToolId(optid+'');
   if (!b) return;
   
-  var sVendor = b[0], sPrjPath = sVendor + b[1], sWdgtName = b[2];
+  var sVendor = b[0], sPrjPath = sVendor + b[1];
   if (dTemplateTools_.hasOwnProperty(sPrjPath)) return;
   
+  var sWdgtFull = sPrjPath + '/' + b[2];
   var sUrl = '/app/' + sPrjPath + '/web/TOOL.json';
   getAsynRequest(sUrl, function(err,sJson) {
     if (err) {
@@ -209,17 +212,44 @@ function checkToolConfig(optid,bRetInfo) {
         var cfg = JSON.parse(sJson);
         
         dTemplateTools_[sPrjPath] = false;
+        var dLib = {}, bCfgItem = [];
         Object.keys(cfg).forEach( function(item) {
           var value = cfg[item];
-          if (value && value.name) {
-            var sOpt = value.opt || 'mono/all';
-            dTemplateTools_[value.name] = [sOpt,value.baseUrl,value.tools];
-            
-            if (sWdgtName == item && bRetInfo) {
-              var bGroup = sOpt.split('/');
-              bRetInfo[0] = bGroup[0];
-              bRetInfo[1] = bGroup[1] || 'all';
+          if (!value || !Array.isArray(value.tools)) return;
+          
+          if (value.hasOwnProperty('baseUrl')) {  // is lib item
+            value.tools.forEach( function(tool) {
+              tool.baseUrl = value.baseUrl;
+            });
+            dLib[item] = value;
+          }
+          else {  // is widget item
+            value.name = item;
+            bCfgItem.push(value);
+          }
+        });
+        
+        bCfgItem.forEach( function(value) {
+          var sOpt = value.opt || 'mono/all', bTool = [], withOrigin = false;
+          value.tools.forEach( function(sPath) {
+            if (typeof sPath != 'string') return;
+            if (sPath == '*') {
+              withOrigin = true;
+              return;
             }
+            var bTmp = sPath.split('/'), sName = bTmp.pop(), sPath2 = bTmp.join('/');
+            var libItem = sName && dLib[sPath2];
+            if (libItem && Array.isArray(libItem.tools)) {
+              var tool = libItem.tools.find( function(a) { return a.name === sName } );
+              if (tool) bTool.push(tool);
+            }
+          });
+          dTemplateTools_[value.name] = [sOpt,bTool,withOrigin];
+          
+          if (sWdgtFull == value.name && bRetInfo) {
+            var bGroup = sOpt.split('/');
+            bRetInfo[0] = bGroup[0];
+            bRetInfo[1] = bGroup[1] || 'all';
           }
         });
       }
@@ -387,7 +417,7 @@ function pendingBackup(iDelayTm) {   // pendingBackup(0) for no delay, default d
       tryNum += 1;
       
       if (operatorStack.length) {
-        if (tryNum >= 16) {
+        if (tryNum >= 4) {
           var sOp = operatorStack[0][1];
           rootNode.instantShow('warning: can not save backup when system not in idle' + (sOp?' (still in '+sOp+')':'') + '.');
         }
@@ -542,7 +572,7 @@ function restoreFromBackup(sValue) {
     }
     
     if (!rootNode.getWidgetNode) return;
-    rootNode.getWidgetNode(sPath,'',false, function(node) {
+    rootNode.getWidgetNode(sPath,'', function(node) {
       setSelectByNode(node,false,false);
     });
   }
@@ -626,7 +656,7 @@ function showRootPage(sName,selectPanel,callback) {
     }
     
     if (selectPanel && (sNodeType == 'Panel' || sNodeType == 'Template')) {
-      rootNode.getWidgetNode(rootNode.frameInfo.rootName + '.' + sName,'',false, function(node) {
+      rootNode.getWidgetNode(rootNode.frameInfo.rootName + '.' + sName,'', function(node) {
         setSelectByNode(node,false,false);
       });
     }
@@ -692,11 +722,11 @@ function keepRulerPosition() {
   else rulerRight.style.left = (LEFT_PANEL_WIDTH + mainFrameWidth - 20 + mainFrameOffsetX) + 'px';
 }
 
-function defaultPluginGetSet(wdgtPath) {
+function defaultPluginGetSet(wdgtPath,noExpr) {
   var typeInfo = null, dSchema = null, option = null;
   
   return [ function(comp) {
-    var b = comp.props && rootNode.widgetSchema(comp);
+    var b = comp.props && rootNode.widgetSchema(comp,false,noExpr);
     if (!b || b.length != 2) return [null,wdgtPath,null];
     
     typeInfo = b[0]; dSchema = b[1];
@@ -723,12 +753,25 @@ function defaultPluginGetSet(wdgtPath) {
       if (trySave) currSelectedWdgt = savedWdgt;
       if (succ) {
         if (retNode) {
-          var b = getWidgetPath(retNode), currPath = b?b[0]:'';
-          if (currPath && currPath == wdgtPath) // if keyid renamed, auto unselect
-            currSelectedWdgt = retNode;
-          else selectPath = '';
+          if (retNode.classList.contains('rewgt-scene')) {
+            var sName = getKeyFromNode_(retNode);
+            unselectWidget();
+            if (sName) {
+              setTimeout( function() {
+                showRootPage(sName,false, function() {
+                  setSelectByNode(retNode,false,false);
+                });
+              },0);
+            }
+          }
+          else {
+            var b = getWidgetPath(retNode), currPath = b?b[0]:'';
+            if (currPath && currPath == wdgtPath) // if keyid renamed, auto unselect
+              setSelectByNode(retNode,false,false);
+            else selectPath = '';
+          }
         }
-        rootNode.notifyBackup(selectPath);
+        afterModifyDoc(300,selectPath);
       }
     }
   }];
@@ -784,7 +827,7 @@ function hideAllFloatBtn(hasUpLevel) {
   }
 }
 
-function setFloatBtnShow(dBtn,bTool,sBaseUrl) { // dBtn:{move:1} // move,copy,linker,styles,edit_txt,uplevel,up,down
+function setFloatBtnShow(dBtn,bTool,noExpr,isSceneWdgt) { // dBtn:{move:1} // move,copy,linker,styles,edit_txt,uplevel,up,down
   var iNum = 0, btns = floatButtons.querySelectorAll('img'), bShow = [], bHide = [];
   for (var i=0,item; item = btns[i]; i++) {
     if (item.getAttribute('extend'))
@@ -801,8 +844,9 @@ function setFloatBtnShow(dBtn,bTool,sBaseUrl) { // dBtn:{move:1} // move,copy,li
   if (bTool) {
     bTool.forEach( function(dTool) {
       if (!dTool.clickable) return;
+      if (dTool.onlyScene && !isSceneWdgt) return;
       
-      var sIconUrl, sIcon = dTool.icon;
+      var sIconUrl, sIcon = dTool.icon, sBaseUrl = dTool.baseUrl || '';
       if (sIcon) {
         if (sIcon[0] == '/' || (sIcon.indexOf('http') == 0 && (sIcon[4] == ':' || sIcon.slice(4,6) == 's:')))
           sIconUrl = sIcon;
@@ -838,7 +882,7 @@ function setFloatBtnShow(dBtn,bTool,sBaseUrl) { // dBtn:{move:1} // move,copy,li
         if (b) {
           var wdgtPath = b[0], dTool_ = Object.assign({},dTool);
           if (!dTool_.get || !dTool_.set) {
-            var bFn = defaultPluginGetSet(wdgtPath);
+            var bFn = defaultPluginGetSet(wdgtPath,noExpr);
             dTool_.get = bFn[0]; dTool_.set = bFn[1];
           }
           // else, dTool_.get/set is prepared by T.XXX
@@ -1040,17 +1084,20 @@ function renewSchemaEditor(sCheckPath) {
   
   var b = getWidgetPath(currSelectedWdgt);
   if (!b) return;
-  var sPath = b[0], editFlag = targCanEditFlag(b[2]);
+  var sPath = b[0], bPath = b[2], editFlag = targCanEditFlag(bPath);
   if (sCheckPath && sPath != sCheckPath) return; // ignore if path not same
   
   if (editFlag < 2) {
-    b = rootNode.widgetSchema(sPath,true);
-    if (b) rightPageDiv.setPropEditor(b[0],b[1],b[2],b[3]); // b is [cmdId,dSchema,dOpt,attrs]
+    var noExpr = (editFlag == 0? targCanEditFlag(bPath,true) > 0: true);
+    b = rootNode.widgetSchema(sPath,true,noExpr);
+    if (b) rightPageDiv.setPropEditor(b[0],b[1],b[2],b[3]); // b is [cmdId,dSchema,dOpt,attrs,canEditHtmlTxt]
   }
 }
 
-function targCanEditFlag(bPath) { // return 0 for all, 1 under some, 2 under none
+function targCanEditFlag(bPath,onlyBottom) { // return 0 for all, 1 under some, 2 under none
   var iRet = 0, i = bPath.length - 2;
+  if (onlyBottom) i += 1;
+  
   while (i >= 0) {
     var item = bPath[i];
     i -= 1;
@@ -1079,9 +1126,24 @@ function targCanEditFlag(bPath) { // return 0 for all, 1 under some, 2 under non
         // else, sFlag == 'all'
       }
     }
+    
+    if (onlyBottom) break;
   }
   
   return iRet;
+}
+
+function joinOriginTool_(bTools,sWdgtPath) {
+  var opt = rootNode.getGroupOpt(sWdgtPath);
+  if (opt && opt.tools) {
+    bTools = bTools.slice(0);
+    opt.tools.forEach( function(tool) {
+      tool = Object.assign({},tool);
+      tool.baseUrl = opt.baseUrl;
+      bTools.push(tool);
+    });
+  }
+  return bTools;
 }
 
 function wdgtSelectChange(bPath) {
@@ -1146,6 +1208,7 @@ function wdgtSelectChange(bPath) {
     resetOldTemp();
     haloLinkNodes_ = [];
     
+    var isSceneWdgt = (bPath.length == 3 && bPath[1][0] == 'ScenePage');
     var canShowTemp = !!rootNode.showTemplate, iMax = bPath.length-1;
     var sWdgtPath = '', lastIsLnk = false, lastIsTmp = false;
     bPath.forEach( function(item,idx) {
@@ -1164,66 +1227,89 @@ function wdgtSelectChange(bPath) {
       }
     });
     
-    var editFlag = targCanEditFlag(bPath);
-    if (editFlag >= 2) {   // under 'none'
-      hideAllFloatBtn(true);
-      rightPageDiv.setPropEditor(0,null,null); // clear prop editor
+    makeWdgtStream(sWdgtPath);
+    
+    var bTools = null;
+    var editFlag = targCanEditFlag(bPath); // 0:all, 1:some, 2: none
+    
+    var iWaitTm = 0, withOrigin = false, noExpr = false;
+    var sOptid = currSelectedWdgt.getAttribute('data-group.optid'); // optid is come from option.name
+    if (sOptid) {
+      var b = dTemplateTools_[sOptid];
+      if (b) {
+        if ((b[0] || 'mono/all').split('/').pop() != 'all')
+          noExpr = true;
+        bTools = b[1];
+        withOrigin = b[2];
+      }
+      else iWaitTm = 500;
     }
     else {
-      var canEditTxt = false;
-      if (sWdgtPath && rootNode.widgetSchema) {
-        var b = rootNode.widgetSchema(sWdgtPath,true); // b is [cmdId,dSchema,dOpt,attrs]
-        if (b) {
-          var dOpt = b[2];
-          canEditTxt = rootNode.beTextable(currSelectedWdgt.children.length,dOpt.name,dOpt.flag); // must exist currSelectedWdgt
-          rightPageDiv.setPropEditor(b[0],b[1],dOpt,b[3]);
-        }
-      }
-      
-      var sTagType = bPath.length >= 2? bPath[1][0]: '';
-      var dBtnShow = {copy:1}, bTools = null, sBaseUrl = '';
-      if (editFlag != 1) dBtnShow.move = 1;  // not under 'some'
-      if (lastIsLnk) { dBtnShow.linker = 1; dBtnShow.styles = 1; }
-      if (canEditTxt) dBtnShow.edit_txt = 1;
-      if (bPath.length > 2 || (bPath.length == 2 && (sTagType == 'Panel' || sTagType == 'ScenePage')))
-        dBtnShow.uplevel = 1;
-      if (bPath.length == 3 && bPath[1][0] == 'ScenePage') { // is scene widget
-        dBtnShow.up = 1;
-        dBtnShow.down = 1;
-      }
-      
-      var iWaitTm = 0;
-      var sOptid = currSelectedWdgt.getAttribute('data-group.optid'); // optid is come from option.name
-      if (sOptid) {
+      if (editFlag >= 2) iWaitTm = 500;
+    }
+    
+    setTimeout( function() {
+      var noExprOk = false;
+      if (iWaitTm && sOptid) {  // try again, maybe get info from TOOL.json
         var b = dTemplateTools_[sOptid];
-        if (b) { // b[0] is 'mono/all'
-          sBaseUrl = b[1] || '';
-          bTools = b[2];
+        if (b) {
+          if ((b[0] || 'mono/all').split('/').pop() != 'all') {
+            noExpr = true;
+            noExprOk = true;
+          }
+          bTools = b[1]; // b[0] is 'mono/all'
+          withOrigin = b[2];
         }
-        else iWaitTm = 1000;
       }
       
-      setTimeout( function() {
-        if (iWaitTm) {  // try again, maybe get info from TOOL.json
-          var b = dTemplateTools_[sOptid];
-          if (b) { // b[0] is 'mono/all'
-            sBaseUrl = b[1] || '';
-            bTools = b[2];
+      if (iWaitTm && editFlag >= 2)
+        editFlag = targCanEditFlag(bPath);  // recheck, maybe TOOL.json has read
+      if (editFlag >= 2) {   // under 'none'
+        hideAllFloatBtn(true);
+        rightPageDiv.setPropEditor(0,null,null); // clear prop editor
+      }
+      else {
+        var canEditTxt = false;
+        if (sWdgtPath && rootNode.widgetSchema) {
+          if (!noExprOk)
+            noExpr = (editFlag == 0? targCanEditFlag(bPath,true) > 0: true);
+          var b = rootNode.widgetSchema(sWdgtPath,true,noExpr);
+          if (b) {  // b is [cmdId,dSchema,dOpt,attrs,canEditHtmlTxt]
+            canEditTxt = currSelectedWdgt.children.length == 0 && b[4];
+            rightPageDiv.setPropEditor(b[0],b[1],b[2],b[3]);
           }
         }
         
-        if (!bTools && sWdgtPath && rootNode.getGroupOpt) {
-          var opt = rootNode.getGroupOpt(sWdgtPath);
-          if (opt) {
-            sBaseUrl = opt.baseUrl || '';
-            bTools = opt.tools || [];
+        var sTagType = bPath.length >= 2? bPath[1][0]: '';
+        var dBtnShow = {copy:1};
+        if (editFlag != 1) dBtnShow.move = 1;  // not under 'some'
+        if (lastIsLnk) { dBtnShow.linker = 1; dBtnShow.styles = 1; }
+        if (canEditTxt) dBtnShow.edit_txt = 1;
+        if (bPath.length > 2 || (bPath.length == 2 && (sTagType == 'Panel' || sTagType == 'ScenePage')))
+          dBtnShow.uplevel = 1;
+        if (isSceneWdgt) {
+          dBtnShow.copy_lnk = 1;
+          dBtnShow.up = 1;
+          dBtnShow.down = 1;
+        }
+        
+        if (sWdgtPath && rootNode.getGroupOpt) {
+          if (withOrigin && bTools)
+            bTools = joinOriginTool_(bTools,sWdgtPath);
+          else if (!bTools) {
+            var opt = rootNode.getGroupOpt(sWdgtPath), bTool_ = (opt && opt.tools) || [];
+            bTools = [];
+            bTool_.forEach( function(tool) {
+              tool = Object.assign({},tool);
+              tool.baseUrl = opt.baseUrl;
+              bTools.push(tool);
+            });
+            noExpr = opt && opt.editable != 'all';
           }
         }
-        setFloatBtnShow(dBtnShow,bTools,sBaseUrl);
-      },iWaitTm);
-    }
-    
-    makeWdgtStream(sWdgtPath);
+        setFloatBtnShow(dBtnShow,bTools,noExpr,isSceneWdgt);
+      }
+    },iWaitTm);
   }
   // else, !bPath, come from timer, refresh selected frame, not reset haloTempNodes_/haloLinkNodes_
   
@@ -1299,19 +1385,21 @@ function getWidgetPath(targ,bNodeList) {
         }
         else {
           var sGroup = targ.getAttribute('data-group.opt') || '', bGroup = sGroup.split('/');
-          var bTool = null, bOptInfo = [], sOptid = targ.getAttribute('data-group.optid');
+          var bOptInfo = ['mono','none'], sOptid = targ.getAttribute('data-group.optid');
           if (sOptid) {
             var bTemp = dTemplateTools_[sOptid];
             if (bTemp) {
-              bTool = bTemp[2];
               sGroup = bTemp[0] + '';
               bGroup = sGroup.split('/');
+              bOptInfo[0] = bGroup[0] || 'mono';
+              bOptInfo[1] = bGroup[1] || 'all';
             }
-            else checkToolConfig(sOptid,bOptInfo);
+            else checkToolConfig(sOptid,bOptInfo); // set later, current default is 'mono/none'
           }
-          bOptInfo[0] = bGroup[0] || 'mono';
-          bOptInfo[1] = bGroup[1] || 'all';
-          if (Array.isArray(bTool)) bOptInfo.push(bTool);
+          else {
+            bOptInfo[0] = bGroup[0] || 'mono';
+            bOptInfo[1] = bGroup[1] || 'all';
+          }
           b.push(bOptInfo);  // b[2]
         }
         
@@ -1723,10 +1811,39 @@ function docOnMouseMove(event) {
 
 function docOnMouseUp(event) {
   if (nowInModal()) return;
-  if (rootNode.splitterMouseDn && rootNode.splitterMouseDn()) return;
+  
+  if (rootNode.splitterMouseDn && rootNode.splitterMouseDn()) {
+    justMultiSelect_ = false;
+    multiCanSelect_  = false;
+    
+    if (haloFrameMult) {
+      haloFrameMult.style.display = 'none';
+      if (haloFrameMult.children.length)
+        haloFrameMult.children[0].style.display = 'none'; // hide selecting frame
+    }
+    floatButtons.style.visibility = 'hidden';  // hidden float buttons
+    
+    multiWdgtCanMove_ = false;
+    multiWdgtInMove_  = false;
+    justMultiMoved_   = false;
+    multiWdgtMoved_   = false;
+    
+    absoWdgtCanMove_  = false;
+    justSelectMoved_  = false;
+    absoWdgtInMove_   = false;
+    absoWdgtHasMoved_ = false;
+    
+    haloResizeType_ = 0;
+  
+    var iLen = operatorStack.length;
+    if (iLen) operatorStack.splice(0,iLen); // clear
+    return;
+  }
   
   justMultiSelect_ = false;
-  if (haloFrameMult.children.length <= 1)
+  if (!haloFrameMult)
+    ;
+  else if (haloFrameMult.children.length <= 1)
     haloFrameMult.style.display = 'none';
   else {
     if (multiCanSelect_) {
@@ -1745,7 +1862,7 @@ function docOnMouseUp(event) {
           if (bMultPath.length == 2 && rootNode.getWidgetNode) { // only select one
             var tarPath = rootNode.frameInfo.rootName + '.' + currRootPageKeyid + '.' + bMultPath[1];
             setTimeout( function() {
-              rootNode.getWidgetNode(tarPath,'',false, function(node) {
+              rootNode.getWidgetNode(tarPath,'', function(node) {
                 if (!node) return;
                 haloFrameMult.style.display = 'none';  // hide mult-selection
                 setSelectByNode(node,false,false);
@@ -1824,6 +1941,11 @@ function docOnMouseUp(event) {
     }
   }
   haloResizeType_ = 0;
+  
+  setTimeout( function() {
+    var iLen = operatorStack.length;
+    if (iLen) operatorStack.splice(0,iLen); // clear
+  },0);
 }
 
 // window.onload processing
@@ -2057,12 +2179,15 @@ window.addEventListener('load', function(event) {
         if (retNode) {
           if (retNode.classList.contains('rewgt-scene')) {
             var sName = getKeyFromNode_(retNode);
+            unselectWidget();
             if (sName) {
-              showRootPage(sName,false, function() {
-                var b = getWidgetPath(retNode);
-                if (b) newSelect = b[0];
-                setSelectByNode(retNode,false,false);
-              });
+              setTimeout( function() {
+                showRootPage(sName,false, function() {
+                  var b = getWidgetPath(retNode);
+                  if (b) newSelect = b[0];
+                  setSelectByNode(retNode,false,false);
+                });
+              },0);
             }
           }
           else if (retNode.parentNode.parentNode === rootNode && retNode.style.position == 'absolute')
@@ -2075,11 +2200,11 @@ window.addEventListener('load', function(event) {
             }
           }
         }
-        afterModifyDoc(300,newSelect);  // delay 0.3 second
+        afterModifyDoc(600,newSelect);  // delay 0.6 second
       }
       else {
         if (nodeChanged)
-          currSelectedWdgt = oldNode;
+          currSelectedWdgt = oldNode;   // restore
       }
       if (callback) callback(succ);
     });
@@ -2199,7 +2324,7 @@ window.addEventListener('load', function(event) {
             targKey2 = pgNode2.getAttribute('keyid') || '';
         }
         
-        rootNode.getWidgetNode(sPath,'',false, function(node) {
+        rootNode.getWidgetNode(sPath,'', function(node) {
           if (!node || !node.classList.contains('rewgt-scene')) return;
           var b = getWidgetPath(node);
           if (b) {
@@ -2275,7 +2400,12 @@ window.addEventListener('load', function(event) {
     
     if (node) {
       var sKey = node.getAttribute('keyid');
-      if (sKey) showRootPage(sKey,false);
+      if (sKey) {
+        unselectWidget();
+        setTimeout( function() {
+          showRootPage(sKey,false);
+        },0);
+      }
     }
   },false);
   for (var i=0,child; child=topPageTool.children[i]; i++) {
@@ -2369,7 +2499,7 @@ window.addEventListener('load', function(event) {
     }
   },false);
   selectInfoBtn.addEventListener('dragend', function(event) {
-    popOperator(draggingId_);
+    if (draggingNode_) popOperator(draggingId_);
     draggingNode_ = null;
     haloFrame2.selectedInfo  = null;
     haloFrame2.style.display = 'none';
@@ -2381,7 +2511,7 @@ window.addEventListener('load', function(event) {
     if (targ.nodeName == 'SPAN') {
       var sRelPath = targ.getAttribute('title'), sPath = targ.getAttribute('path');
       if (sRelPath && sPath && rootNode.getWidgetNode) {
-        rootNode.getWidgetNode(sRelPath,sPath,true, function(node) {
+        rootNode.getWidgetNode(sRelPath,sPath, function(node) {
           setSelectByNode(node,false,false);
         });
       }
@@ -2451,7 +2581,7 @@ window.addEventListener('load', function(event) {
         if (wd && hi)
           dProp.style = {width:wd+'px',height:hi+'px'};
         if (isSceneWdgt)
-          bWidget = [['P',{klass:'default-large-small hidden-visible-auto'},2],bWidget];
+          bWidget = [['P',{klass:'default-large-small hidden-visible-auto','data-group.optid':'rewgt/shadow-slide/steps'},2],bWidget];
         
         createWidget(isSceneWdgt,tarPath,{option:{name:'Img',widget:bWidget}},byShift,iX,iY);
       }
@@ -2500,7 +2630,7 @@ window.addEventListener('load', function(event) {
         else if (bLnk) {
           var sRelPath = bLnk[0], sFrom = bLnk[1];
           if (sRelPath && sFrom)
-            sHtml += '<span title="' + htmlEncode(sRelPath) + '" path="' + htmlEncode(sFrom) + '" style="color:blue; text-decoration:underline">' + htmlEncode(sSeg) + '</span>'
+            sHtml += '<span title="' + htmlEncode(sRelPath,true) + '" path="' + htmlEncode(sFrom,true) + '" style="color:blue; text-decoration:underline">' + htmlEncode(sSeg) + '</span>'
           else sHtml += htmlEncode(sSeg);
         }
         else sHtml += htmlEncode(sSeg);
@@ -2509,6 +2639,8 @@ window.addEventListener('load', function(event) {
     selectInfoSpan.innerHTML = sHtml;
     selectInfoSpan.isSceneWdgt = (bPath && bPath.length == 3 && bPath[1][0] == 'ScenePage');
   };
+  
+  var firstShowPages_ = true;
   topPanel.listChildren = function(sPath) {
     var s = '', b = ['','#a00',-1,[],[]];
     if (rootNode.listChildren)
@@ -2529,7 +2661,7 @@ window.addEventListener('load', function(event) {
     selectInfoName.setAttribute('wdgt_name',sWdgtName);
     selectInfoName.innerHTML = sWdgtName? '<b>' + htmlEncode(sWdgtName) + '</b>:': '';
     
-    if (!sPath) listScenePages(bExt,false);
+    if (!sPath && !firstShowPages_) listScenePages(bExt,false);
   };
   
   childInfo.addEventListener('click', function(event) {
@@ -2551,7 +2683,7 @@ window.addEventListener('load', function(event) {
     var b = getWidgetPath(currSelectedWdgt);
     if (b) {
       var sPath = b[0], bPath = b[2];
-      rootNode.getWidgetNode(sName,sPath,false, function(node,isRef) {
+      rootNode.getWidgetNode(sName,sPath, function(node,isRef) {
         if (!node) return;
         if (isRef) {
           var isSceneWdgt = (bPath.length == 2 && bPath[1][0] == 'ScenePage');
@@ -2808,7 +2940,7 @@ window.addEventListener('load', function(event) {
   }
   if (!noResPg) {
     if (!sFirstPg) sFirstPg = 'resource';
-    rightPageDiv.addPage('resource',listResUrl);
+    rightPageDiv.addPage('resource',listResUrl + '&home=1');
   }
   bPage.forEach( function(item) {
     if (!sFirstPg) sFirstPg = item[0];
@@ -2880,16 +3012,30 @@ window.addEventListener('load', function(event) {
               nodeChanged = true;
             }
             
+            var schemaId = msg.param[0], dProp = msg.param[1], bRmv = msg.param[2] || [];
+            bRmv.forEach( function(sKey) {
+              dProp[sKey] = undefined;   // waiting to remove 
+            });
+            
             checkFirstBackup();
-            rootNode.updateWdgtProp(msg.param[0],msg.param[1], function(succ,newNode) {
+            rootNode.updateWdgtProp(schemaId,dProp, function(succ,newNode) {
               if (succ) {
-                if (newNode && newNode.classList.contains('rewgt-scene'))
-                  unselectWidget(); // unselect to refresh
-                else {
-                  if (nodeChanged)
-                    currSelectedWdgt = newNode || oldNode;
+                if (newNode && newNode.classList.contains('rewgt-scene')) {
+                  var sName = getKeyFromNode_(newNode);
+                  unselectWidget();
+                  if (sName) {
+                    setTimeout( function() {
+                      showRootPage(sName,false, function() {
+                        setSelectByNode(newNode,false,false);
+                      });
+                    },0);
+                  }
                 }
-                afterModifyDoc(0,'');  // no renew prop-editor, because modification come from editor
+                else {
+                  if (nodeChanged && newNode)
+                    setSelectByNode(newNode,false,false);
+                }
+                afterModifyDoc(300,'');  // no renew prop-editor, because modification come from editor
               }
               else {
                 if (nodeChanged)
@@ -2951,6 +3097,7 @@ window.addEventListener('load', function(event) {
     ['Modify child styles','/app/files/rewgt/web/res/styles.png','styles',false],
     ['Edit text content','/app/files/rewgt/web/res/edit_txt.png','edit_txt',false],
     ['Select uplevel','/app/files/rewgt/web/res/goup.png','uplevel',false],
+    ['Copy as linker','/app/files/rewgt/web/res/copy2.png','copy_lnk',false],
     ['Pop to top','/app/files/rewgt/web/res/up.png','up',false],
     ['Push to bottom','/app/files/rewgt/web/res/down.png','down',false],
   ];
@@ -3092,6 +3239,21 @@ window.addEventListener('load', function(event) {
         }
       }
     }
+    else if (sName == 'copy_lnk') {
+      if (currSelectedWdgt && currSelectedWdgt.parentNode) {
+        var b = getWidgetPath(currSelectedWdgt);
+        if (b) {
+          clipTextState = 2;
+          clipTextArea.value = '<div $="' + b[0] + '"></div>';
+          clipTextArea.select();
+          document.execCommand('copy');
+          
+          setTimeout( function() {
+            floatButtons.style.visibility = 'hidden';
+          },0);
+        }
+      }
+    }
     
     function upDownCallback(succ) {
       if (succ)
@@ -3099,7 +3261,7 @@ window.addEventListener('load', function(event) {
     }
     
     function getStyles(comp) {
-      var b = comp.props && rootNode.widgetSchema(comp);
+      var b = comp.props && rootNode.widgetSchema(comp,false,true);
       if (!b || b.length != 2) return [null,'',''];
       
       wdgtOption = b[1].wdgtOption || null;
@@ -3122,11 +3284,11 @@ window.addEventListener('load', function(event) {
         if (succ) {
           if (retNode) {
             var b = getWidgetPath(retNode), currPath = b?b[0]:'';
-            if (currPath && currPath == sWdgtPath)  // if keyid renamed, auto unselect
-              currSelectedWdgt = retNode;
+            if (currPath && currPath == sWdgtPath)   // if keyid renamed, auto unselect
+              setSelectByNode(retNode,false,false);
             else selectPath = '';
           }
-          rootNode.notifyBackup(selectPath);
+          afterModifyDoc(300,selectPath);
         }
       }
     }
@@ -3152,10 +3314,10 @@ window.addEventListener('load', function(event) {
           if (retNode) {
             var b = getWidgetPath(retNode), currPath = b?b[0]:'';
             if (currPath && currPath == sWdgtPath)  // if keyid renamed, auto unselect
-              currSelectedWdgt = retNode;
+              setSelectByNode(retNode,false,false);
             else selectPath = '';
           }
-          rootNode.notifyBackup(selectPath);
+          afterModifyDoc(300,selectPath);
         }
       }
     }
@@ -3187,7 +3349,7 @@ window.addEventListener('load', function(event) {
     }
   },false);
   floatButtons.addEventListener('dragend', function(event) {
-    popOperator(draggingId_);
+    if (draggingNode_) popOperator(draggingId_);
     draggingNode_ = null;
     haloFrame2.selectedInfo  = null;
     haloFrame2.style.display = 'none';
@@ -3282,8 +3444,9 @@ window.addEventListener('load', function(event) {
           }
           
           try {
-            var bProj = JSON.parse(sJson);
-            if (Array.isArray(bProj)) {
+            var bInner,bOuter, bList = JSON.parse(sJson);
+            if (Array.isArray(bList) && bList.length == 2 && Array.isArray(bInner=bList[0]) && Array.isArray(bOuter=bList[1])) {
+              var innerLen = bInner.length, bProj = bInner.concat(bOuter);
               var dTool = {
                 name: 'default',
                 title: 'list project',
@@ -3293,7 +3456,7 @@ window.addEventListener('load', function(event) {
                 height: 0.9,
                 clickable: false,
               };
-              rootNode.showDesignDlg(0,dTool,bProj,'');
+              rootNode.showDesignDlg(0,dTool,bProj,'',innerLen);
             }
           }
           catch(e) { }  // ignore error
@@ -3388,10 +3551,10 @@ window.addEventListener('load', function(event) {
       currSelectedWdgt = node;
     return old && old.parentNode? old: null;
   };
-  rootNode.notifyBackup = function(wdgtPath) {
-    afterModifyDoc(300,wdgtPath);
+  rootNode.notifyBackup = function(wdgtPath,afterTm) {
+    afterModifyDoc(afterTm || 300,wdgtPath);
   };
-  rootNode.showDesignDlg = function(taskId,toolOpt,inValue,baseUrl) {
+  rootNode.showDesignDlg = function(taskId,toolOpt,inValue,baseUrl,extraArg) {
     var iTotalWd = window.innerWidth - LEFT_PANEL_WIDTH, iTotalHi = window.innerHeight;
     if (toolOpt.halfScreen) {
       iTotalWd -= rootNode.frameInfo.rightWd;
@@ -3465,7 +3628,9 @@ window.addEventListener('load', function(event) {
     maskFrame.initDialog = function() {
       if (!maskFrame.messengerOK || !rootNode.pluginCss) return;
       try {
-        var s = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:[taskId,inValue,rootNode.pluginCss()]});
+        var bParam = [taskId,inValue,rootNode.pluginCss()];
+        if (extraArg !== undefined) bParam.push(extraArg);
+        var s = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:bParam});
         maskFrame.contentWindow.postMessage(s,'*');
       }
       catch(e) { console.log(e); }  // maybe meet invalid json-data
@@ -3536,7 +3701,7 @@ window.addEventListener('load', function(event) {
     
     var targ = event.target;
     setTimeout( function() {
-      var closeDlg = false, frame = null;
+      var closeDlg = false, frame = null, exitDesign = true;
       if (targ === modalMaskLeft || targ === modalMaskMiddle) {
         if (modalMaskMiddle.style.display != 'none') {
           frame = modalMaskMiddle.querySelector('iframe');
@@ -3545,10 +3710,23 @@ window.addEventListener('load', function(event) {
         }
         if (!closeDlg) rootNode.setDialogModal(false); // exit both dialog and design modal
       }
+      else {
+        var targ2 = targ.parentNode;
+        while (targ2) {
+          if (targ2 === modalMaskLeft || targ2 === modalMaskMiddle) {
+            exitDesign = false; // under modalMaskLeft and modalMaskMiddle
+            break;
+          }
+          else if (targ2 === document) break;
+          targ2 = targ2.parentNode;
+        }
+      }
       
-      if (closeDlg)
+      if (closeDlg) // frame must not null
         frame.exitDialog();
-      else rootNode.setDesignModal(false);
+      else {
+        if (exitDesign) rootNode.setDesignModal(false);
+      }
     },300); // delay some time, let dialog can catch onchange event
   };
   
@@ -3692,20 +3870,26 @@ window.addEventListener('load', function(event) {
       // first, try external plugin editor
       var wdgtPath = b[0], bPath = b[2], sOptid = currSelectedWdgt.getAttribute('data-group.optid');
       var editFlag = targCanEditFlag(bPath);
+      var noExpr = (editFlag == 0? targCanEditFlag(bPath,true) > 0: true);
       if (editFlag <= 1) {  // editFlag <= 1 means under 'some' or 'all'
         if (sOptid && sOptid.indexOf('/') > 0) { // sOptId must be 'xxx/xxx'
           var bTool = dTemplateTools_[sOptid];   // no need check !bTool and query from server, since it has done on widget selected
-          var sBase = bTool? bTool[1]: null;
-          if (Array.isArray(bTool) && typeof sBase == 'string' && (bTool = bTool[2])) { // bTool[0] is 'mono/all'
-            var dTool = bTool.find( function(item){return item.name === 'default'} );
-            if (dTool) { // exist default plugin editor
-              var dTool_ = Object.assign({},dTool);
-              if (!dTool_.get || !dTool_.set) {
-                var bFn = defaultPluginGetSet(wdgtPath);
-                dTool_.get = bFn[0]; dTool_.set = bFn[1];
+          if (Array.isArray(bTool)) {
+            var withOrigin = bTool[2];
+            bTool = bTool[1]; // bTool[0] is 'mono/all'
+            if (bTool) {
+              if (withOrigin && rootNode.getGroupOpt)
+                bTool = joinOriginTool_(bTool,wdgtPath);
+              var dTool = bTool.find( function(item){return item.name === 'default'} );
+              if (dTool) { // exist default plugin editor
+                var dTool_ = Object.assign({},dTool);
+                if (!dTool_.get || !dTool_.set) {
+                  var bFn = defaultPluginGetSet(wdgtPath,noExpr); // noExpr means not 'all'
+                  dTool_.get = bFn[0]; dTool_.set = bFn[1];
+                }
+                rootNode.popDesigner(wdgtPath,'default',dTool_,dTool_.baseUrl || '');
+                return;
               }
-              rootNode.popDesigner(wdgtPath,'default',dTool_,sBase);
-              return;
             }
           }
         }
@@ -3723,7 +3907,7 @@ window.addEventListener('load', function(event) {
         halfScreen:true, clickable:false,
         width: 0.9, height: 0.9,
       };
-      var bFn = defaultPluginGetSet(wdgtPath);
+      var bFn = defaultPluginGetSet(wdgtPath,noExpr);
       dTool.get = bFn[0]; dTool.set = bFn[1];
       rootNode.popDesigner(wdgtPath,'default',dTool,''); // baseUrl is '', show edit_prop.html
     }
@@ -3763,6 +3947,31 @@ window.addEventListener('load', function(event) {
           currWdgt = sceneInfo[2];
           bPath = bPath.slice(0,2);
           sName = bPath[1][1];
+          // sWdgtPath is '.body.scene'
+        }
+      }
+      else if (inScene && fromJson) {
+        if (!isLinker && bNodeList.length >= 3) {
+          var iTmp = bNodeList.length - 1;
+          while (iTmp >= 2) {
+            currWdgt = bNodeList[iTmp];
+            if (currWdgt.getAttribute('data-is.ground')) { // ignore ground widget, try parent level
+              iTmp -= 1;
+              continue;
+            }
+            else {
+              bPath = bPath.slice(0,iTmp+1);
+              sName = bPath[iTmp][1];
+              iTmp -= 1;
+              
+              sWdgtPath = sName;
+              while (iTmp >= 0) {
+                sWdgtPath = bPath[iTmp][1] + '.' + sWdgtPath;
+                iTmp -= 1;
+              }
+              break;
+            }
+          }
         }
       }
       
@@ -3839,7 +4048,7 @@ window.addEventListener('load', function(event) {
         if (wd && hi)
           dProp.style = {width:wd+'px',height:hi+'px'};
         if (isSceneWdgt)
-          bWidget = [['P',{klass:'default-large-small hidden-visible-auto'},2],bWidget];
+          bWidget = [['P',{klass:'default-large-small hidden-visible-auto','data-group.optid':'rewgt/shadow-slide/steps'},2],bWidget];
         
         createWidget(isSceneWdgt,tarPath,{option:{name:'Img',widget:bWidget}},byShift,iX,iY);
       }
@@ -3889,7 +4098,6 @@ window.addEventListener('load', function(event) {
   };
   
   // define action for thumbnail button, switch pages/widgets
-  var firstShowPages_ = true;
   function switchPageList() {
     if (topPageList.style.display == 'none') {
       if (firstShowPages_) {
@@ -3981,10 +4189,32 @@ window.addEventListener('load', function(event) {
     
     if (rmvInfo && rootNode.removeWidget) {
       if (confirmIt && !confirm('do you want delete selected widget?')) return;
+      
+      var nextPageKeyid = '';   // try get next page's keyid
+      if (currRootPageType == 'ScenePage' && currSelectedWdgt && currSelectedWdgt.classList.contains('rewgt-scene')) {
+        var meetCurr = false;
+        for (var i=0,node; node = topPageList.children[i]; i++) {
+          var sTmp = node.getAttribute('keyid');
+          if (sTmp) {
+            if (sTmp == currRootPageKeyid)
+              meetCurr = true;
+            else {
+              nextPageKeyid = sTmp;
+              if (meetCurr) break;
+            }
+          }
+        }
+      }
+      
       checkFirstBackup();
       rootNode.removeWidget(rmvInfo, function(changed) {
         if (changed) {
-          unselectWidget();  // both for ScenePage and others
+          unselectWidget();     // both for ScenePage and others
+          if (nextPageKeyid) {  // try focus to next ScenePage
+            setTimeout( function() {
+              showRootPage(nextPageKeyid,false);
+            },300);
+          }
           afterModifyDoc(300,'');
         }
       });
@@ -4114,7 +4344,7 @@ window.addEventListener('load', function(event) {
     event.preventDefault();  // ignore default paste text
     var types = event.clipboardData.types, sText = '';
     for (var i=0,item; item=types[i]; i+=1) {
-      if (item == 'Text' || item.indexOf('text/') == 0) {
+      if (item == 'Text' || item.startsWith('text/')) {
         sText = event.clipboardData.getData(item);
         break;
       }
@@ -4279,27 +4509,32 @@ window.addEventListener('load', function(event) {
     }
     
     if (rootNode.onlyScenePage && rootNode.onlyScenePage()) {
-      switchPageList();  // show thumbnail list
-      
       var bdNode = rootNode.topmostNode();
       if (!bdNode) return;
       for (var i=0,node; node=bdNode.children[i]; i++) {
         if (node.classList.contains('rewgt-scene')) { // try show first ScenePage
           var sName = getKeyFromNode_(node);
-          if (sName) showRootPage(sName,false);
+          if (sName) nextStep(sName);
           return;
         }
       }
+    }
+    
+    function nextStep(sName) {
+      showRootPage(sName,false);
+      setTimeout( function() {
+        switchPageList();  // show thumbnail list
+      },2000);  // wait ready for cloning thumb nodes
     }
   });
   
   function hookReadyEvent(callback) {
     if (!callback) return;
     checkReadyNum_ += 1;
-    if (checkReadyNum_ > 6) {   // not processed within 3 seconds yet
+    if (checkReadyNum_ > 16) {   // force callback after 8 seconds
       setTimeout( function() {
         callback();
-      },3000);
+      },0);
       return;
     }
     

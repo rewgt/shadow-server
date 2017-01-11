@@ -101,10 +101,11 @@
         }
         
         try {
-          var bProj = JSON.parse(sJson);
-          if (Array.isArray(bProj)) {
+          var bInner,bOuter, bList = JSON.parse(sJson);
+          if (Array.isArray(bList) && bList.length == 2 && Array.isArray(bInner=bList[0]) && Array.isArray(bOuter=bList[1])) {
+            var innerLen = bInner.length, bProj = bInner.concat(bOuter);
             bodyFrame.initDialog = function() {
-              var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:[0,bProj,[],true]}); // true means from homepage
+              var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:[0,bProj,[],innerLen,true]}); // true means from homepage
               bodyFrame.contentWindow.postMessage(sCmd,'*');
             };
             bodyFrame.src = '/app/files/rewgt/web/list_projects.html';

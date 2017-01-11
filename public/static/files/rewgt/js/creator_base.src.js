@@ -109,7 +109,7 @@ function getLinkFullPath_(entry,sPath_) {
   }
 }  */
 
-function getCompByPath2_(entry,sPath_,lnkStyle,callback) { // entry is component object, auto show template
+function getCompByPath2_(entry,sPath_,callback) { // entry is component object, auto show template
   function doCallback(targ) {
     targ = targ && targ.component;
     if (callback) callback(targ);
@@ -122,8 +122,7 @@ function getCompByPath2_(entry,sPath_,lnkStyle,callback) { // entry is component
   if (isSibling) {
     if (entry) {
       var targ = entry.widget, owner = targ; // default according to entry
-      if (lnkStyle) owner = owner && owner.parent;
-      if (iLevel < 0) owner = owner && owner.parent;  // start with '//', maybe sPath=''
+      if (iLevel < 0) owner = owner && owner.parent; // start with '//', maybe sPath=''
       if (owner)
         return getLevelByLevel(owner,sPath);
     }
@@ -213,7 +212,7 @@ function getRelativePath_(srcPath,tarPath,inParent) {
   var sLnkPath = '';
   if (sSame) {
     if (b2.length >= b1.length && iSameNum >= 2 && iSameNum == (b1.length-iPadding)) { // reference by sibling
-      sLnkPath = b2.slice(iSameNum).join('.');
+      sLnkPath = '//' + b2.slice(iSameNum).join('.');
     }
     else {
       var hasNav = false, sRelative = '';
@@ -243,7 +242,7 @@ function getRelativePath_(srcPath,tarPath,inParent) {
           sLnkPath = './' + sRelative + (sLnkPath?'.':'') + sLnkPath;
         else sLnkPath = './' + sLnkPath;
       }
-      else {
+      else { // !hasNav, sRelative is full-path
         if (sRelative)
           sLnkPath = sRelative + (sLnkPath?'.':'') + sLnkPath;
       }
@@ -254,13 +253,14 @@ function getRelativePath_(srcPath,tarPath,inParent) {
   return sLnkPath;
 }
 
-function getCompSchema_(comp,dTypeInfo) {
+function getCompSchema_(comp,dTypeInfo,noExpr) {
   var template = comp._;
   if (!template || !template._getGroupOpt) return null;  // failed
   
   var props,AStyle, sLink = undefined;
   var bStated = template._statedProp || [];
-  var bSlient = template._slientProp || [];
+  var bSilent = template._silentProp || [];
+  var hasHtmlTxt = template._htmlText;
   
   // step 1: prepare wdgtOption
   var sTempName = template._className;
@@ -268,20 +268,20 @@ function getCompSchema_(comp,dTypeInfo) {
     option:template._getGroupOpt(comp), doc:template._docUrl || '',
     linkPath:'', linkStyles:null,
   };
-  var iFlag = 0; // 0:panel, 1:unit(div), 2:paragraph, 3:inline
+  var isLinker = false, iFlag = 0; // 0:panel, 1:unit(div), 2:paragraph, 3:inline
   sLink = comp.state['data-unit.path'];
   if (sLink !== undefined) {
-    iFlag = 2;
+    iFlag = 2; isLinker = true;
     sTempName = 'RefDiv';
   }
   else {
     sLink = comp.state['data-span.path'];
     if (sLink !== undefined) {
-      iFlag = 3;
+      iFlag = 3; isLinker = true;
       sTempName = 'RefSpan';
     }
   }
-  if (sLink === undefined) {  // not linker
+  if (!isLinker) {
     if (comp.props['childInline.']) {
       if (utils.hasClass(comp,'rewgt-unit'))
         iFlag = 2;
@@ -293,17 +293,17 @@ function getCompSchema_(comp,dTypeInfo) {
       // else iFlag = 0;
     }
   }
-  else {
+  else {  // isLinker
     wdgtOption.linkPath = sLink;
     wdgtOption.linkStyles = comp.props.styles;
     bStated = [];
-    bSlient = [];
+    bSilent = [];
   }
   wdgtOption.flag = iFlag;
   
   // step 2: process linker props
   var keyid_, sKeyid_;
-  if (sLink !== undefined) {
+  if (isLinker) {
     var oldProp = comp.props['link.props'];
     if (oldProp) { // has linked, use old props['data-*'], props['aria-*']
       props = Object.assign({},oldProp);
@@ -347,17 +347,22 @@ function getCompSchema_(comp,dTypeInfo) {
     });
   }
   
-  // step 3: replace stated props, remove slient props
+  // step 3: replace stated props, remove silent props
   bStated.forEach( function(item) {
     var value = comp.state[item];
     if (value !== undefined)
       props[item] = value;
   });
-  var sHtml = props['html.'];
-  if (sHtml) wdgtOption['html.'] = sHtml;
-  bSlient.forEach( function(item) {
+  bSilent.forEach( function(item) {
     delete props[item];
   });
+  
+  if (hasHtmlTxt) {
+    var sHtml = isLinker? props['html.']: comp.state['html.'];
+    if (sHtml && typeof sHtml == 'string')
+      wdgtOption['html.'] = sHtml;
+  }
+  delete props['html.'];
   
   delete props.children;
   delete props['hasStatic.'];
@@ -375,6 +380,8 @@ function getCompSchema_(comp,dTypeInfo) {
       hasEx = true;
       return;
     }
+    
+    if (noExpr && item[0] == '$') return;   // ignore $expr
     
     var value = props[item], isDataset = false;
     if (value === undefined) return;    // ignore 'undefined' value
@@ -416,8 +423,17 @@ function getCompSchema_(comp,dTypeInfo) {
         dCfg.default = JSON.stringify(value);
     }
     else if (value === null || sType == 'any') {  // match any type, no dCfg.type
-      if (typeof value != 'string')
+      if (item[0] == '$')    // force as string type: $expr
+        dCfg.type = 'string';
+      
+      var valType = typeof value;
+      if (valType != 'string') {
+        if (valType == 'function') {
+          console.log('warning: can not edit function property (' + item + ')');
+          return;
+        }
         dCfg.default = JSON.stringify(value);
+      }
     }
     else if (sType == 'integer') {
       var iTmp = parseInt(value);
@@ -504,6 +520,13 @@ main.$$onLoad.push( function(callback) {
   containNode_ = creator.containNode_;      // must be exists
   topmostWidget_ = creator.topmostWidget_;
   
+  if (utils.instantShow !== containNode_.instantShow) {
+    setTimeout( function() {
+      if (typeof containNode_.instantShow == 'function')
+        utils.instantShow = containNode_.instantShow;  // overwrite old function
+    },300);
+  }
+  
   containNode_.closeModal = function(callback) {
     function doCallback() {
       if (callback) callback();
@@ -539,7 +562,7 @@ main.$$onLoad.push( function(callback) {
     return bRet;
   };
   
-  containNode_.getWidgetNode = function(sPath,sRefBy,lnkStyle,callback) { // auto show template when meet
+  containNode_.getWidgetNode = function(sPath,sRefBy,callback) { // auto show template when meet
     var retIsRef = false;
     function doCallback(ret) {
       if (callback) callback(ret,retIsRef);
@@ -548,14 +571,13 @@ main.$$onLoad.push( function(callback) {
     if (!sPath) return doCallback(null);
     
     var refObj = null;
-    var ch = sPath[0], isAbs = sPath[1] != '/' && (ch == '.' || ch == '/'); // start with: .seg  or /seg
+    var ch = sPath[0], isAbs = (ch == '.' || ch == '/') && sPath[1] != '/'; // start with: .seg  or /seg
     if (sRefBy && !isAbs) {
       refObj = W.W(sRefBy);
       refObj = refObj && refObj.component;
       if (!refObj) return doCallback(null);
     }
-    if (isAbs) lnkStyle = false;
-    getCompByPath2_(refObj,sPath,lnkStyle, function(targObj) {
+    getCompByPath2_(refObj,sPath, function(targObj) {
       // if (!targObj) console.log('warning: can not find widget (' + sPath + ').'); // no need logout
       var ret = null;
       if (targObj) {
@@ -570,7 +592,7 @@ main.$$onLoad.push( function(callback) {
     var bTree = [];
     containNode_.dumpTree(bTree=[]);
     if (bTree.length == 1)
-      return containNode_.streamTree(bTree[0])
+      return containNode_.streamTree(bTree[0],0,1);
     else return '';
   };
   
@@ -1058,14 +1080,14 @@ main.$$onLoad.push( function(callback) {
   }
   
   containNode_.createWidget = function(bTree,sToolId,tarPath,isChild,iX,iY,callback) {
-    var succ = false, oldCompIdx = {}, returnNode = null;
+    var succ = false, oldCompIdx = {}, returnNode = null, tarOwnerObj2 = null;
     function doCallback() {
       if (callback) {
-        if (succ) {
-          var b = Object.keys(tarOwnerObj.$gui.compIdx);
+        if (succ && tarOwnerObj2) {
+          var b = Object.keys(tarOwnerObj2.$gui.compIdx);
           for (var i=0,item; item=b[i]; i+=1) {
             if (!oldCompIdx.hasOwnProperty(item) && item[0] != '$') {
-              var wdgt = tarOwnerObj.widget, targ = wdgt && wdgt[item];
+              var wdgt = tarOwnerObj2.widget, targ = wdgt && wdgt[item];
               var targObj = targ && targ.component;
               if (targObj)
                 returnNode = ReactDOM.findDOMNode(targObj);
@@ -1248,7 +1270,7 @@ main.$$onLoad.push( function(callback) {
     return insertNewComp();
     
     function insertNewComp() {
-      var tarOwnerObj2 = isChild? tarNodeObj: tarOwnerObj;
+      tarOwnerObj2 = isChild? tarNodeObj: tarOwnerObj;
       if (isUnderLinker(ReactDOM.findDOMNode(tarOwnerObj2))) {
         utils.instantShow('error: can not add widget to a linker.');
         return doCallback();
@@ -1267,7 +1289,14 @@ main.$$onLoad.push( function(callback) {
           utils.instantShow('warning: link path is empty.'); // just warning, continue adding
       }
       
-      var sSrcKey = utils.keyOfElement(srcEle), srcNotNamed = (parseInt(sSrcKey)+'') == sSrcKey;
+      var sSrcKey = utils.keyOfElement(srcEle), srcNotNamed = false, autoKey = false;
+      if (!sSrcKey || typeof sSrcKey != 'string')
+        srcNotNamed = true;
+      else { // is string
+        autoKey = sSrcKey.search(/^auto[0-9]+$/) == 0;
+        if (autoKey || (parseInt(sSrcKey)+'') === sSrcKey)
+          srcNotNamed = true;
+      }
       var needCopy = false;
       if (srcNotNamed)
         needCopy = true;
@@ -1279,13 +1308,16 @@ main.$$onLoad.push( function(callback) {
       var addInScene = sceneObj && !srcIsScene;
       if (needCopy) {
         var dProp = {'keyid.':'',key:''};
+        if (autoKey && tarOwnerObj2.props['isScenePage.'])
+          dProp['keyid.'] = dProp.key = 'auto' + (tarOwnerObj2.$gui.removeNum + tarOwnerObj2.$gui.comps.length);
+        
         if (sLnkAttr) dProp[sLnkAttr] = sLnkPath;
         if (addInScene) { dProp.left = iX; dProp.top = iY; }
         if (sToolId)  // tool ID, not 'data-group.opt' which would not dump out
           dProp['data-group.optid'] = sToolId + ''; // can success dump out since passed by prop
         srcEle = React.cloneElement(srcEle,dProp);
       }
-      else {
+      else { // must not autoKey
         if (sLnkAttr || addInScene || sToolId) {
           var dProp = {};
           if (sLnkAttr) dProp[sLnkAttr] = sLnkPath;
@@ -1297,13 +1329,12 @@ main.$$onLoad.push( function(callback) {
       
       succ = true;
       if (isChild) {
-        tarOwnerObj = tarNodeObj;
-        Object.assign(oldCompIdx,tarOwnerObj.$gui.compIdx);
-        tarOwnerObj.setChild(srcEle,doCallback);
+        Object.assign(oldCompIdx,tarOwnerObj2.$gui.compIdx);
+        tarOwnerObj2.setChild(srcEle,doCallback);
       }
       else {
-        Object.assign(oldCompIdx,tarOwnerObj.$gui.compIdx);
-        tarOwnerObj.setChild('+'+tarNodeObj.$gui.keyid,srcEle,doCallback);
+        Object.assign(oldCompIdx,tarOwnerObj2.$gui.compIdx);
+        tarOwnerObj2.setChild('+'+tarNodeObj.$gui.keyid,srcEle,doCallback);
       }
     }
   };
@@ -1377,6 +1408,11 @@ main.$$onLoad.push( function(callback) {
       tarOwnerObj = topmostWidget_.component;
       
       if (srcIsScene) {    // srcType must be 1
+        if (rmvSrc && srcNodeObj === sceneObj) { // move to same place
+          utils.instantShow('warning: ignore moving ScenePage to same place.');
+          return doCallback();
+        }
+        
         isChild = false;
         return copyOrMove();
       }
@@ -1452,7 +1488,14 @@ main.$$onLoad.push( function(callback) {
         }
       }
       
-      var sSrcKey = utils.keyOfElement(srcEle), srcNotNamed = (parseInt(sSrcKey)+'') == sSrcKey;
+      var sSrcKey = utils.keyOfElement(srcEle), srcNotNamed = false, autoKey = false;
+      if (!sSrcKey || typeof sSrcKey != 'string')
+        srcNotNamed = true;
+      else {
+        autoKey = sSrcKey.search(/^auto[0-9]+$/) == 0;
+        if (autoKey || (parseInt(sSrcKey)+'') === sSrcKey)
+          srcNotNamed = true;
+      }
       var needCopy = false;
       if (srcNotNamed)
         needCopy = true;
@@ -1462,9 +1505,22 @@ main.$$onLoad.push( function(callback) {
       }
       
       var dProp = creator.getCompRenewProp(srcNodeObj) || {};
-      if (needCopy) { dProp['keyid.'] = ''; dProp.key = ''; }
+      if (needCopy) {
+        if (autoKey && tarOwnerObj2.props['isScenePage.'])
+          dProp['keyid.'] = dProp.key = 'auto' + (tarOwnerObj2.$gui.removeNum + tarOwnerObj2.$gui.comps.length);
+        else dProp['keyid.'] = dProp.key = '';
+      }
+      // else, autoKey must be false
+      
       if (sLnkAttr) dProp[sLnkAttr] = sLnkPath;
-      if (sceneObj) { dProp.left = iX; dProp.top = iY; }
+      if (srcIsScene) {
+        dProp.left = 0;
+        dProp.top = 0;
+      }
+      else if (sceneObj) {
+        dProp.left = iX;
+        dProp.top = iY;
+      }
       if (outOfScene) { dProp.left = null; dProp.top = null; }
       // srcEle = React.cloneElement(srcEle,dProp);
       srcEle = creator.deepCloneReactEle(srcEle,dProp,srcNode,srcNodeObj);
@@ -1536,10 +1592,6 @@ main.$$onLoad.push( function(callback) {
     compObj.setState({style:dStyle},doCallback);
   };
   
-  containNode_.beTextable = function(hasChild,sTemp,flag) { // flag == 3 is inline widget
-    return (!hasChild && (flag == 3 || creator.textableBlock(sTemp)));
-  };
-  
   containNode_.getGroupOpt = function(compOrPath) {
     var comp = compOrPath;
     if (typeof compOrPath == 'string') {
@@ -1551,7 +1603,7 @@ main.$$onLoad.push( function(callback) {
   };
   
   var lastSchemaIndex_ = 0, lastSchemaComp_ = null, lastTypeInfo_ = {}, lastSchemaOpt_ = {};
-  containNode_.widgetSchema = function(compOrPath,adjustIt) {
+  containNode_.widgetSchema = function(compOrPath,adjustIt,noExpr) {
     var comp = compOrPath;
     if (typeof compOrPath == 'string') {
       var wdgt = W.W(compOrPath);
@@ -1561,7 +1613,7 @@ main.$$onLoad.push( function(callback) {
     
     if (!adjustIt) {
       var typeInfo = comp._._getSchema(comp);
-      return [typeInfo,getCompSchema_(comp,typeInfo)];
+      return [typeInfo,getCompSchema_(comp,typeInfo,noExpr)];
     }
     // else, adjustIt, for builtin prop-editor (right panel)
     
@@ -1570,7 +1622,7 @@ main.$$onLoad.push( function(callback) {
     if (sEditable == 'none') return [0];   // failed, clear prop-editor
     
     var typeInfo = comp._._getSchema(comp);
-    var dSchema = getCompSchema_(comp,typeInfo);
+    var dSchema = getCompSchema_(comp,typeInfo,noExpr);
     if (!dSchema) return null;
     if (dSchema.properties && !dSchema.properties.style) // set default style={} for easy editing
       dSchema.properties.style = {type:'object',propertyOrder:200,default:{}};
@@ -1603,7 +1655,10 @@ main.$$onLoad.push( function(callback) {
     bAttr2.sort( function(a,b) { return a[0] - b[0]; } );
     bAttr2.forEach( function(item) { bAttr.push(item[1]); } );
     
-    return [lastSchemaIndex_,dSchema,{name:lastSchemaOpt_.name,doc:lastSchemaOpt_.doc,flag:lastSchemaOpt_.flag},bAttr];
+    var baseUrl = lastSchemaOpt_.option.baseUrl || '';
+    return [lastSchemaIndex_,dSchema, { name:lastSchemaOpt_.name,
+      doc:lastSchemaOpt_.doc, flag:lastSchemaOpt_.flag, baseUrl:baseUrl,
+    }, bAttr, comp._._htmlText && !comp.props['marked.']]; // no editing 'html.' for MarkedDiv like
   };
   
   function updateWdgtProp_(compObj,typeInfo,option,dProp,backupComp,callback) {
@@ -1630,10 +1685,8 @@ main.$$onLoad.push( function(callback) {
     if (Array.isArray(klass)) {
       var sTmp = '';
       klass.forEach( function(item) {
-        if (!item) return;  // ignore ''
-        if (sTmp)
-          sTmp += ' ' + item;
-        else sTmp = item + '';
+        if (sTmp) sTmp += ' ';
+        sTmp += ((item || 'undefined') + '');
       });
       klass = sTmp? sTmp: undefined;
     }
@@ -1681,7 +1734,7 @@ main.$$onLoad.push( function(callback) {
       
       var bInfo = typeInfo[item], tpInfoType = 'any';
       if (bInfo && bInfo.length) tpInfoType = bInfo[1];
-      if (tpInfoType == 'any' && typeof value == 'string') { // try translate string to matched type
+      if (tpInfoType == 'any' && typeof value == 'string' && item[0] != '$') { // try translate string to matched type
         var value_ = value.trim(), ch = value_[0];
         if ((ch == '"' || ch == "'") && value_.length >= 2 && value_.slice(-1) == ch) {
           dProp[item] = value_.slice(1,-1);   // take as string
@@ -1770,6 +1823,8 @@ main.$$onLoad.push( function(callback) {
     }
     else { // if props.xxx removed, it's value is: undefined
       // ele = React.cloneElement(ele,dProp); // can not use old props.children, maybe out of date
+      if (option['html.'] && !dProp.hasOwnProperty('html.'))
+        dProp['html.'] = option['html.'];
       ele = creator.deepCloneReactEle(ele,dProp,compWdgt,compObj); // obj.setChild() not change obj.props.children
     }
     
@@ -2278,20 +2333,26 @@ main.$$onLoad.push( function(callback) {
         sLnkPath = spanLnk || unitLnk;  // sLnkPath can be empty
       }
       
-      var needCopy = false, sSourKey = utils.keyOfElement(srcEle);
-      if (!sSourKey)
+      var needCopy = false, sSrcKey = utils.keyOfElement(srcEle), autoKey = false;
+      if (!sSrcKey || typeof sSrcKey != 'string')
         needCopy = true;
-      else {
-        var iTmp = parseInt(sSourKey);
-        if ((iTmp+'') === sSourKey)
+      else {  // sSrcKey is string
+        autoKey = sSrcKey.search(/^auto[0-9]+$/) == 0;
+        if (autoKey || (parseInt(sSrcKey)+'') === sSrcKey)
           needCopy = true;
-        else if (typeof ownerObj.$gui.compIdx[sSourKey] == 'number')
+        else if (typeof ownerObj.$gui.compIdx[sSrcKey] == 'number')
           needCopy = true;
       }
       
       if (needCopy || sLnkAttr || inScene) {
         var dProp = {};
-        if (needCopy) { dProp['keyid.'] = ''; dProp.key = ''; }
+        if (needCopy) {
+          if (autoKey && ownerObj.props['isScenePage.'])
+            dProp['keyid.'] = dProp.key = 'auto' + (ownerObj.$gui.removeNum + ownerObj.$gui.comps.length);
+          else dProp['keyid.'] = dProp.key = '';
+        }
+        // else, autoKey must be false
+        
         if (sLnkAttr) dProp[sLnkAttr] = sLnkPath;
         if (inScene) { // maybe paste from none scene page
           dProp.left = srcEle.props.left || 0;

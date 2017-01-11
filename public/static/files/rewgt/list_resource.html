@@ -88,13 +88,15 @@ var homeImgNode    = null;
 var homeSpanNode   = null;
 var titleSpanNode  = null;
 
+var canShowHomeBtn = false;
+
 var inputJson    = null;
 var hasProjBase  = false;
 var sWorkDirUrl  = '';
 var sLastListUrl = '';
 
 function htmlEncode(s) {
-  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function getUrlParam(s) {
@@ -174,10 +176,8 @@ function updateInputJson(sUrl) {
   function setupByJson() {
     // step 1: setup title, uplevel
     var showGoHome = false;
-    if (sWorkDirUrl && sLastListUrl) {
-      if (sLastListUrl.indexOf('/files/') != 0)
-        showGoHome = true;
-    }
+    if (canShowHomeBtn && sWorkDirUrl)
+      showGoHome = true;
     if (showGoHome) { // show go home button
       homeImgNode.style.display = 'inline';
       homeSpanNode.style.display = 'none';
@@ -482,6 +482,8 @@ window.addEventListener('load', function(event) {
       return;
     }
   }
+  
+  canShowHomeBtn = !!param.home; // home=xx
   
   fileTBodyNode  = document.querySelector('#file-list tbody');
   uplevelTrNode  = document.querySelector('#goto-uplevel');

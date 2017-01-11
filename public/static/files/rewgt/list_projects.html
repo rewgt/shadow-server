@@ -7,7 +7,8 @@
 <script>
 window.addEventListener('load', function(event) {
 
-var projectList   = null;  // [sCateProj, ...]
+var projectList   = null;  // [sCateProj, ...]  // include inner projects and outer projects
+var innerPrjLen   = 0;
 var templateNames = null;  // [[fileName,sTitle],...]
 
 var pagesLastNode  = document.querySelector('#pages-last');
@@ -21,7 +22,7 @@ var createProjNode = document.querySelector('#create-proj');
 var openNewNode    = document.querySelector('#open-new');
 
 function htmlEncode(s) {
-  return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function location__(href) {
@@ -79,14 +80,42 @@ function postAsynRequest(sUrl,data,callback) {  // callback must passed, only su
 function initGui() {
   if (!Array.isArray(projectList)) return;
   
-  projectList.forEach( function(item,idx) {
+  var ownerNode = pagesLastNode.parentNode;
+  if (innerPrjLen > 0) {
+    var expand = document.createElement('button');
+    expand.innerHTML = 'Show private projects'
+    expand.onclick = function(event) { // click to expand privates
+      var targ = event.target;
+      if (targ.style.display == 'none') return;
+      targ.style.display = 'none';
+      
+      var endNode = targ.parentNode.parentNode;  // get this tr node
+      for (var idx=0; idx < innerPrjLen; idx++) {
+        addOnePrjItem(projectList[idx],endNode);
+      }
+    };
+    
+    var tr = document.createElement('tr');
+    var tdA = document.createElement('td');
+    tr.appendChild(tdA);
+    tdA.appendChild(expand);
+    tr.appendChild(document.createElement('td')); // tdB
+    var tdC = document.createElement('td');
+    tdC.innerHTML = '&nbsp;';
+    tr.appendChild(tdC);
+    ownerNode.insertBefore(tr,pagesLastNode);
+  }
+  
+  for (var idx=innerPrjLen,item; item = projectList[idx]; idx++) {
+    addOnePrjItem(item,pagesLastNode);
+  }
+  
+  function addOnePrjItem(item,endNode) {
     var tr = document.createElement('tr');
     var tdA = document.createElement('td');
     tdA.innerHTML = htmlEncode(item);
     tr.appendChild(tdA);
-    var tdB = document.createElement('td');
-    if (idx == 0) tdB.setAttribute('style','width:10px');
-    tr.appendChild(tdB);
+    tr.appendChild(document.createElement('td'));  // tdB
     var tdC = document.createElement('td');
     tr.appendChild(tdC);
     
@@ -113,10 +142,32 @@ function initGui() {
       window.open(sUrl,'_blank');
     }
     tdC.appendChild(btn2);
-
-    pagesLastNode.parentNode.insertBefore(tr,pagesLastNode);
-  });
+    
+    ownerNode.insertBefore(tr,endNode);
+  }
 }
+
+window.removeHistoryHtml = function(event) {
+  event.stopPropagation();
+  
+  var sFile = '', pNode = event.target.parentNode;
+  pNode = pNode && pNode.parentNode;
+  sFile = pNode && pNode.getAttribute('fname');
+  if (!sFile) return;
+  
+  if (!projPageInfo || !projPageInfo.currProj) return;
+  var currPrjUrl = projPageInfo.currProj;
+  if (currPrjUrl.slice(-1) != '/') currPrjUrl += '/';
+  
+  postAsynRequest(currPrjUrl + '$utils?cmd=del_history',{source:sFile}, function(err,sInfo) {
+    if (err) {
+      if (sInfo)
+        alert('Failed: ' + sInfo);
+      console.log(err);
+    }
+    else pNode.parentNode.removeChild(pNode);
+  });
+};
 
 btnExpandNode.onclick = function(event) {
   if (!Array.isArray(projectList)) return;
@@ -128,25 +179,33 @@ btnExpandNode.onclick = function(event) {
     }
     
     try {
-      var bRet = JSON.parse(sJson);
-      if (Array.isArray(bRet)) {
+      var bTmp, bRet = JSON.parse(sJson);
+      if (!Array.isArray(bRet) || bRet.length != 2) return;
+      
+      if (Array.isArray(bTmp=bRet[0])) {
+        var iFixed = bTmp.length;
+        bRet = bTmp.concat(bRet[1]);
         tempListNode.innerHTML = '';
         
         bRet.forEach( function(item,idx) {
-          var sFile = item[0], sTitle = item[1];
+          var sFile = item[0], sTitle = item[1], sRmvHtml = '';
+          
+          if (idx >= iFixed)  // can not remove first template
+            sRmvHtml = '&nbsp;&nbsp;<button onclick="removeHistoryHtml(event)">remove</button>';
           
           var pNode = document.createElement('p');
+          pNode.setAttribute('fname',sFile);
+          
           pNode.setAttribute('style','margin-left:4px');
           var pgNode = document.createElement('input');
           pgNode.setAttribute('type','radio');
           pgNode.setAttribute('name','temp-page');
-          pgNode.setAttribute('fname',sFile);
           pgNode.setAttribute('id','page-' + idx);
           if (idx == 0) pgNode.setAttribute('checked','true');
           pNode.appendChild(pgNode);
           labNode = document.createElement('label');
           labNode.setAttribute('for','page-' + idx);
-          labNode.innerHTML = htmlEncode(sTitle) + ' <span style="color:#888">(' + htmlEncode(sFile) + ')</span>';
+          labNode.innerHTML = htmlEncode(sTitle) + ' <span style="color:#888">(' + htmlEncode(sFile) + ')</span>' + sRmvHtml;
           pNode.appendChild(labNode);
           
           pNode.onclick = function(event) {
@@ -206,20 +265,20 @@ createProjNode.onclick = function(event) {
   }
   if (sNewFile[0] != '/') sNewFile = '/' + sNewFile;
   
-  var sNewFile_ = sNewFile.toUpperCase(), hasExist = false;
-  projectList.forEach( function(item) {
-    if (item) {
-      if (item.slice(-1) == '/') item = item.slice(0,-1);
-      if (item.toUpperCase() == sNewFile_)
-        hasExist = true;
-    }
-  });
-  if (hasExist) {
-    alert('Project (' + sNewFile + ') already exists.');
-    return;
+  var sPrjDir = sNewFile, sFileName = 'index.html';
+  if (sNewFile.slice(-5).toUpperCase() == '.HTML') {
+    var b = sNewFile.split('/');
+    sFileName = b.pop();
+    sPrjDir = b.join('/');
   }
+  else sPrjDir = sNewFile;
+  sNewFile = sPrjDir + '/' + sFileName;
   
   var sHead = headTagsNode.value.trim(), sTempFile = sampleHtmlNode.value.trim();
+  if (sHead) {
+    if (sHead.search(/(?:<title|<meta|<link|<script|<style)(>|\s)/gi) < 0)
+      sHead = '<title>' + htmlEncode(sHead) + '</title>';
+  }
   if (sTempFile) {
     var loc = location__(sTempFile);
     sTempFile = loc.pathname;
@@ -229,26 +288,26 @@ createProjNode.onclick = function(event) {
     var b = tempListNode.querySelectorAll('input');
     for (var i=0,item; item=b[i]; i+= 1) {
       if (item.checked) {
-        sTempFile = item.getAttribute('fname');
+        sTempFile = item.parentNode.getAttribute('fname');
         break;
       }
     }
   }
   if (!sTempFile) return;  // fatal error, imposible
   
-  postAsynRequest(sNewFile + '/$utils?cmd=create_page',{
+  postAsynRequest(sPrjDir + '/$utils?cmd=create_page',{
     source: sTempFile,
-    name: 'index.html',
+    name: sFileName,
     head: sHead,
   }, function(err,sInfo) {
     if (err) {
       if (sInfo)
         alert('Failed: ' + sInfo);
-      else alert('Create ' + sNewFile + '/index.html failed.');
+      else alert('Create ' + sNewFile + ' failed.');
       console.log(err);
     }
     else {
-      alert('Create new project successful.');
+      alert('Create new page successful.');
       openNewNode.innerHTML = 'Open ' + htmlEncode(sNewFile);
       openNewNode.setAttribute('fname',sNewFile);
       openNewNode.style.display = 'inline';
@@ -261,9 +320,12 @@ openNewNode.onclick = function(event) {
   
   var sProj = event.target.getAttribute('fname');
   if (!sProj) return;
-  if (sProj.slice(-1) != '/') sProj += '/';
+  var b = sProj.split('/'), sFile = b.pop();
+  sProj = b.join('/');
   
-  var sUrl = sProj + '$creator';  // default open index.html
+  var sUrl = sProj + '/$creator';  // default open index.html
+  if (sFile.toUpperCase() != '/INDEX.HTML')
+    sUrl += '?page=' + encodeURIComponent(sFile);
   window.open(sUrl,'_blank');
 };
 
@@ -283,8 +345,8 @@ window.addEventListener('message', function(msg) {
   }
   
   if (msg instanceof Object && msg) {
-    if (msg.method == 'init') { // msg.param: [taskId,inValue,bCss,fromHome]
-      var data = msg.param[1], fromHome = msg.param[3];
+    if (msg.method == 'init') { // msg.param: [taskId,inValue,bCss,innerPrjNum,fromHome]
+      var data = msg.param[1], fromHome = msg.param[4];
       if (!fromHome) {          // not come from homepage
         dragFromNode.style.visibility = 'visible';
         dragFromNode.style.height = '';
@@ -292,6 +354,7 @@ window.addEventListener('message', function(msg) {
       
       if (Array.isArray(data)) {
         projectList = data;
+        innerPrjLen = msg.param[3] || 0;
         initGui();
       }
     }
@@ -331,22 +394,22 @@ p {
 
 <h3 class='cfg-title'>All projects</h3>
 <table style='margin-left:10px'>
-  <tr id='pages-last'><td>&nbsp;</td><td></td><td></td></tr>
+  <tr id='pages-last'><td>&nbsp;</td><td style='width:10px'></td><td></td></tr>
 </table>
 
 <h3 class='cfg-title' style='margin-top:2px'>Create new project <button id='btn-expand'>v</button></h3>
 <div style='margin-left:8px; display:none'>
-  <h4 class='sub-title'>Select template</h4>
+  <h4 class='sub-title'>Select history template</h4>
   <div id='temp-list'></div>
   <div id='drag-from-res' style='visibility:hidden; height:0px'>
     <h4 class='sub-title'>Or, copy from exist file <span style='font-weight:400'>(drag &amp; drop *.html file from resource area)</span></h4>
     <p><input id='sample-file' type='text' style='width:360px'></p>
   </div>
-  <h4 class='sub-title'>Head tags <span style='font-weight:400; color:#888'>(such as: &lt;title&gt;, &lt;meta&gt;, &lt;link&gt;)</span></h4>
-  <p><textarea id='head-tags' style='width:360px; height:80px' placeholder='<title>description</title>'></textarea></p>
-  <h4 class='sub-title'>Project name <span style='font-weight:400; color:#888'>(such as: /MyProject, /$$Category/project)</span></h4>
+  <h4 class='sub-title'>Title <span style='font-weight:400; color:#888'>(input title, or describe &lt;title&gt;, &lt;meta&gt;, &lt;link&gt;)</span></h4>
+  <p><textarea id='head-tags' style='width:360px; height:80px'></textarea></p>
+  <h4 class='sub-title'>Project name <span style='font-weight:400; color:#888'>(such as: /project, /project/page.html)</span></h4>
   <p><input id='file-name' type='text' style='width:360px' placeholder='/$$Category/$$SubCategory/project'></p>
-  <p><button id='create-proj'>Create project</button>&nbsp;<button id='open-new' style='display:none'>Open</button></p>
+  <p><button id='create-proj'>Create HTML page</button>&nbsp;<button id='open-new' style='display:none'>Open</button></p>
 </div>
 
 </body>

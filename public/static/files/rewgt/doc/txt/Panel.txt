@@ -2,6 +2,8 @@ Panel
 4.4.2.!panel
 [ props ]
   className: 'rewgt-panel'
+[ duals ]
+  nodes: []
 [ method ]
   isRow()
   isReverse()

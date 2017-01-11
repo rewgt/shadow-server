@@ -72,6 +72,7 @@
 [2,"3.4.3.","附加定义双源setter","md/3.4.3.onsite_dual_setter.md"],
 [2,"3.4.4.","idSetter预定义","md/3.4.4.use_id_setter.md"],
 [2,"3.4.5.","协调两种编程风格","md/3.4.5.functional_vs_directive.md"],
+[2,"3.4.6.","结合markdown编程","md/3.4.6.program_in_md.md"],
 [1,"3.5.","调试与测试","md/3.5.debug_and_test.md"],
 [2,"3.5.1.","开发版本与发行版本","md/3.5.1.dev_product_ver.md"],
 [2,"3.5.2.","启用__debug__","md/3.5.2.use_debug_flag.md"],

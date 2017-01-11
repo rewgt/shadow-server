@@ -9,35 +9,36 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo37</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'> 
-  <div :t=ScenePage name='first_pg'>
-    <div :t=Panel left='{-30}' top='{-10}'>
-      <div :t=Div>First page</div>
+<div $=BodyPanel key='body'> 
+  <div $=ScenePage name='first_pg'>
+    <div $=Panel left='{-30}' top='{-10}'>
+      <div $=Div>First page</div>
     </div>
   </div>
   
-  <div :t=ScenePage name='second_pg'>
-    <div :t=Panel left='{-30}' top='{-10}'>
-      <div :t=Div>Second page</div>
+  <div $=ScenePage name='second_pg'>
+    <div $=Panel left='{-30}' top='{-10}'>
+      <div $=Div>Second page</div>
     </div>
   </div>
   
-  <div :t=ScenePage name='third_pg'>
-    <div :t=Panel left='{-30}' top='{-10}'>
-      <div :t=Div>Third page</div>
+  <div $=ScenePage name='third_pg'>
+    <div $=Panel left='{-30}' top='{-10}'>
+      <div $=Div>Third page</div>
     </div>
-    <div :t=NavPanel left='{-30}' top='{20}' width='{200}'>
-      <div :t=P>
-        <span :t=OptSpan key='a' data-checked='1'>A</span><span :t=Br></span>
-        <span :t=OptSpan key='b'>B</span>
+    <div $=NavPanel left='{-30}' top='{20}' width='{200}'>
+      <div $=P>
+        <span $=OptSpan key='a' data-checked='1'>A</span><span $=Br></span>
+        <span $=OptSpan key='b'>B</span>
       </div>
-      <div :t=GroundDiv key='a'>Item A</div>
-      <div :t=GroundDiv key='b'>Item B</div>
+      <div $=GroundDiv key='a'>Item A</div>
+      <div $=GroundDiv key='b'>Item B</div>
     </div>
   </div>
 </div>

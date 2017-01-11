@@ -9,23 +9,24 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo21</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div :t=BodyPanel key='body'>
-  <div :t=Panel key='top' height='{null}'>
-    <div :t=P key='hello' width='{0.9999}' html.='Hello, world!'></div>
-    <div $='hello' style='color:red'></div>
-    <div $='hello' html.='How are you?'></div>
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top' height='{null}'>
+    <div $=P key='hello' width='{0.9999}' html.='Hello, world!'></div>
+    <div $='//hello' style='color:red'></div>
+    <div $='//hello' html.='How are you?'></div>
   </div>
   
-  <div :t=Panel key='top2' height='{null}'>
-    <div :t=P key='test' width='{0.9999}'>
-      <span :t=Button key='btn' html.='test 1'></span>
-      <span $='btn' html.='test 2'></span>
-      <span $='btn' key='last_btn' html.='test 3'></span>
+  <div $=Panel key='top2' height='{null}'>
+    <div $=P key='test' width='{0.9999}'>
+      <span $=Button key='btn' html.='test 1'></span>
+      <span $='//btn' html.='test 2'></span>
+      <span $='//btn' key='last_btn' html.='test 3'></span>
     </div>
   </div>
 </div>
@@ -43,7 +44,7 @@ var main = W.$main, utils = W.$utils, ex = W.$ex;
 
 main['.body.top2.test.btn'] = {
   $onClick: function(event) {
-    alert(this.keyid);
+    alert(this.duals.keyid);
   },
 };
 
