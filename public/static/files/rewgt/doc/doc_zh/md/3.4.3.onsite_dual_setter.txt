@@ -100,7 +100,7 @@ function onLoad() {
     if (value <= 2) {    // no need prepare render content
       if (value == 1) {  // init process
         this.defineDual('test', function(value,oldValue) {
-          this.state.test = value;
+          // ...
         },0);
       }
       else if (value == 2) {  // mount process
@@ -119,7 +119,7 @@ function onLoad() {
   }
 ```
 
-这里定义 `duals.test` 指定原始值为 0，该值直接设到 `state.test` 中的，并不调用 `duals.test` 的 setter 函数，如果我们有 `props.test` 值传入，它将赋给 `duals.test`，就在上述 `value == 1` 代码段执行后，系统自动用 `duals.test = props.test` 进行赋值。
+这里定义 `duals.test` 指定原始值为 0，该值直接设到 `state.test` 中的，并不调用 `duals.test` 的 setter 函数，如果我们有 `props.test` 值传入，首次 `render()` 时它将赋给 `duals.test`（会调用 setter 函数）。
 
 #### 用可计算属性传递节点间数据
 

@@ -158,6 +158,19 @@ article.rewgt-scene.no-frame {
   transition: none;
 }
 
+.rewgt-paperview {
+  position: absolute;
+  left: auto;
+  top: auto;
+}
+.rewgt-paperview > * {
+  position: absolute;
+}
+.grid_paper-none {
+  background-repeat: repeat;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAAB90RVh0U29mdHdhcmUATWFjcm9tZWRpYSBGaXJld29ya3MgOLVo0ngAAAAWdEVYdENyZWF0aW9uIFRpbWUAMDEvMTgvMTfHAUlpAAAALUlEQVQ4jWN0cXERYaAiYGFgYGDYvXv3G2oZyEQtg0YNHDVw1MBRA0cNpLGBALy7BCdAPOpCAAAAAElFTkSuQmCC");
+}
+
 .rewgt-goto {
   width: 24px;
   height: 24px;

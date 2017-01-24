@@ -24,7 +24,9 @@ Shadow Widget 的事件化驱动，追根结底由 duals 双源属性的 setter 
   });
 ```
 
-完成上述定义后，一次赋值 `duals.id__ = utils.identicalId()` 将依次触发上面两个 setter 函数，**越底层的 setter 越早被调用**。因为双源属性 attr 最底层的 setter 必被调用，无论它多少层继承，所以，**我们要求最底层的 setter 函数对 state.attr 赋值，其它层不必对 state.attr 重复赋值**。
+完成上述定义后，一次赋值 `duals.id__ = utils.identicalId()` 将依次触发上面两个 setter 函数，**越底层的 setter 越早被调用**。
+
+接下来我们考察赋值语句 `comp.duals.attr = value` 如何执行，及多个 setter 对它的影响。
 
 #### setter 被调之前系统自动判断是否有更新
 
@@ -37,6 +39,16 @@ Shadow Widget 的事件化驱动，追根结底由 duals 双源属性的 setter 
 ```
 
 `ex.time()` 得到的是 “由当前时间转换而来的整数”，其值可标记界面操作的唯一 ID，这样，每次操作传递 `[data,ex.time()]` 都能触发本属性的 setter 函数了。
+
+#### 在 setter 函数中校验与转换
+
+执行 `comp.duals.attr = value`，系统判断 `value` 非旧值，然后自动完成 `comp.state.attr = value` 赋值，再调用 setter 函数，若有多层 setter，就从底向上依次调用。
+
+各层 setter 函数调用中有 3 个值可用：参数 `value` 与 `oldValue`，及 `comp.state.attr`。前两者是赋值操作的新值与旧值，`comp.state.attr` 则是最终赋过去的值。在多层 setter 调用中，`comp.state.attr` 还用于表达校验后值，包括合法性校验（未通过就 `throw` 一个 `Error`）与数据自动转换（如把字串 `"5"` 转化为整数 `5`）。
+
+各层 setter 函数可能要做不同的校验或转换，一般而言，越是底层 WTC 类，对输入数据取值范围要求越宽，越是上层继承类，越专注于特定应用，取值范围也越窄，校验若通不过应 `throw` 异常来终止操作，转换后若对原值产生修改，应直接赋改过的值给 `comp.state.attr`。各层 setter 调用中，`comp.state.attr` 取值是当前被赋的结果值，可能经过自动转换了，所以，它与参数 `value` 取值可能不同。
+
+当 `comp.duals.attr = value` 赋值结束，最终触发注册的侦听函数时，传给侦听函数的 `value` 参数就是 `comp.state.attr`，它可能在 setter 函数中被转换过。
 
 #### duals 立即赋值与延缓赋值
 

@@ -11,6 +11,8 @@
 > - [`ajax`](#4.2.3.!ajax)
 > - [`jsonp`](#4.2.3.!jsonp)
 > - [`widgetNum`](#4.2.3.!widget_num)
+> - [`Base64.encode`](#4.2.3.!base64_encode)
+> - [`Base64.decode`](#4.2.3.!base64_decode)
 
 > immutable 数据比较
 > - [`shallowEqual`](#4.2.3.!shallow_equal)
@@ -75,8 +77,8 @@
 > 3. `dataType`，取值为 `'json', 'pre-json', 'text'` 三者之一，缺省未指定时，如果 URL 读取某 *.json 文件，自动取 `'json'`（即：把请求结果看作规范的 JSON 文本），否则取 `'text'`（即：把结果看作字串）。   
 `pre-json` 格式与 `json` 类似，也指示客户侧将返回的数据看作 JSON 格式，`json` 类型直接解析 JSON，但 `pre-json` 类型在解析之前插入两项预处理，其一，把由首尾两个 “`"""`” 括起来的文本看作字串，文本可以跨行书写，其二，允许以 “`//comment`” 的形式在独立行作注释。这两项预处理把所有跨行字串转换为常规 JSON string 值，并删除所有独立行注释。
 > 4. `data`，用于请求的附加参数，当 type 为 `POST` 或 `PUT` 时，本参数以 json 格式、utf-8 字串方式上传，其它情况下，本参数附加在发出请求的 URL 上。
-> 5. `success`，请求成功时的回调函数，回调格式为 success(data,statusText,xhr)，其中 `data` 是ajax 请求的返回数据，对于 `text` 格式它的值是字串，对于 `json` 与 `pre-json`，它的值是经 `JSON.parse()` 转换后的 JSON 数据，`statusText` 是状态描述，`xhr` 是 XmlHttp 对象。
-> 6. `error`，请求失败时的回调函数，回调格式为 error(xhr,statusText)
+> 5. `success`，请求成功时的回调函数，回调格式为 `success(data,statusText,xhr)`，其中 `data` 是ajax 请求的返回数据，对于 `text` 格式它的值是字串，对于 `json` 与 `pre-json`，它的值是经 `JSON.parse()` 转换后的 JSON 数据，`statusText` 是状态描述，`xhr` 是 XmlHttp 对象。
+> 6. `error`，请求失败时的回调函数，回调格式为 `error(xhr,statusText)`
 > 7. `timeout`，请求的超时等待时间，以毫秒为单位，值为 0 表示永久等待，缺省等待 60 秒。
 > 8. `headers`，发送请求要附加的 header 配置，如 `{'Origin':'*'}`。
 > 9. `username` 与 `password`，发送请求要附加的 username 与 password。
@@ -96,6 +98,14 @@
 ##### <a name="widget_num"></a>`widgetNum()`
 
 > 用于查询曾挂入 W 树的 R 节点总数。
+
+##### <a name="base64_encode"></a>`Base64.encode(input)`
+
+> 对输入字串 `input` 进行 Base64 编码，返回编码结果。
+
+##### <a name="base64_decode"></a>`Base64.decode(input)`
+
+> 对输入字串 `input` 进行 Base64 解码，返回解码结果。
 
 ##### <a name="shallow_equal"></a>`shallowEqual(obj1,obj2)`
 

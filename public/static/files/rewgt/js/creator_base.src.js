@@ -814,11 +814,11 @@ main.$$onLoad.push( function(callback) {
               newX = newX / (r.width / iOldX);
               if (newX >= 1) newX = 0.9999;  // max is 100%
             }
-            targObj.state.width = newX;
+            targObj.duals.width = newX;
             changed = true;
           }
           else if (iOldX >= 1) {
-            targObj.state.width = Math.max(1,r.width + x);
+            targObj.duals.width = Math.max(1,r.width + x);
             changed = true;
           }
         }
@@ -832,28 +832,26 @@ main.$$onLoad.push( function(callback) {
               newY = newY / (r.height / iOldY);
               if (newY >= 1) newY = 0.9999;  // max is 100%
             }
-            targObj.state.height = newY;
+            targObj.duals.height = newY;
             changed = true;
           }
           else if (iOldY >= 1) {
-            targObj.state.height = Math.max(1,r.height + y);
+            targObj.duals.height = Math.max(1,r.height + y);
             changed = true;
           }
         }
       }
       else if (targObj.props['childInline.']) {
-        var r = node.getBoundingClientRect();
-        var dStyle = Object.assign({},targObj.state.style);
+        var r = node.getBoundingClientRect(), dStyle = {};
         if (iResizeType == 1 || iResizeType == 3) {
           dStyle.width = Math.max(0,r.width+x) + 'px';
-          targObj.state.style = dStyle;
           changed = true;
         }
         if (iResizeType == 2 || iResizeType == 3) {
           dStyle.height = Math.max(0,r.height+y) + 'px';
-          targObj.state.style = dStyle;
           changed = true;
-        }              
+        }
+        if (changed) targObj.duals.style = dStyle;
       }
       
       if (changed) {

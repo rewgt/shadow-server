@@ -78,7 +78,6 @@ main['.body.top.markdown'] = {
   getInitialState: function() {
     var state = this._getInitialState(this);
     this.defineDual('markOrg', function(value,oldValue) {
-      this.state.markOrg = value;
       this.duals['html.'] = value;
     });
     return state;
