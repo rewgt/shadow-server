@@ -50,13 +50,13 @@ shadow-server 是 Shadow Widget 开发系统在本机提供的 WebService 服务
 
 由 `shadow-widget` 工程共享的 `bundle.js` 文件， 已将 `react, react-dom, shadow-widget` 这三者的 js 库打包一起，在新建工程的 html 文件中添加如下引用，以便快速建立 Shadow Widget 开发环境。
 
-```
+``` html
   <script src="/shadow-widget/bundle.js"></script>
 ``` 
 
 或者用：
 
-```
+``` html
   <script src="/app/rewgt/shadow-widget/web/bundle.js"></script>
 ``` 
 

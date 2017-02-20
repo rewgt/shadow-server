@@ -57,7 +57,7 @@ TablePanel 使用表格方式布局，包含 3 个层次，TablePanel 是顶部�
 
 比如 demo6 描述了一个 2 行 3 列的 TablePanel：
 
-```
+``` html
   <div $=TablePanel>
     <div $=TableRow>
       <div $=Panel width='{100}' height='{40}'><div $=P>A</div></div>
@@ -85,7 +85,7 @@ SplitDiv 分割条用于鼠标拖拉快速改变控件大小，它限在以 flex
 
 使用 SplitDiv 分割条构件，如 demo7 中的代码：
 
-```
+``` html
   <div $=Panel klass='nowrap-default-wrap_reverse' height='{60}'>
     <div $=Panel width='{100}' style='background-color:#eee'></div>
     <div $=SplitDiv style='background-color:#aaa'></div>

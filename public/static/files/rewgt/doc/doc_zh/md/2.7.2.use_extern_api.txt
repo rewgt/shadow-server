@@ -33,7 +33,7 @@ Shadow Widget 将构件的 class 名分开用 className 与 klass 两个属性�
 
 `utils.hasClass(comp,cls)` 用于判断 `comp` 构件是否存在 `cls` 类定义，比如：
 
-```
+``` js
    utils.hasClass(comp,'read_only')   // read_only 是否在使用
    utils.hasClass(comp,'read_only has_select')   // read_only 或 has_select 任一个是否在使用
    utils.hasClass(comp,['read_only','has_select'])   // read_only 或 has_select 任一个是否在使用
@@ -71,7 +71,7 @@ demo39 给出了 `utils.ajax` 的使用例子，请自行参考。
 
 `ex.jsonp(config,initValue)` 的 `config` 参数格式与 `utils.jsonp(config)` 的 `config` 要求相同，只是 `config.callback` 回调函数是自动安装的，不必用参数传入。比如：
 
-```
+``` js
     $user='ex.jsonp({url:"query/user.json"},{name:""})'
 ```
 
@@ -81,7 +81,7 @@ demo39 给出了 `utils.ajax` 的使用例子，请自行参考。
 
 `ex.ajax(config,initValue)` 也用于异步请求，`initValue` 参数的要求与 `ex.jsonp(config,initValue)` 的 `initValue` 参数相同。`config` 参数则与 `utils.ajax(config)` 的 `config` 要求相同，其中 `config.success` 与 `config.error` 回调函数也自动安装，不必用参数传入。`ex.ajax()` 计算结果的数据格式必须是 `{status:statusText, data:returnData}`，比如：
 
-```
+``` js
     $user='ex.ajax({url:"query/user.json"},{status:"",data:{name:""}})'
 ```
 
@@ -93,7 +93,7 @@ demo40 给出了 `ex.ajax` 的使用例子，请自行参考。
 
 同一节点有多个属性引用 jsonp 或 ajax 请求结果时，宜用 `$data` 表达式获取数据，其它属性则引用 `duals.data` 中的局部数据。因为，每轮 render 更新时，`$data` 表达式总是先于其它可计算属性被执行的。比如：
 
-```
+``` html
   <div $=Div $$for='' 
       $data='ex.ajax({url:"query/user.json"},{status:"",data:null})' 
       $html='duals.data.data && ("name = " + duals.data.data.name)'>

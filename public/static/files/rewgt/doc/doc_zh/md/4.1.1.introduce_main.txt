@@ -11,7 +11,7 @@ main 模块提供 3 项功能：
 
 基本用法：
 
-```
+``` js
   var main = W.$main;
   
   main['.body.p.btn'] = {

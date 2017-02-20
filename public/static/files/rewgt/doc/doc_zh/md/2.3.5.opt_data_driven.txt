@@ -9,7 +9,7 @@
 
 举例如下：
 
-```
+``` html
   <div $=Panel key='top'>
     <div $=NavPanel key='nav' width='{0.9999}' height='{80}'>
       <div $=P key='opt'>
@@ -26,7 +26,7 @@
 
 这个例子中，`trigger='{["./opt.txt",{$set:["text",1]}]}'` 定义待触发的动作，`"./opt.txt"` 指示目标节点，找到目标节点的 `duals.data`，之后的动作相当于执行如下语句：
 
-```
+``` js
     duals.data = ex.update(duals.data,{$set:["text",1]});
 ```
 
@@ -50,7 +50,7 @@
 
 选项构件的 `data-checked` 是双源属性，其值变化可被侦听，例如：
 
-```
+``` js
   main['.body.top.nav.opt.lab.btn'] = {
     componentDidMount: function() {
       this._componentDidMount(this);

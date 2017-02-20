@@ -13,7 +13,7 @@
 
 有两种方法可以做到这一点，方法一，在投影定义中，这么替换 render 函数：
 
-```
+``` js
   main['.body.top.p.btn'] = {
     render: function() {
       if (W.__debug__) {
@@ -29,7 +29,7 @@
 
 方法二，或者用 `W.$dataSrc` 传递一个 render 函数，比如：
 
-```
+``` js
   var dataSrc = W.$dataSrc = {};
   
   function debugRender() {
@@ -50,7 +50,7 @@
 
 举个简单例子：
 
-```
+``` js
   dataSrc['.body.top.p.btn'] = {
     'dual-msg': 'Hello, world!',
     render: debugRender,

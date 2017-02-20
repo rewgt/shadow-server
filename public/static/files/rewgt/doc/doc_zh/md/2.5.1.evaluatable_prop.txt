@@ -9,7 +9,7 @@
 
 如下定义界面（请参考 demo26）：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=P key='hello' width='{0.9999}' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
       <span $=Input key='name' $value='duals.data.name + " " + duals.data.lastName'></span>
@@ -25,7 +25,7 @@
 
 上面程序运行中，如果改变 hello 节点的 `duals.data` 取值，`$value` 表达式将自动重新计算。比如在浏览器的控制台，输入如下脚本：
 
-```
+``` js
   W.body.top.hello.component.duals.data = {name:'Hillary', lastName:'Clinton'}
 ```
 
@@ -61,7 +61,7 @@
 
 相对路径的参考基点是最近调用空间（即：当前调用空间）所在的 R 节点。如上例，若将 `$value` 改成如下：
 
-```
+``` js
     $value='duals("//").keyid + ", " + duals("name").keyid'
 ```
 
@@ -73,7 +73,7 @@
  
 可计算属性与常规双源属性一样，可以被侦听，比如（参见 demo26）：
 
-```
+``` js
   main['.body.top.hello.name'] = {
     componentDidMount: function() {
       this._componentDidMount(this);

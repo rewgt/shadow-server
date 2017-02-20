@@ -587,6 +587,31 @@ function afterModifyDoc(iDelay,wdgtPath) {
 
 // list scene pages
 //-----------------
+function cloneThumbNode_(owner,node) {
+  var newNode = node.cloneNode(true);
+  newNode.style.display = 'block';
+  newNode.style.position = 'static';
+  newNode.style.width = '900px';
+  newNode.style.height = '700px';
+  newNode.style.transform = 'scale(0.142)'; // 900 * 0.142 = 127.8, 700 * 0.142 = 99.4
+  newNode.style.transformOrigin = '0 0';
+  newNode.style.zIndex = '3006';
+  owner.appendChild(newNode);
+  
+  var targCanvas, sourCanvas = node.querySelectorAll('canvas'), iLen = sourCanvas.length;
+  if (iLen && iLen == (targCanvas=newNode.querySelectorAll('canvas')).length) {
+    setTimeout( function() {
+      for (var i=0,sour,targ; sour=sourCanvas[i]; i++) {
+        targ = targCanvas[i];
+        if (targ.width && targ.height) {
+          var ctx = targ.getContext('2d');
+          ctx.drawImage(sour,0,0);
+        }
+      }
+    },600);
+  }
+}
+
 function listScenePages(bInfo,renew) {
   // step 1: check pages in same order or not
   var changed = false;
@@ -616,16 +641,7 @@ function listScenePages(bInfo,renew) {
       divNode.setAttribute('keyid',sKey);
       if (sName) divNode.setAttribute('name',sName);
       topPageList.appendChild(divNode);
-      
-      var newNode = node.cloneNode(true);
-      newNode.style.display = 'block';
-      newNode.style.position = 'static';
-      newNode.style.width = '900px';
-      newNode.style.height = '700px';
-      newNode.style.transform = 'scale(0.142)'; // 900 * 0.142 = 127.8, 700 * 0.142 = 99.4
-      newNode.style.transformOrigin = '0 0';
-      newNode.style.zIndex = '3006';
-      divNode.appendChild(newNode);
+      cloneThumbNode_(divNode,node);
     });
   }
   
@@ -661,6 +677,19 @@ function showRootPage(sName,selectPanel,callback) {
       });
     }
     
+    if (sCurrPage) {
+      rootNode.getWidgetNode(rootNode.frameInfo.rootName + '.' + sName,'', function(node) {
+        if (node) {
+          setTimeout( function() {
+            var evt = document.createEvent('Event');
+            evt.initEvent('slideenter',true,true);
+            evt.pageKey = sName;
+            node.dispatchEvent(evt);
+          },0);
+        }
+      });
+    }
+    
     if (callback) callback();
   });
 }
@@ -689,17 +718,8 @@ function updateSceneThumb(sKey) {
         node.setAttribute('name',sName);
       else node.removeAttribute('name');
       
-      var newNode = pageNode.cloneNode(true);
-      newNode.style.display = 'block';
-      newNode.style.position = 'static';
-      newNode.style.width = '900px';
-      newNode.style.height = '700px';
-      newNode.style.transform = 'scale(0.142)'; // 900 * 0.142 = 127.8, 700 * 0.142 = 99.4
-      newNode.style.transformOrigin = '0 0';
-      newNode.style.zIndex = '3006';
-      
       node.innerHTML = '';
-      node.appendChild(newNode);
+      cloneThumbNode_(node,pageNode);
       break;
     }
   }
@@ -1275,7 +1295,7 @@ function wdgtSelectChange(bPath) {
             noExpr = (editFlag == 0? targCanEditFlag(bPath,true) > 0: true);
           var b = rootNode.widgetSchema(sWdgtPath,true,noExpr);
           if (b) {  // b is [cmdId,dSchema,dOpt,attrs,canEditHtmlTxt]
-            canEditTxt = currSelectedWdgt.children.length == 0 && b[4];
+            canEditTxt = currSelectedWdgt && currSelectedWdgt.children.length == 0 && b[4];
             rightPageDiv.setPropEditor(b[0],b[1],b[2],b[3]);
           }
         }
@@ -1579,9 +1599,12 @@ function docOnMouseDown(event) {
   }
   else {
     if (!event.shiftKey && currRootPageType == 'ScenePage') {
-      var inOneSelect = false;
-      if (!currSelectedWdgt || currSelectedWdgt.classList.contains('rewgt-scene')) {
-        if (haloFrameMult.style.display == 'block' && haloFrameMult.children.length > 1) {
+      var inOneSelect = false, isGround = false;
+      if ( !currSelectedWdgt || currSelectedWdgt.classList.contains('rewgt-scene') ||
+           (currSelectedWdgt.getAttribute('data-is.ground') && (isGround=true)) ) {
+        if (isGround)
+          multiCanSelect_ = true;
+        else if (haloFrameMult.style.display == 'block' && haloFrameMult.children.length > 1) {
           // still in history multi-selection
           if (inMultiArea(x,y)) {
             multiWdgtCanMove_ = true; multiWdgtMoved_ = false;
@@ -1680,7 +1703,7 @@ function docOnMouseMove(event) {
       var topLeftX = Math.min(x,multiSelectFromX_), topLeftY = Math.min(y,multiSelectFromY_);
       var btmRghtX = Math.max(x,multiSelectFromX_), btmRghtY = Math.max(y,multiSelectFromY_);
       var firstNode = haloFrameMult.children[0];
-      if (!firstNode) {
+      if (!firstNode) { // firstNode is selecting indicator
         firstNode = document.createElement('div');
         firstNode.setAttribute('style','position:absolute; border:1px dotted red; left:0px; top:0px; width:0px; height:0px;');
         haloFrameMult.appendChild(firstNode);
@@ -2404,6 +2427,12 @@ window.addEventListener('load', function(event) {
         unselectWidget();
         setTimeout( function() {
           showRootPage(sKey,false);
+          
+          if (node.querySelector('canvas')) {
+            setTimeout( function() {
+              updateSceneThumb(sKey);
+            },600); // try wait animate finished
+          }
         },0);
       }
     }
@@ -4329,6 +4358,9 @@ window.addEventListener('load', function(event) {
     var clipReady = clipTextState == 2 && clipTextArea.value;
     if (clipReady && clipTextSelectId == currSelectedIndex) {
       // event.preventDefault();  // use default clipboard-copy
+      setTimeout( function() {
+        rootNode.instantShow('copy successful, wait to paste...');
+      },0);
     }
     else {
       event.preventDefault();  // copy nothing
@@ -4404,6 +4436,9 @@ window.addEventListener('load', function(event) {
       // event.preventDefault();  // use default cut text to clipboard
       clipLastCutList_ = clipTextPaths;
       clipLastCutText_ = clipTextArea.value;
+      setTimeout( function() {
+        rootNode.instantShow('cut successful, wait to paste...');
+      },0);
     }
   },false);
   clipTextArea.addEventListener('keydown', function(event) {

@@ -5,7 +5,7 @@
 
 `W.__design__` 指示当前运行的程序是否处于 “可视化设计” 状态，编程时这么判断：
 
-```
+``` js
     if (W.__design__)
       console.log('in design state');
     else console.log('not in design state');
@@ -27,7 +27,7 @@
 
 举例来说：
 
-```
+``` js
 class THighlightBtn_ extends T.Button_ {
   // ...
 

@@ -11,7 +11,7 @@ ex 本质是类实例，当 MJI 解释器进入新一层 callspace 时都动态�
 
 基本用法：
 
-```
+``` js
   var ex = W.$ex;
   
   var tm = ex.time();

@@ -56,7 +56,7 @@ Shadow Widget 还自动将 `dual-*` 属性自动注册到 duals，其命名在�
 
 除了上述传属性的方式可定义 duals 外，还可调用 `defineDual()` 接口来注册双源属性。duals.attr 要像 `props.attr` 或 `state.attr` 一样在构件挂载后就可使用，所以我们要求在构件的 `getInitialState` 函数中调用 `defineDual()` 注册双源属性。比如：
 
-```
+``` js
   main['.body.top.p2'] = {
     getInitialState: function() {
       var state = this._getInitialState(this);
@@ -79,7 +79,7 @@ Shadow Widget 还自动将 `dual-*` 属性自动注册到 duals，其命名在�
 
 让 duals 使用指定的 setter 函数，举例如下：
  
-```
+``` js
     this.defineDual('test2', function(value,oldValue) {
       if (oldValue === undefined)
         console.log('first assign');
@@ -93,7 +93,7 @@ setter 函数要求带两个参数，`value` 是赋予的新值，`oldValue` 是
 
 在 `getInitialState()` 中调用 `this.defineDual()` 定义 `duals.attr` 后无法立即对 `this.state.attr` 赋值，因为此时 `this.state` 尚未就绪，只能等到首次 `render()` 调用时才真正赋值。比如下面 `duals.test2` 在定义后，紧接一条赋值语句：
 
-```
+``` js
     this.defineDual('test2', function(value,oldValue) {
       console.log(this.state.test2,value,oldValue);
     });
@@ -112,20 +112,20 @@ Shadow Widget 缺省为每个构件自动注册一个双源属性 keyid，它用
 
 Shadow Widget 用 `"html."` 表达节点的文本值，如下两行转义标签效果等同：
 
-```
+``` html
   <div $=P html.='example'></div>
   <div $=P>example</div>
 ```
 
 某节点只有未定义子节点时，`"html."` 指示的内容才被显示，比如下面只显示 “text”，`"html."` 指示的值并不显示，因为已存在一个 `Span` 子节点：
 
-```
+``` html
   <div $=P html.='example'><span $=Span>text</span></div>
 ```
 
  `"html."` 是系统内置的双源属性，运行中这么赋值：
 
-```
+``` html
   comp.duals['html.'] = 'example';
 ```
 

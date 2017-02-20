@@ -13,7 +13,7 @@
 
 如下代码，最后一行是我们新添加的：
 
-```
+``` html
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
 <div $=BodyPanel key='body'>
@@ -27,7 +27,7 @@
 
 将上述修改存盘，然后在 test1 工程目录下创建 `src/my_module.js` 文件，为该 JS 文件保存如下源码：
 
-```
+``` js
 if (!window.W) { window.W = new Array(); W.$modules = [];}
 W.$modules.push( function(require,module,exports) {
 

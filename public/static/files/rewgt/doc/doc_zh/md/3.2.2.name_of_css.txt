@@ -13,7 +13,7 @@ React 的 className 属性在 Shadow Widget 中分割为两块：props.className
 
 比如，我们设计一个扁平风格的按钮，className 为 `flat-btn`，klass 指定若干状态，如 `default-red-blue`、`default-hover` 等，相关 css 定义如下：
 
-```
+``` css
   .flat-btn {
     border: 1px solid gray;
     border-radius: 8px;

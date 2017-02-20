@@ -9,7 +9,7 @@
 
 下面介绍如何用 idSetter 定义的方式实现同样功能，因用到 JSX 句式，需经 babel 转译（若不想转译，可改用 json-x 方式表达）。代码如下：
 
-```
+``` js
   var childStyle = {};
   
   function id__(value,oldValue) {
@@ -30,7 +30,7 @@
 
 将 idSetter 函数挂入：
 
-```
+``` js
 function onLoad() {
   var body = W.W('.body').component;
   body.setChild(
@@ -49,7 +49,7 @@ W.$main.$onLoad.push(onLoad);
 
 例如，把上面代码改写成如下样式：
 
-```
+``` js
 var React = require('react');
 var ReactDOM = require('react-dom');
 var W = require('shadow-widget');

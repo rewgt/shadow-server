@@ -9,7 +9,7 @@
 
 比如下面（参见 demo33）将界面代码定义在模板 TempDiv 之下，然后用 `$='//tmp_log.p'` 引用它。
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=TempDiv key='tmp_log'>
       <div $=P key='p' $width='duals.data.width' $height='duals.data.height'>
@@ -24,7 +24,7 @@
 
 用 `$` 引用时，通过重新定义 dual-data 数据来定制被引用界面的表现特征。比如下面定义两个节点，分别用来展示只读的与拖拉右下角变宽高的 Textarea 构件：
 
-```
+``` html
   <div $='//tmp_log.p' dual-data='{{"width":300,"height":200,"resize":"none","readOnly":"readonly"}}'></div>
   <div $='//tmp_log.p' dual-data='{{"width":300,"height":200,"resize":"both","readOnly":""}}'></div>
 ```
@@ -35,7 +35,7 @@
 
 通过引用时重定义 `dual-data` 数据，如果 `dual-data` 数据项较多，书写会不方便，我们可以这么简化：把 `dual-data` 缺省值定义到模板下被引用的节点中，然后用 `$trigger` 表达式调整 `dual-data` 取值。比如：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=TempDiv key='tmp_log2'>
       <div $=P key='p' dual-data='{{"width":300,"height":200,"resize":"none","readOnly":""}}'
@@ -54,7 +54,7 @@
 
 如下代码，`$='//tmp.test2'` 引用模板中预定义界面，而预定义的界面里，又用 `$='//tmp.txt'` 引用在模块中定义的模板。
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=TempDiv key='tmp'>
       <div $=P key='test' dual-income='{0}' dual-outgo='{0}'

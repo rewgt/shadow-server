@@ -9,7 +9,7 @@
 
 用转义标签定义界面（见 demo16）：
 
-```
+``` html
 <style>
 .ctrl-page {
   margin: 0px 2px 0px 0px;
@@ -55,7 +55,7 @@ Shadow Widget 中可用作 “选项构件” 的有：
 这些构件名都以 "Opt" 前缀标示，OptSpan 对应于 Span，OptButton 对应 Button，其它类推。点击 “选项构件” 表示选中这个构件，它的 duals['data-checked'] 取值变为 `'1'`，未选时其值为空字串。
 
 属性 `data-checked` 用在 CSS 定义中，可描述选项构件在选中与未选中时的界面表现，如上例用这个样式：
-```
+``` css
     .ctrl-page[data-checked="1"] { color: #c00; }
 ``` 
 指定构件在选中时，按钮文字显示红色。

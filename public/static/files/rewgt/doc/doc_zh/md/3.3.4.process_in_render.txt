@@ -28,7 +28,7 @@ childNumId 用于表达当前构件的子成员有无增删，构件 comp 用 `c
 
 求得 childNumId 值的算法如下：
 
-```
+``` js
     duals.childNumId = gui.comps.length + (gui.removeNum << 16);
 ```
 
@@ -42,7 +42,7 @@ childNumId 用于表达当前构件的子成员有无增删，构件 comp 用 `c
 
 样例 sample_dev2 从一个 json 文件读取一个数组，保存到 `duals.data`，然后将数组内容用多个 `<li>` 节点展示到界面。其中，定义 `duals.id__` 的 setter 函数如下：
 
-```
+``` js
   this.defineDual('id__', function(value,oldValue) {
     if (value <= 2) return;
     

@@ -5,7 +5,7 @@
 
 上一节已给出空白工程入口模块 index.js 的代码，其中如下片断专供开发者定制：
 
-```
+``` js
 // write your code here ...
 
 var exportModules = {
@@ -21,7 +21,7 @@ var exportModules = {
 
 变量 `exportModules` 列出可供上层 require 的模块，比如，我们将上面代码改为：
 
-```
+``` js
 // write your code here ...
 var my_module = require('./src/my_module');
 
@@ -39,13 +39,13 @@ var exportModules = {
 
 比如我们要在自定义模块 `my_module.js` 中，定义一个移动鼠标在其上可高亮的按钮 `HighlightBtn`，界面这么描述：
 
-```
+``` html
   <span $=HighlightBtn>Click me</span>
 ```
 
 接着，在 `my_module.js` 模块中定义这个构件模板类（Widget Template Class，WTC）：
 
-```
+``` js
 var React = require('react');
 var ReactDOM = require('react-dom');
 var W = require('shadow-widget');

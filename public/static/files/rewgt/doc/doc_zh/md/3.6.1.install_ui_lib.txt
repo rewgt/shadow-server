@@ -11,20 +11,24 @@
 
 我们用例子来说明，参见 demo42，假定我们要设计一种按钮，移鼠标在其上时按钮高亮显示，移走鼠标变恢复正常。
 
-```
+``` js
+var sampleEle = null;
+
 function registMyLib(callback) {
-  var jsonX = [ ['P',{key:'sample'}],
-    ['Button', {
-      key:'hoverBtn',
-      $onMouseOver: function(event) {
-        this.duals.style = {opacity:'0.5'};
-      },
-      $onMouseOut: function(event) {
-        this.duals.style = {opacity:''};
-      },
-    }],
-  ];
-  var sampleEle = utils.loadElement(jsonX);
+  if (!sampleEle) {
+    var jsonX = [ ['P',{key:'sample'}],
+      ['Button', {
+        key:'hoverBtn',
+        $onMouseOver: function(event) {
+          this.duals.style = {opacity:'0.5'};
+        },
+        $onMouseOut: function(event) {
+          this.duals.style = {opacity:''};
+        },
+      }],
+    ];
+    sampleEle = utils.loadElement(jsonX);
+  }
   
   utils.setVendorLib('ui', function(template) {
     template.setChild(sampleEle,callback);
@@ -38,7 +42,7 @@ function registMyLib(callback) {
 
 然后，将安装处理挂入：
 
-```
+``` js
 main.$$onLoad.push( function(callback) {
   registMyLib(callback);
 });
@@ -55,7 +59,7 @@ main.$$onLoad.push( function(callback) {
 
 最后，在界面以绝对路径方式引用库构件：
 
-```
+``` html
     <span $='.ui.sample.hoverBtn'>Test1</span>
 ```
 

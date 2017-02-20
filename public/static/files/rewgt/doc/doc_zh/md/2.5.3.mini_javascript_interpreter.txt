@@ -61,7 +61,7 @@ MJI 也用 `while(cond,expr,expr2, ...)` 函数调用形式表达循环语句，
 
 用 `$for` 开启调用空间在前文已有举例，现再举一个用 '$' 引用开启调用空间的例子（见 demo28）：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=Div key='hello' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
       <div $=P key='p' width='{0.9999}'>

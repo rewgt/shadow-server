@@ -20,7 +20,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 
 在每个 W 节点可方便的查找它的下级 W 节点，也可用绝对路径查找任意位置 W 节点。比如定义了如下界面：
 
-```
+``` html
   <div $=BodyPanel key='body'>
     <div $=Panel key='top'>
       <div $=P key='p' width='{0.9999}'>
@@ -33,7 +33,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 
 从 W 树查找指定 R 节点，及从 R 节点取父级 W 节点，代码如下：
 
-```
+``` js
   var inputComp = W.W(".body.top.p.input").component;
   parentWdgt = inputComp.widget.parent;
   console.log(parentWdgt.getPath());
@@ -41,7 +41,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 
 在 R 节点查找它的下级节点：
 
-```
+``` js
   var sPath = 'input';   // such as 'sub1.sub2.sub3'
   var inputWdgt = parentWidget.W(sPath);
   assert(inputWdgt === inputComp.widget);
@@ -49,7 +49,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 
 在任意 R 节点用绝对路径查找：
 
-```
+``` js
   var sPath2 = '.body.top.markdown';   // absolute path start with '.'
   var markWdgt = inputWdgt.W(sPath2);
   console.log(markWdgt.getPath());
@@ -71,7 +71,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 
 先捕获输入构件的 `onChange` 事件，把变化了的输入字串赋值给 `duals.textValue`：
 
-```
+``` js
   main['.body.top.p.input'] = {
     getInitialState: function() {
       var state = this._getInitialState(this);
@@ -87,7 +87,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 
 然后在目标 R 节点（MarkedDiv）侦听输入节点的 `duals.textValue` 变化，拿变化后文本刷新 markdown 转换输出：
 
-```
+``` js
   main['.body.top.markdown'] = {
     componentDidMount: function() {
       this._componentDidMount(this);
@@ -115,7 +115,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 
 将上面例子中 MarkedDiv 构件的投影式声明，改成如下样子：
 
-```
+``` js
 main['.body.top.markdown'] = {
   onTextValue: function(value,oldValue) {
     // no need check this.isHooked
@@ -143,7 +143,7 @@ main['.body.top.markdown'] = {
 
 为了演示两个 duals 如何联动，我们再次改写 MarkedDiv 的投影式声明：
 
-```
+``` js
   main['.body.top.markdown'] = {
     getInitialState: function() {
       var state = this._getInitialState(this);

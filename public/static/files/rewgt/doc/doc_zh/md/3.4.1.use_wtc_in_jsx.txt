@@ -19,7 +19,7 @@ WTC 类定义后，最终要用来创建构件，它在如下场景使用：
 
 用法一：在 json-x 数据中使用 jsx 表达式
 
-```
+``` js
   var Btn = T.Button._createClass();
 
   var jsonX = [ ['P',{key:'txt'}],
@@ -40,7 +40,7 @@ json-x 数据经 `utils.loadElement()` 或 `utils.loadElementEx()` 读入，将�
 
 如下是投影定义的代码片断：
 
-```
+``` js
   getInitialState: function() {
     var state = this._getInitialState(this);
     
@@ -70,14 +70,14 @@ json-x 数据经 `utils.loadElement()` 或 `utils.loadElementEx()` 读入，将�
 
 如果底层工程化开发，我们不必用转义标签定义界面，在 html 页面只保留根节点（`.body`）定义，如下：
 
-```
+``` html
   <div $=BodyPanel key='body'> 
   </div>
 ```
 
 界面主体改在底层 JS 代码中用 JSX 描述。先举一个简单例子，创建一个按钮，点击它能显示 `"clicked!"` 提示信息。
 
-```
+``` js
 var React = require('react');
 var ReactDOM = require('react-dom');
 var W = require('shadow-widget');
@@ -118,7 +118,7 @@ W.$main.$onLoad.push(onLoad);
 
 相关源码请参考 sample_dev3 工程，其中：
 
-```
+``` js
   var Button = T.Button._createClass({ /* shadow definition */ });
 ```
 

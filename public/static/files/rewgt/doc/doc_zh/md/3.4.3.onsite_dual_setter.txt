@@ -9,7 +9,7 @@
 
 比如：
 
-```
+``` js
 var t = utils.getWTC('*');
 
 function onLoad() {  
@@ -46,7 +46,7 @@ function onLoad() {
 
 所以，`duals.id__` 的 setter 函数常这么定义：
 
-```
+``` js
   function id__(value,oldValue) {
     if (value <= 2) {    // no need prepare render content
       if (value == 1) {  // init process
@@ -95,7 +95,7 @@ function onLoad() {
 
 如下 idSetter 函数，在 `value == 1` 条件段注册 `duals.test` 双源属性，在 `oldValue == 1` 条件段编写其它初始化代码。
 
-```
+``` js
   function id__(value,oldValue) {
     if (value <= 2) {    // no need prepare render content
       if (value == 1) {  // init process

@@ -9,7 +9,7 @@
 
 按如下定义界面：
 
-```
+``` html
   <div $=Panel key='top'>
     <div $=P key='toolbar'>
       <span $=Button key='test'>Test</span>
@@ -22,7 +22,7 @@
 
 接着编写 main 模块代码：
 
-```
+``` js
   var popOption = { width:0.7, height:200 };
 
   main['.body.top.toolbar.test'] = {
@@ -57,7 +57,7 @@
 
 定义界面时，用 `style='display:none'` 让被克隆的源节点不显示（注：让源头节点不显示还有更规范的方法，参见 [“模板与引用”](#2.4.)）。然后改用如下 popOption：
 
-```
+``` js
   var popOption = { width:0.7, height:200,
     bodyStyle: {display:'block', backgroundColor:'#eee'},
   };

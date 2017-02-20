@@ -19,7 +19,7 @@ Shadow Widget 要求凡对 props.attr 与 state.attr 取值产生影响的地方
 
 如下是常见的**误用**情形：
 
-```
+``` js
   comp.duals.aDict = {};
   comp.duals.aDict.attr = someValue;  // warning: not trigger render()
   
@@ -35,7 +35,7 @@ Shadow Widget 要求凡对 props.attr 与 state.attr 取值产生影响的地方
 
 将上面误用的代码，改到正确方式：
 
-```
+``` js
   comp.duals.aDict = Object.assign({}, comp.duals.aDict, {attr:someValue});
 
   var aList = comp.duals.aList.slice(0);  // copy array
@@ -45,7 +45,7 @@ Shadow Widget 要求凡对 props.attr 与 state.attr 取值产生影响的地方
 
 或者用立即数表达方式重建数据实例，如下代码也能触发 render 刷新：
 
-```
+``` js
   comp.duals.aDict = {attr:someValue, otherAttr:otherValue};
   comp.duals.aList = [someValue, otherValue];
 ```
@@ -58,7 +58,7 @@ Shadow Widget 建议使用 react Add-Ons 的 update API，使用方法参见 <a 
 
 为方便大家使用，Shadow Widget 缺省将这个 update 接口打包到发行库中，下面简单举例：
 
-```
+``` js
   comp.duals.aDict = ex.update(comp.duals.aDict,{$merge: {attr:someValue}}); // merge
   comp.duals.aDict = ex.update(comp.duals.aDict,{$set: {attr:someValue}});   // replace
 
@@ -73,7 +73,7 @@ Shadow Widget 为每个构件都定义了 `duals.id__` 属性，当构件创建�
 
 利用这个特点，**在 setter 函数用 `oldValue == 1` 识别出首次 `render()` 调用，然后执行特定的初始化处理**，比如：
 
-```
+``` js
   this.defineDual('id__', function(value,oldValue) {
     if (oldValue == 1) {  // init process
       // do something ...
@@ -85,7 +85,7 @@ Shadow Widget 为每个构件都定义了 `duals.id__` 属性，当构件创建�
 
 调用 `utils.identicalId()` 可获得一个唯一 ID 值（与历史取值不重复），将它赋给 `duals.id__` 即驱动指定构件触发 `render()` 刷新。`comp.reRender()` 方法就是通过如下语句实现强制刷新的：
 
-```
+``` js
   this.duals.id__ = utils.identicalId();
 ```
 

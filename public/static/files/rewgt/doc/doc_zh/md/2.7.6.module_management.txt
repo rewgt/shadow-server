@@ -9,7 +9,7 @@
 
 当处理复杂界面开发时，我们常划分模块，比如有 moduleA 与 moduleB，分别在两个文件编写 javascript 代码，用 `<script>` 标签把它们导入进来，如下：
 
-```
+``` html
 <script src="js/moduleA.js"></script>
 <script src="js/moduleB.js"></script>
 
@@ -21,7 +21,7 @@
 
 用户开发的 JS 模块应在 react、react-dom、shadow-widget 库之前定义。然后，各 JS 模块按如下方式各自编码。
 
-```
+``` js
 if (!window.W) { window.W = new Array(); W.$modules = [];}
 W.$modules.push( function(require,module,exports) {
 
@@ -61,13 +61,13 @@ var main = W.$main, utils = W.$utils, ex = W.$ex;
 
 在转义标签中可这么指定字号：
 
-```
+``` html
   <div $=P klass='S4 large-small-default'></div>
 ```
 
 运行中若用 javascript 指定：
 
-```
+``` js
   component.mergeClass('S4 large-small-default');
 ```
 
@@ -75,7 +75,7 @@ var main = W.$main, utils = W.$utils, ex = W.$ex;
 
 用 `<link>` 标签引入用户自行定义的 CSS 文件，如:
 
-```
+``` html
 <link rel="stylesheet" shared="true" href="css/my.css" />
 ```
 

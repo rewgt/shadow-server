@@ -9,7 +9,7 @@
 
 代码如下（见 demo32）：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=Div key='div' width='{0.9999}' $for=''
          dual-data='{{"name":"wayne","registed":true,"hasLogin":true}}'>
@@ -35,7 +35,7 @@
 
 三种条件指令的用法与常规编程语言中的 `if, else if, else` 语句接近，我们既可以用 `$elif` 指令逐条列举各项条件，扁平的组织各个分支，如下：
 
-```
+``` html
   <div $=Div key='div3' width='{0.9999}' dual-data='{5}' $for=''>
     <div $=P $if='duals.data == 1'>1</div>
     <div $=P $elif='duals.data == 2'>2</div>
@@ -47,7 +47,7 @@
 
 也可以嵌套着用，比如：
 
-```
+``` html
   <div $=Div key='div4' width='{0.9999}' dual-data='{5}' $for=''>
     <div $=P $if='duals.data >= 1 && duals.data <= 4'>
       <span $=Span $if='duals.data >= 3'>

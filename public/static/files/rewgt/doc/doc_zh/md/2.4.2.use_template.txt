@@ -11,7 +11,7 @@ Shadow Widget 提供 3 种模板：TempPanel、TempDiv、TempSpan，正式运行
 
 只需增加模板构件，把要克隆的源节点定义到模板构件下，`$=path` 引用也改向模板下的源节点，如下：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=TempDiv key='tmp'>
       <div $=P key='hello' width='{0.9999}' html.='Hello, world!'></div>
@@ -23,7 +23,7 @@ Shadow Widget 提供 3 种模板：TempPanel、TempDiv、TempSpan，正式运行
 
 为模板下的源节点提供投影式声明，被引用后投影声明也是生效的，比如界面定义：
 
-```
+``` html
   <div $=P key='test' width='{0.9999}'>
     <div $=TempSpan key='tmp'>
       <span $=Button key='btn' html.='test 1'></span>
@@ -35,7 +35,7 @@ Shadow Widget 提供 3 种模板：TempPanel、TempDiv、TempSpan，正式运行
 
 投影式声明：
 
-```
+``` js
   main['.body.top2.test.tmp.btn'] = {
     $onClick: function(event) {
       alert(this.duals.keyid);
@@ -57,7 +57,7 @@ Shadow Widget 提供 3 种模板：TempPanel、TempDiv、TempSpan，正式运行
 
 同一功能组内的多个模板，通常并列定义，有时为了理解方便，让一个模板包含另一模板，也是可以的，比如：
 
-```
+``` html
   <div $=TempDiv key='tmp'>
     <div $=TempDiv key='tmp'>
       <div $=P key='hello' width='{0.9999}' html.='template in template'></div>
@@ -74,7 +74,7 @@ Shadow Widget 提供 3 种模板：TempPanel、TempDiv、TempSpan，正式运行
 
 “引用的引用” 常在模板内定义，比如将基础功能定义为模板，然后把它的若干变种（即：引用它并重定义某些属性）也定义到模板。比如：
 
-```
+``` html
   <div $=TempDiv key='tmp2'>
     <div $=P key='normal' width='{0.9999}' html.='It is an example.'></div>
     <div $='//normal' key='hint' style='color:gray'></div>
@@ -94,7 +94,7 @@ Shadow Widget 提供 3 种模板：TempPanel、TempDiv、TempSpan，正式运行
 
 以 `'$=path'` 实现引用的节点，还可以带 `styles` 属性来指明引用后，它的各个子节点的附加 `style` 定义，举件如下：
 
-```
+``` html
   <div $=TempDiv key='tmp3'>
     <div $=P key='normal' width='{0.9999}'>
       <span $=Span key='txt' style='font-weight:600'>It is an example.</span>

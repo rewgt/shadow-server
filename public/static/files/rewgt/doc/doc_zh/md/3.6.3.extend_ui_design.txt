@@ -7,7 +7,7 @@
 
 在 Shadow Widget 可视化设计器中，选中一个构件，开发者可在右侧属性页编辑该构件的各项属性，为保证各个属性能按特定类型编辑，该构件的 WTC 类需定义 `_getSchema()` 函数，如下是个例子：
 
-```
+``` js
 class TMarkedDiv_ extends TDiv_ {
   // 无关代码已注释
 

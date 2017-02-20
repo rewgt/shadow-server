@@ -9,7 +9,7 @@
 
 比如下面界面定义了 3 段文本：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=P key='hello' width='{0.9999}' html.='Hello, world!'></div>
     <div $=P style='color:red' width='{0.9999}' html.='Hello, world!'></div>
@@ -19,7 +19,7 @@
 
 如果改成节点引用的方式，如下：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=P key='hello' width='{0.9999}' html.='Hello, world!'></div>
     <div $='//hello' style='color:red'></div>
@@ -33,13 +33,13 @@
 
 第二个节点传递 `html.` 属性值还可改成如下方式：
 
-```
+``` html
   <pre $='//hello'>How are you?</pre>
 ```
 
 引用非 inline 节点，要用 `<div $='path'>`。若引用 inline 节点，则用 `<span $='path'>`，举例如下：
 
-```
+``` html
   <div $=P key='test' width='{0.9999}'>
     <span $=Button key='btn' html.='test 1'></span>
     <span $='//btn' html.='test 2'></span>
@@ -52,7 +52,7 @@
 
 除了属性继承，投影式声明所定义的属性，也一律原样继承。比如：
 
-```
+``` js
   main['.body.top2.test.btn'] = {
     $onClick: function(event) {
       alert(this.duals.keyid);

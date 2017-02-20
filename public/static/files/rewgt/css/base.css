@@ -356,6 +356,16 @@ h6.small-default-large, .S6.small-default-large {
   text-align: right;
 }
 
+.left-align_center-right {
+  text-align: left;
+}
+.align_center-right-left {
+  text-align: center;
+}
+.right-left-align_center {
+  text-align: right;
+}
+
 .overflow_auto {
   overflow: hidden;
 }
@@ -427,4 +437,11 @@ h6.small-default-large, .S6.small-default-large {
 }
 .roman-decimal-alpha {
   list-style: upper-roman;
+}
+
+.row_hover-col-default tr:hover td {
+  background-color:#f4f4f4;
+}
+.col-default-row_hover td:hover {
+  background-color:#f4f4f4;
 }

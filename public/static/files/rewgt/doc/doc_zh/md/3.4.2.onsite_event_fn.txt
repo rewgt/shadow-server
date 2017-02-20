@@ -9,7 +9,7 @@
 
 比如：
 
-```
+``` js
   var t = utils.getWTC(['Panel','Button','usr.Submit']); // t.Panel, t.Button, t.Submit
   var t = utils.getWTC('*');        // t.Panel, t.Span, ...
   var usr = utils.getWTC('usr.*');  // usr.Submit
@@ -22,7 +22,7 @@
 
 将上一节用过的例子改造一下，定义 onClick 函数，在 JSX 中用 props 参数传递，如下：
 
-```
+``` js
 var React = require('react');
 var ReactDOM = require('react-dom');
 var W = require('shadow-widget');
@@ -59,7 +59,7 @@ W.$main.$onLoad.push(onLoad);
 
 比如：
 
-```
+``` html
   <t.Button $onClick={onClick} $$for='' $name='"btn_" + duals.keyid'>test</t.Button>
 ```
 

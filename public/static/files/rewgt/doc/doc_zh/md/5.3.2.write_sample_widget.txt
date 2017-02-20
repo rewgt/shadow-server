@@ -9,7 +9,7 @@
 
 定义样板文件最简便的方式就写编写一个 svg 格式的图片文件，Shadow Widget 内置构件的样板均用 svg 文件定义，下面我们取 Span 构件的样板定义：
 
-```
+``` html
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width='90' height='60' viewport='0 0 90 60' version='1.1' xmlns='http://www.w3.org/2000/svg'>

@@ -21,7 +21,7 @@
 
 一个极简单的例子如下：
 
-```
+``` html
   <div $=ScenePage>
     <div $=Div left='{0}' top='{0}'>Hello, world!</div>
   </div>
@@ -33,7 +33,7 @@ ScenePage 下的节点用 `left` 与 `top` 指定它的左上角座标，`(0,0)`
 
 ScenePage 下的成员虽用 absolute 定位，但成员节点的内容仍按既定规则进行布局，比如，ScenePage 下放置一个 Panel，该  Panel 的内容仍是 flex 布局。下面例子来源于 demo36：
 
-```
+``` html
   <div $=ScenePage>
     <div $=Panel left='{-0.4}' top='{-0.4}' width='{200}' height='{100}'>
       <div $=Panel width='{0.2}' style='background-color:#eee'></div>
@@ -49,7 +49,7 @@ ScenePage 下的成员虽用 absolute 定位，但成员节点的内容仍按既
 
 代码如下：
 
-```
+``` html
   <div $=ScenePage>
     <div $=Panel left='{-0.5}' top='{-0.5}' width='{0.9999}' height='{0.9999}'>
       <div $=Div>Hello, world!</div>

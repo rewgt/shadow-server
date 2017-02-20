@@ -14,7 +14,7 @@ Shadow Widget 在底层基类定义了如下 component 约定的方法：
 
 **在投影声明中，如果重定义这些类方法，请记得要调回基类原有定义**，比如：
 
-```
+``` js
   componentDidMount: function() {
     this._componentDidMount(this);
 
@@ -34,7 +34,7 @@ Shadow Widget 在底层基类定义了如下 component 约定的方法：
 
 静态方法 `getDefaultProps()` 也能重新定义，如下举例针对 Button 构件：
 
-```
+``` js
   getDefaultProps: function() {
     var props = W.$templates.Button.getDefaultProps();  // find from WTC
     // props.attr = value;
@@ -64,7 +64,7 @@ Shadow Widget 在底层基类定义了如下 component 约定的方法：
 
 一个 R 节点，**只在首次 `render()` 时自动注册上述 duals 属性，而且在它的生存周期内，只做一次**。所以，我们要使用某自动注册的属性，比如对 Input 构件的 value 属性做侦听，需要这么显式的在转义标签中指明 value 取值（尽管它的缺省值就是空串）：
 
-```
+``` html
   <span $=Input type='text' key='input' value=''></span>
 ```
 

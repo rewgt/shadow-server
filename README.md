@@ -16,7 +16,7 @@ Shadow Server 工程为 Shadow Widget 开发环境提供一套在本地运行的
 ### 安装
 
 ```
-md user
+mkdir user
 cd user
 git clone https://github.com/rewgt/shadow-server.git
 ```
@@ -38,6 +38,7 @@ npm start
 [shadow-widget 开源项目](https://github.com/rewgt/shadow-widget)   
 [shadow-book 开源项目](https://github.com/rewgt/shadow-book)   
 [shadow-slide 开源项目](https://github.com/rewgt/shadow-slide)
+[shadow-gits 开源项目](https://github.com/rewgt/shadow-gits)
 
 ### 版权（BSD开源协议）
 

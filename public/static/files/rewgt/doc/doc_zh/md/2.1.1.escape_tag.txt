@@ -22,7 +22,7 @@
 
 在转义标签中定义的属性，将以 props.attr 的方式传递给 react 系统来创建 component，比如：
 
-```
+``` html
   <div $=P name='desc' data-state='OK' height='{40}'>example</div>
 ```
 
@@ -49,7 +49,7 @@ React 用 className 属性表示 DOM 节点的 class 字串，这个属性非常
 
 多数情况下，用户不必关心控件的 className 属性，既然表达不可变类名，创建控件时已缺省指定，用户需要关心的是如何传递 klass 属性，比如：
 
-```
+``` html
   <div $=P klass='default-large-small'>example</div>
 ```
 
@@ -59,7 +59,7 @@ Shadow Widget 推荐采用 **以 "-" 字母分割各个状态** 的命名方式�
 
 多个 class 命名可在 klass 属性中同时使用，比如：
 
-```
+``` html
   <div $=P klass='default-large-small auto-hidden-visible' height='{40}'>example</div>
 ```
 
@@ -67,7 +67,7 @@ Shadow Widget 推荐采用 **以 "-" 字母分割各个状态** 的命名方式�
 
 因为 style 极为常用，Shadow Widget 特别增强了它的功能，其一，在转义标签中，既可以将 style 写成字串格式，也可写成 react 要求的 Object 格式，比如，下面两种书写方式都是正确的。
 
-```
+``` html
   <div $=P style='background-color:#ccc'>example</div>
   <div $=P style='{{"backgroundColor":"#ccc"}}'>example2</div>
 ```
@@ -86,13 +86,13 @@ duals.style 赋值按覆盖合并的方式进行，即，同名 css 属性被新
 
 若在转义标签的子节点混入非转义标签，系统将自动把它视作 **“静态节点”**，尝试原样放到指定位置。比如：
 
-```
+``` html
   <div $=P><span>text1</span><span>text2</span></div>
 ```
 
 这里显示 text1 与 text2 的 span 节点因未用 `$` 转义，所以这两者是 **“非转义标签”**，最终界面显示的是：
 
-```
+``` html
   <p class='rewgt-unit'>
     <span class='rewgt-static'>
       <span>text1</span><span>text2</span>

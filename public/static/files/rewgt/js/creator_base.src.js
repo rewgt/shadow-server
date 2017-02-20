@@ -1498,13 +1498,28 @@ main.$$onLoad.push( function(callback) {
       if (srcNotNamed)
         needCopy = true;
       else if (!rmvSrc) {  // source is named and current do copy, !rmvSrc means 'copy'
-        if (typeof tarOwnerObj2.$gui.compIdx[sSrcKey] == 'number')  // exist same name
+        if (typeof tarOwnerObj2.$gui.compIdx[sSrcKey] == 'number')   // exist same name
           needCopy = true;
+      }
+      
+      if (needCopy && autoKey && srcIsScene && rmvSrc && !isChild) { // move ScenePage
+        var sTargFlag = '+'+tarNodeObj.$gui.keyid;
+        tarOwnerObj2.setChild('-' + sSrcKey, function() {
+          copied = true;
+          tarOwnerObj2.setChild(sTargFlag,srcEle,function() {
+            var wdgt = tarOwnerObj2.widget, targ = wdgt && wdgt[sSrcKey];
+            var targObj = targ && targ.component;
+            if (targObj)
+              retNode = ReactDOM.findDOMNode(targObj);
+            if (callback) callback(copied,retNode);
+          });
+        });
+        return;
       }
       
       var dProp = creator.getCompRenewProp(srcNodeObj) || {};
       if (needCopy) {
-        if (autoKey && tarOwnerObj2.props['isScenePage.'])
+        if (autoKey && (tarOwnerObj2.props['isScenePage.'] || srcIsScene))
           dProp['keyid.'] = dProp.key = 'auto' + (tarOwnerObj2.$gui.removeNum + tarOwnerObj2.$gui.comps.length);
         else dProp['keyid.'] = dProp.key = '';
       }
@@ -1711,11 +1726,10 @@ main.$$onLoad.push( function(callback) {
     if (typeof keyid == 'string') {
       keyid = keyid.trim();
       if (keyid) {
-        if ((parseInt(keyid)+'') == keyid) {   // ignore number
+        if ((parseInt(keyid)+'') == keyid)   // ignore number
           keyid = '';
-          if (typeof oldKeyid == 'string') clearKey = true;
-        }
       }
+      if (!keyid && typeof oldKeyid == 'string') clearKey = true;
     }
     else keyid = '';
     delete dProp['keyid.'];
@@ -2082,6 +2096,8 @@ main.$$onLoad.push( function(callback) {
           if (node) {
             var r = node.getBoundingClientRect();
             if (r.width == 0 && r.height == 0) return;  // ignore none-area widget
+            if (parseInt(node.style.zIndex || 0) <= -999) return; // exclude -999
+            
             if (fromRightBtm) {
               if (isInteract(x1_,y1_,x2_,y2_,r.left,r.top,r.left+r.width,r.top+r.height))
                 bRet.push([subKey,r.left,r.top,r.width,r.height]);

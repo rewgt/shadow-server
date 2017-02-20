@@ -7,7 +7,7 @@
 
 前面各章举例均用到如下在网页中直接编程的样板代码：
 
-```
+``` html
 <script>
 if (!window.W) { window.W = new Array(); W.$modules = [];}
 W.$modules.push( function(require,module,exports) {
@@ -26,7 +26,7 @@ var main = W.$main, utils = W.$utils, ex = W.$ex;
 
 紧随其后，我们可以插入如下 script 段，用于预设 `W.__debug__` 的值：
 
-```
+``` html
 <script>
 W.__debug__ = 1;
 </script>
@@ -59,7 +59,7 @@ addShortcut 用于往 W 节点添加若干在 R 节点定义的类方法，例�
 
 举例来说，假设 `.body.top.p.btn` 是一个按纽，预定义如下代码：
 
-```
+``` js
   var dataSrc = W.$dataSrc = {};
 
   main['.body.top.p.btn'] = {

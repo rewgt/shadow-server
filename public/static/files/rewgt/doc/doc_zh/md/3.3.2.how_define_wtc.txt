@@ -9,7 +9,7 @@
 
 下面举一个简单例子，一些常用的语句用注释标出，随后有解释。
 
-```
+``` js
 var React = require('react');
 var ReactDOM = require('react-dom');
 var W = require('shadow-widget');

@@ -15,7 +15,7 @@ React 是一种数据驱动的编程系统，就单个 react component 节点而
 
 Shadow Widget 采用近似于 reflux 的解决方案，Reflux 这么创建一个 store：
 
-```
+``` js
   var actions = Reflux.createActions(["fireBall"]);
   var statusStore = Reflux.createStore({
     getInitialState: function() {

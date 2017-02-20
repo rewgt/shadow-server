@@ -9,7 +9,7 @@
 
 比如当前编辑 `/test1/index.html` 文件，打开这个源文件，在 head 段能找到如下定义：
 
-```
+``` html
 <head>
   <meta charset="utf-8">
   <meta property="pinp:template" page="Panel" content="/files/rewgt/templates/Panel">
@@ -30,7 +30,7 @@
 
 有两个资源页（`property` 与 `resource`）是内置的，不必用 `<meta property="pinp:template">` 定义也会在设计界面列出，其中 `property` 用来编辑选中节点的各项属性，`resource` 用于列出当前工程目录下的文件。如果想禁用这两个缺省页，可用如下语句：
 
-```
+``` html
   <meta property="pinp:template" page="property" content="">
   <meta property="pinp:template" page="resource" content="">
 ```

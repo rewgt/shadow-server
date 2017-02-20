@@ -42,7 +42,7 @@ Shadow Widget 规范定义读写构件属性的规格，把属性编辑器的定
 
 `TOOL.json` 文件用 JSON 格式，记录它所在工程的所有工具集的定义，比如下面定义 `jsonConfig` 配置：
 
-```
+``` json
 {
   "lib": {
     "baseUrl": "/app/rewgt/shadow-slide/web/output",
@@ -73,7 +73,7 @@ Shadow Widget 规范定义读写构件属性的规格，把属性编辑器的定
 <a name="tool_config"></a>
 当拖入样板文件创建一个构件时，系统得到一个工具集 ID 值，然后到 `TOOL.json` 文件检索此 ID，比如找到上面 `"rewgt/shadow-slide/steps"` 定义项，再从该项的 tools 找出各个操作的路径。路径值若为 `"*"` 表示引用当前构件 WTC 定义的原有工具集（用 `WTC._getGroupOpt()` 获取），其它路径值表示从本 `TOOL.json` 文件的定义中查找，比如 `"lib/step"`，将从 `jsonConfig.lib.tools` 下找到 `name` 为 `"step"` 的项目，系统最终获得如下定义：
 
-```
+``` js
   {
     name: "rewgt/shadow-slide/steps",
     opt: "mono/all",
@@ -120,13 +120,15 @@ C) `tools`，用数组 `[toolConfig, ...]` 定义各项操作，其中 `toolConf
 9. `onlyScene`，仅 ScenePage 下的构件选中时，才显示本浮动按钮。
 10. `left, top, width, height`，指定弹窗位置与大小，`left` 与 `top` 指定弹窗的左上角位置，既可以是像素值（值大于 1）也可以是百分比（取值0~0.9999），如果 `left` 或 `top` 缺省未定义，表示自动居中。`width` 与 `height` 指定弹窗的宽高，既可以是像素值（值大于 1）也可以是百分比（取值0~0.9999），如果未指定，宽与高自动取 `100%`。
 
+说明：当一个构件用 `'data-group.optid'` 属性指示从 `TOOL.json` 查找扩展工具时，从上述 `opt` 项（值为 `"mono/all"` 或 `"mono/some"` 或 `"mono/none"`）可提取 `editable` 配置值（ `"all"` 或 `"some"` 或 `"none"`），这时，该构件本配置的原定义（即  `WTC._getGroupOpt().editable`）将被覆盖。
+
 #### 编辑器弹窗与主设计界面的通信机制
 
 编辑器弹窗是一个独立的 Web 页（由 `toolConfig.url` 指定），主设计界面通过 iframe 标签将弹窗 Web 页展示出来，两者之间的通信通过窗口 message 实现。
 
 如下代码用于编辑器弹窗接收消息（无关代码已注释掉）：
 
-```
+``` js
   window.addEventListener('message', function(msg) {
     try {
       if (typeof msg == 'object' && msg.data) {
@@ -155,7 +157,7 @@ C) `tools`，用数组 `[toolConfig, ...]` 定义各项操作，其中 `toolConf
 
 如果编辑器弹窗要向设计器主界面发送消息，采用如下代码：
 
-```
+``` js
   var msg = {method:'onDialogLoad',param:[]};
   var sCmd = '[PROJECT_NAME]' + JSON.stringify(msg);
   window.parent.window.postMessage(sCmd,'*');

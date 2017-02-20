@@ -7,10 +7,128 @@ var M = exports = module.exports = main.modules['trunk.js'];
 
 // import modules
 //---------------
-var fs = require('fs');
+var fs = require('fs'), crypto = require('crypto');
 
 // module global definition
 //-------------------------
+var re_decode64_ = /[^A-Za-z0-9\+\/\=]/g;
+var re_win32ln_  = /\r\n/g;
+var base64Key_   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+var Base64 = {
+  encode: function(input) {
+    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+    var output = '', i = 0;
+    
+    input = Base64._utf8_encode(input);
+    while (i < input.length) {
+      chr1 = input.charCodeAt(i++);
+      chr2 = input.charCodeAt(i++);
+      chr3 = input.charCodeAt(i++);
+      enc1 = chr1 >> 2;
+      enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+      enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+      enc4 = chr3 & 63;
+
+      if (isNaN(chr2))
+        enc3 = enc4 = 64;
+      else if (isNaN(chr3))
+        enc4 = 64;
+      output = output + base64Key_.charAt(enc1) + base64Key_.charAt(enc2) +
+               base64Key_.charAt(enc3) + base64Key_.charAt(enc4);
+    }
+
+    return output;
+  },
+
+  decode: function(input) {
+    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+    var output = '', i = 0;
+    
+    input = input.replace(re_decode64_,'');
+    while (i < input.length) {
+      enc1 = base64Key_.indexOf(input.charAt(i++));
+      enc2 = base64Key_.indexOf(input.charAt(i++));
+      enc3 = base64Key_.indexOf(input.charAt(i++));
+      enc4 = base64Key_.indexOf(input.charAt(i++));
+      chr1 = (enc1 << 2) | (enc2 >> 4);
+      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+      chr3 = ((enc3 & 3) << 6) | enc4;
+
+      output = output + String.fromCharCode(chr1);
+      if (enc3 != 64)
+        output = output + String.fromCharCode(chr2);
+      if (enc4 != 64)
+        output = output + String.fromCharCode(chr3);
+    }
+    
+    output = Base64._utf8_decode(output);
+    return output;
+  },
+
+  _utf8_encode: function(string) {
+    string = string.replace(re_win32ln_,'\n');
+    
+    var utftext = '';
+    for (var n = 0; n < string.length; n++) {
+      var c = string.charCodeAt(n);
+
+      if (c < 128)
+        utftext += String.fromCharCode(c);
+      else if(c > 127 && c < 2048) {
+        utftext += String.fromCharCode((c >> 6) | 192);
+        utftext += String.fromCharCode((c & 63) | 128);
+      }
+      else {
+        utftext += String.fromCharCode((c >> 12) | 224);
+        utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+        utftext += String.fromCharCode((c & 63) | 128);
+      }
+    }
+    return utftext;
+  },
+
+  _utf8_decode: function(utftext) {
+    var i = 0, string = '';
+    var c = 0, c1 = 0, c2 = 0;
+    while ( i < utftext.length ) {
+      c = utftext.charCodeAt(i);
+      if (c < 128) {
+        string += String.fromCharCode(c);
+        i++;
+      }
+      else if(c > 191 && c < 224) {
+        c2 = utftext.charCodeAt(i+1);
+        string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+        i += 2;
+      }
+      else {
+        c2 = utftext.charCodeAt(i+1);
+        c3 = utftext.charCodeAt(i+2);
+        string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+        i += 3;
+      }
+    }
+    return string;
+  }
+};
+
+function recursiveMkDir(sBase,sPath) {
+  var b = sPath.split('/'), sTarg = sBase;
+  while (b.length) {
+    var item = b.shift();
+    if (item) {
+      sTarg = path.join(sTarg,item);
+      if (!fs.existsSync(sTarg)) {
+        try {
+          fs.mkdirSync(sTarg);
+        }
+        catch(e) { }
+      }
+    }
+  }
+}
+
 var TYPE_OF_MIME = {
   "3gp" : "video/3gpp",
   "a" : "application/octet-stream",
@@ -201,6 +319,8 @@ config.FILES_DIR  = path.join(config.STATIC_DIR,'files');
 })();
 
 var utils = main.utils = main.utils || {};
+utils.Base64 = Base64;
+
 utils.scanCategory = function(sCatePrjPath) { // sCatePrjPath muse lead by '/'
   var sCate = '', b = sCatePrjPath.split('/$$'), iLen = b.length;
   for (var i=0; i < iLen; i++) {
@@ -335,11 +455,135 @@ rootRouter.regist('POST','/:project/*', function(req,res,next) {  // only suppor
   res.status(400).send('Bad request');
 });
 
+function handleGitRequest(sMethod,sPath,req,res) {
+  var bPath = sPath.split('/'), sOwner = bPath.shift(), sRepo = bPath.shift(), sCmdType = bPath.shift();
+  if (bPath.length > 0 && !bPath[bPath.length-1]) bPath.pop();  // remove tail '/'
+  var sLeftPath = bPath.join('/');
+  
+  if (sMethod == 'GET') {
+    if (sCmdType === 'contents') {
+      var sFile = path.join(config.USER_DIR,sRepo,sLeftPath); // sLeftPath maybe ''
+      if (fs.existsSync(sFile) && sFile.indexOf(config.USER_PATH) == 0) {
+        var st = fs.lstatSync(sFile);
+        if (st.isDirectory()) {
+          var bRet = [];
+          fs.readdirSync(sFile).forEach( function(item) {
+            if (item[0] == '.') return;
+            
+            var sPath2 = path.join(sFile,item), st2 = fs.lstatSync(sPath2);
+            if (st2.isDirectory()) {
+              bRet.push( { type:'dir', size:0, name:item,
+                path:path.join(sLeftPath,item),  // no sha,url,*_url,_links
+              });
+            }
+            else {
+              bRet.push( { type:'file', size:st2.size, name:item,
+                path:path.join(sLeftPath,item),  // no sha,url,*_url,_links
+                ctime: st2.ctime.toISOString(),  // new added
+                mtime: st2.mtime.toISOString(),  // new added
+              });
+            }
+          });
+          res.json(bRet);
+        }
+        else {
+          var sFileName = bPath.length > 0? bPath[bPath.length-1]: '';
+          var sContent = fs.readFileSync(sFile,'utf-8');
+          var shaSum = crypto.createHash('sha1');
+          shaSum.update('blob ' + sContent.length + '\0');
+          shaSum.update(sContent);
+          
+          res.json( { type:'file', size:st.size, name:sFileName,
+            path: sLeftPath,  // no encoding,url,*_url,_links
+            content: Base64.encode(sContent),
+            sha: shaSum.digest('hex'),
+          });
+        }
+        return;
+      }
+      
+      res.status(404).send('can not find file: /' + sRepo + '/' + sLeftPath);
+      return;
+    }
+  }
+  else if (sMethod == 'PUT') {
+    if (sCmdType === 'contents') {
+      if (sRepo && sLeftPath) {
+        var dBody = req.body;
+        var sRepoPath = path.join(config.USER_DIR,sRepo);
+        var sFile = path.join(sRepoPath,sLeftPath);
+        if ( fs.existsSync(sRepoPath) && typeof dBody == 'object' && 
+             typeof dBody.content == 'string' && sFile.indexOf(sRepoPath+'/') == 0) {
+          var srcText = Base64.decode(dBody.content);
+          var bSeg = sLeftPath.split('/'), sFileName = bSeg.pop();
+          if (bSeg.length) recursiveMkDir(sRepoPath,bSeg.join('/'));
+          
+          fs.writeFileSync(sFile,srcText,'utf-8');
+          
+          var shaSum = crypto.createHash('sha1'), st = fs.lstatSync(sFile);
+          shaSum.update('blob ' + srcText.length + '\0');
+          shaSum.update(srcText);
+          
+          var dRet = { content:{ name:sFileName, path:sLeftPath,
+            sha:shaSum.digest('hex'),
+            type:'file', size:srcText.length,  // no url,*_url,_links
+            ctime:st.ctime.toISOString(), mtime:st.mtime.toISOString(),
+          }};
+          res.json(dRet);
+          return;
+        }
+      }
+    }
+  }
+  else if (sMethod == 'DELETE') {
+    if (sCmdType === 'contents') {
+      
+      if (sRepo && sLeftPath) {
+        var sFile = path.join(config.USER_DIR,sRepo,sLeftPath);
+        if (fs.existsSync(sFile) && sFile.indexOf(path.join(config.USER_DIR,sRepo,'/')) == 0)
+          fs.unlinkSync(sFile);
+        
+        res.json({content:null});
+        return;
+      }
+    }
+  }
+  
+  res.status(400).send('Bad request');
+}
+
+rootRouter.regist('PUT','/:project/*', function(req,res,next) {  // only support service
+  var sProj = req.params.project, sPath = req.params[0] || '';
+  
+  if (sProj == 'repos') {    // github like API
+    handleGitRequest('PUT',sPath,req,res)
+    return;
+  }
+  
+  res.status(400).send('Bad request');
+});
+
+rootRouter.regist('DELETE','/:project/*', function(req,res,next) {  // only support service
+  var sProj = req.params.project, sPath = req.params[0] || '';
+  
+  if (sProj == 'repos') {    // github like API
+    handleGitRequest('DELETE',sPath,req,res)
+    return;
+  }
+  
+  res.status(400).send('Bad request');
+});
+
 rootRouter.regist('GET','/:project/*', function(req,res,next) {
   var sProj = req.params.project, sPath = req.params[0] || '', sFile = '';
   
   if (is_in_develop_ && sProj == 'develop') { // app.get('/develop/...') is override
     next();
+    return;
+  }
+  
+  if (sProj == 'repos') {    // github like API
+    handleGitRequest('GET',sPath,req,res)
     return;
   }
   

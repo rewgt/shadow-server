@@ -9,7 +9,7 @@ templates 模块提供 WTC 类及 WTC 类实例的注册功能，Shadow Widget �
 
 基本用法：
 
-```
+``` js
   var T = W.$templates;
   
   class MyPanel extends T.Panel_ {

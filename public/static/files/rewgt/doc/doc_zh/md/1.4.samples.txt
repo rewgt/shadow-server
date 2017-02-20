@@ -5,15 +5,15 @@
 
 #### 安装 Shadow Widget
 
-```
-  md user
+``` bash
+  mkdir user
   cd user
   git clone https://github.com/rewgt/shadow-server.git
 ```
 
 #### 在本机启动 web 服务
 
-```
+``` bash
   cd shadow-server
   npm start
 ```
@@ -29,7 +29,7 @@
 
 本例只用到一个 index.html 文件，接下来我们讲解它的实现过程。在文件的末尾有如下四行：
 
-```
+``` html
   <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
   <script src="/app/files/rewgt/web/js/react.min.js"></script>
   <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
@@ -40,7 +40,7 @@
 
 然后定义文档 body 下的节点： 
 
-```
+``` html
   <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
   <div $=BodyPanel key='body'>
     <div $=Panel>

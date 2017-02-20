@@ -11,7 +11,7 @@
 
 其次，对于运行中的工程，它能识别当前运行在开发态与发行态，Shadow Widget 采用 `W.__debug__` 指示当前版本以 development 方式运行，还是以 production 方式运行，编程中我们可以广泛插入如下代码来辅助调测：
 
-```
+``` js
     if (W.__debug__) {
       // write some code for debugging
     }
@@ -34,7 +34,7 @@
 
 发行版本既可以像调测用的 bundle.js 那样，把所有依赖库打包在一起，也可以把标准库从输出的 JS 文件剔除，这样，在网页文件中要用多条 `<script>` 语句把各个标准库导入进来，比如：
 
-```
+``` html
   <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js'></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js'></script>
   <script src='js/shadow-widget.min.js'></script>
@@ -48,13 +48,13 @@
 
 若用 browserify 打包工具，将标准库从 bundle.js 剔除用 `-u` 选项，原 `npm start` 执行如下命令（见 package.json 中 start 命令）：
 
-```
+``` bash
     watchify index.js -v -o bundle.js -t [ babelify --presets [ es2015 react ] ]
 ```
 
 剔除 3 个 cdn 库，start 命令改为：
 
-```
+``` bash
     watchify -u react -u react-dom -u shadow-widget index.js -v -o bundle.js -t [ babelify --presets [ es2015 react ] ]
 ```
 

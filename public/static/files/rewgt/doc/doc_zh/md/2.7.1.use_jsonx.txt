@@ -37,13 +37,13 @@ json-x 用数组表达一个节点，格式为 `[type,props]`，这里 type 指�
 
 在转义标签中使用的非转义标签就是 “静态节点”，参见 [转义标签](#2.1.1.)，比如：
 
-```
+``` html
   <div $=P><span>text1</span><span>text2</span></div>
 ```
 
 改用 json-x 表达就是：
 
-```
+``` js
   [ ['P',{}], ['',{html:['<span>text1</span>','<span>text2</span>']}] ]
 ```
 
@@ -53,7 +53,7 @@ json-x 单节点中的 WTC 类名若为空，表示它是静态节点。
 
 表达常规 React 节点与表达 WTC 节点类似，都用 `[type,props]`，仅 type 不同，比如下面 3 条语句，第一条用来创建 WTC 节点，后两条用来创建常规 React 节点。
 
-```
+``` js
   var jsonX1 = [['P',{key:'txt'}],'How are you?'];    // type is 'P'
   var jsonX2 = [['p',{key:'txt'}],'How are you?'];    // type is 'p'
   var jsonX3 = [[MyClass,{key:'txt'}],'How are you?'];  // MyClass is React Class
@@ -61,7 +61,7 @@ json-x 单节点中的 WTC 类名若为空，表示它是静态节点。
 
 只有 WTC 节点才能挂到 W 树中，非 WTC 节点不挂到 W 树，其下不能定义 WTC 子节点。比如上面 jsonX2 描述的 p 节点，其下不能定义 Span 子节点，但可以定义 span 节点。所以，下面用法是错误的：
 
-```
+``` js
   var jsonX2 = [['p',{key:'txt'}],'How are you?', ['Span',{key:'sub','html.':'example'}]];
 ```
 
@@ -71,7 +71,7 @@ json-x 单节点中的 WTC 类名若为空，表示它是静态节点。
 
 调用 `utils.loadElement(jsonX)` 可将 json-x 数据转化为 Element，比如：
 
-```
+``` js
   var jsonX = ['P',{'html.':'Hello, world!'}];
   var ele = utils.loadElement(jsonX);
 ```
@@ -86,7 +86,7 @@ Shadow Widget 并未提供从 Element 到 json-x 的转换 API，因为在 `util
 
 demo38 演示了动态组装子节点的例子，先定义界面：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=Div key='div'></div>
   </div>
@@ -94,7 +94,7 @@ demo38 演示了动态组装子节点的例子，先定义界面：
 
 然后定义投影类：
 
-```
+``` js
 main['.body.top.div'] = {
   getInitialState: function() {
     var state = this._getInitialState(this);
@@ -139,7 +139,7 @@ React 在 `props.children` 记录各个子节点的 `Element`，`Element` 与 `C
 
 比如待组装的子构件用到 name 属性，我们应这么定义 json-x 数据：
 
-```
+``` js
   var jsonX = [['P',{name:'',key:'txt',style:{}}],'How are you?'];
 ```
 
@@ -151,7 +151,7 @@ React 在 `props.children` 记录各个子节点的 `Element`，`Element` 与 `C
 
 举例来说：
 
-```
+``` js
   var ele = utils.loadElement(['P']);
   var b = utils.loadElement(['P'],['Ul',{key:'a'}]);
   assert(b.length == 2);
@@ -163,7 +163,7 @@ React 在 `props.children` 记录各个子节点的 `Element`，`Element` 与 `C
 
 举个例子（见样例 demo38），这么定义界面：
 
-```
+``` html
   <div $=Panel key='top' height='{null}'>
     <div $=P key='p'></div>
   </div>
@@ -171,7 +171,7 @@ React 在 `props.children` 记录各个子节点的 `Element`，`Element` 与 `C
 
 我们在 `.body.top.p` 的 P 节点下，用 json-x 安装一个按钮 Button 子节点（key 为 btn），预先定义按钮的投影类定义：
 
-```
+``` js
 main['.body.top.p.btn'] = {
   $onClick: function(event) {
     alert('clicked');
@@ -183,7 +183,7 @@ main['.body.top.p.btn'] = {
 
 调用 `utils.loadElementEx()` 的代码如下：
 
-```
+``` js
 main['.body.top.p'] = {
   getInitialState: function() {
     var state = this._getInitialState(this);
@@ -210,7 +210,7 @@ main['.body.top.p'] = {
 
 loadElementEx 导入 json-x 同时还绑捆投影定义，如果投影定义比较简单，比如只用到事件函数，我们还可以直接在 json-x 中传递事件函数。比如：
 
-```
+``` js
 main['.body.top.p'] = {
   getInitialState: function() {
     var state = this._getInitialState(this);

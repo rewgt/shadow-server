@@ -11,7 +11,7 @@ W 树的根节点（即 `'body'` 节点）是一种特殊节点，它虽是一�
 
 侦听 innerSize 宽高变化，比如：
 
-```
+``` js
   var body = W.W('.body').component;  // or: W.body.component
   body.listen('innerSize', function(value,oldValue) {
     console.log('innerSize',value,oldValue);

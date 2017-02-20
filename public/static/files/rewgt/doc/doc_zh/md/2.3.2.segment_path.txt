@@ -24,7 +24,7 @@
 
 在一个导航段内，可以用相对路径的方式定位 R 节点，比如我们在第一个按钮的 onClick 事件中，用 `componentOf` 查找第二个按钮，代码如下：
 
-```
+``` js
   main['.body.top.nav.p.a'] = {
     $onClick: function(event) {
       var button_b = this.componentOf('./p.b');
@@ -55,7 +55,7 @@ Shadow Widget 支持在 URL 的 hash 部分指定段路径实现跳转，比如�
 
 若以编程方式实现 “段路由”，需调用如下 API：
 
-```
+``` js
     utils.gotoHash(sHash,callback)
 ```
 
@@ -67,7 +67,7 @@ Shadow Widget 支持在 URL 的 hash 部分指定段路径实现跳转，比如�
 
 主要代码如下所示：
 
-```
+``` js
   window.onhashchange = function() {
     var sHash = window.location.hash;
     sHash = sHash? sHash.slice(1): '';

@@ -9,7 +9,7 @@
 
 如果想在地址栏通过修改 hash 值随时跳转，增加如下 `window.onhashchange` 定义即可：
 
-```
+``` js
   window.onhashchange = function() {
     var sHash = window.location.hash;
     sHash = sHash? sHash.slice(1): '';

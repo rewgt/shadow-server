@@ -21,7 +21,7 @@ Div 的属性包括：`width, height, minWidth, maxWidth, minHeight, maxHeight, 
 
 比如下面一段代码（源码见 demo9）：
 
-```
+``` html
   <div $=Panel klass='auto-hidden-visible'>
     <div $=Div klass='auto-hidden-visible'>
       <div $=P>Paragraph B, </div>
@@ -42,7 +42,7 @@ MarkedDiv 类继承自 Div，支持用 <a target="_blank" href="https://daringfi
 
 比如：
 
-```
+``` html
   <div $=Panel klass='auto-hidden-visible'>
     <div $=MarkedDiv>## Hello, world!</div>
   </div>
@@ -50,7 +50,7 @@ MarkedDiv 类继承自 Div，支持用 <a target="_blank" href="https://daringfi
 
 运行中若想修改 markdown 文本，采用如下赋值语句：
 
-```
+``` js
   comp.duals['html.'] = 'ABC\n===';
 ```
 
@@ -58,7 +58,7 @@ MarkedDiv 类继承自 Div，支持用 <a target="_blank" href="https://daringfi
 
 因为 `<div>` 标签不适合用来书写 markdown 文本，我们改用 `<pre>` 标签，按如下方式书写就方便多了：
 
-```
+``` html
   <pre $=MarkedDiv>## Hello, world!
 
 It is a sample.
@@ -69,7 +69,7 @@ It is a sample.
 
 除了常规的 markdown 语法，MarkedDiv 还额外支持 **插入块引用** 的功能。只需在 markdown 文本采用如下语句： 
 
-```
+``` html
   <pre $=".path.to.ref"></pre>
 ```
 

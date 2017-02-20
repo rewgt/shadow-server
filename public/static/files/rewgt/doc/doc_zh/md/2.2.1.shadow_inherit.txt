@@ -11,7 +11,7 @@ Shadow Widget 将前端开发过程划分为 “构件开发” 与 “界面开
 
 在 html 文件的尾部插入如下代码：
 
-```
+``` html
 <script>
 if (!window.W) { window.W = new Array(); W.$modules = [];}
 W.$modules.push( function(require,module,exports) {
@@ -33,7 +33,7 @@ W.$modules.push( function(require,module,exports) {
 
 接下来，我们再在 main 模块导入必要全局变量：
 
-```
+``` html
 <script>
 if (!window.W) { window.W = new Array(); W.$modules = [];}
 W.$modules.push( function(require,module,exports) {
@@ -58,7 +58,7 @@ W.$modules.push( function(require,module,exports) {
 
 用转义标签定义界面：
 
-```
+``` html
   <div $=Panel key='top' height='{100}'>
     <div $=P key='p'><span $=Button key='btn'>Click me</span></div>
   </div>
@@ -66,7 +66,7 @@ W.$modules.push( function(require,module,exports) {
 
 在 main 模块编写代码：
 
-```javascript
+``` js
   main['.body.top.p.btn'] = {
     $onClick: function(event) {
       alert('clicked!');
@@ -95,7 +95,7 @@ W.$modules.push( function(require,module,exports) {
 
 `W.$main` 提供 `isReady` 与 `inRunning` 两个变量标识当前运行状态，另外还提供 `$onLoad` 初始化列表以便 react 首次 render 输出后供依次回调。下面举例说明：
 
-```
+``` js
 main['.body.top.p.btn'] = {
   getInitialState: function() {
     console.log('in getInitialState()');

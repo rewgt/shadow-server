@@ -175,6 +175,7 @@
 
 ```
     '*'
+    'Panel'
     'usr.*'
     ['*','Panel','usr.Submit','usr2.*']
 ```

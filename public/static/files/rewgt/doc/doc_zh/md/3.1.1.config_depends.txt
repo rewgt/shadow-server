@@ -15,20 +15,20 @@
 
 1) 创建工程目录 sample_dev
 
-```
+``` bash
   mkdir sample_dev
   cd sample_dev
 ```
 
 2) 创建 package.json，这个文件以后还可再改，`npm init` 交互提示您输入项目信息，为简单起见，先用缺省值，一路回车。
 
-```
+``` bash
   npm init
 ```
 
 3) 添加依赖库
 
-```
+``` bash
   npm install --save-dev babel-preset-es2015 babel-preset-react babelify
   npm install --save-dev watchify
   npm install --save react
@@ -44,7 +44,7 @@ Shadow Widget 支持 `React 0.14` 以后的版本，如果您想用 React 旧版
 
 4) 编写入口文件 index.js，在当前工程目录创建 index.js 文件，拷贝如下内容到这个文件：
 
-```
+``` js
 'use strict';
 
 var useBrowserify = false, useWebpack = false;
@@ -129,7 +129,7 @@ else if (useWebpack) {
 
 5) 在 package.json 中定义 start 命令用于启动 watchify，合入如下代码：
 
-```
+``` js
   "scripts": {
     "start": "watchify index.js -v -o bundle.js -t [ babelify --presets [ es2015 react ] ]"
   },
@@ -137,7 +137,7 @@ else if (useWebpack) {
 
 以上 5 步操作的目的是为了生成一个工程环境，您还可从官方提供的样板工程（rewgt/sample_dev）直接克隆，效果是一样的。克隆过程如下：
 
-```
+``` bash
   git clone https://github.com/rewgt/sample_dev.git
   cd sample_dev
   npm install
@@ -147,7 +147,7 @@ else if (useWebpack) {
 
 用如下命令启动监听并转译：
 
-```
+``` bash
   npm start
 ```
 
@@ -157,7 +157,7 @@ else if (useWebpack) {
 
 在工程目录下新建 index.html 文件，并拷贝如下内容（如果当前工程是从官方样板工程克隆来的，本文件早已存在）：
 
-```
+``` html
 <!DOCTYPE html>
 <html>
 <head>

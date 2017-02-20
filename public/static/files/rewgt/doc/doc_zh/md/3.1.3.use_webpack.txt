@@ -9,13 +9,13 @@ Shadow Widget 同时支持用 browserify 与 webpack 打包，上一节已介绍
 
 先全局安装 webpack 版本，如果本机还没安装的话，运行如下命令：
 
-```
+``` bash
 npm install webpack --global
 ```
 
 从 Shadow Widget 官方克隆样板工程：
 
-```
+``` bash
 git clone https://github.com/rewgt/sample_webpack.git
 cd sample_webpack
 npm install

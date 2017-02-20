@@ -9,7 +9,7 @@
 
 MarkedTable 用一段 markdown 格式的文本描述一个表格，比如：
 
-```
+``` html
 <pre $=MarkedTable>
 row1-col1
 
@@ -27,7 +27,7 @@ row2-col2
 
 如果想把多行文本纳入同一个单元格，不妨用 “软换行”，markdown 格式规定：一行若以两个以上空格结尾，表示本行与下一行将串接（即相当于 `<br>` 换行，而不是 block 块换段）。如果想把多个 block 段纳入到同一单元格中，可以嵌套使用 MarkedDiv，比如：
 
-```
+``` html
 row1-col1
 
 <pre $=MarkedDiv>
@@ -39,7 +39,7 @@ still in row1-col2
 
 MarkedTable 中用 MarkedDiv 或 MarkedTable 表达一个单元格时，单元节点还可附加定义 `col-span, row-span, td-style` 标签，这三项分别对应于 `<td>` 的 `rowspan, colspan, style` 属性。举例如下：
 
-```
+``` html
 <pre $=MarkedTable>
 row1-col1
 
@@ -67,7 +67,7 @@ row2-col2
 
 `duals.nodes` 不仅记录在 markdown 文本中定义的所有 “块引用”，如果 “块引用” 明确指定 key 值时，还额外按 `nodes[key] = element` 记录索引信息。比如下面例子：
 
-```
+``` html
   <div $=NavPanel $for='' dual-data='{[]}'>
     <pre $=MarkedDiv key='mark' style='{{"display":"none"}}' 
       $trigger='["./",{$set:duals("./mark").nodes}]'>
@@ -91,7 +91,7 @@ row2-col2
 
 MarkedDiv、MarkedTable 支持用 `props.noShow` 隐藏 markdown 转为 HTML 标签后的内容展示。当用户只用导出到 `duals.nodes` 的属性，而不直接展示由 markdown 描述的内容时，宜在 MarkedDiv 或 MarkedTable 的转义标签中用 `no-show` 指明，比如：
 
-```
+``` html
   <div $=NavPanel height='{100}' $for='' dual-data='{[]}'>
     <pre $=MarkedDiv key='mark' no-show='1'
       $trigger='["./",{$set:duals("./mark").nodes}]'>

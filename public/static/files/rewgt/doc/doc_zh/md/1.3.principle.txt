@@ -25,7 +25,7 @@
 
 Shadow Widget 要求构件开发者采用 ES6 的 class 定义各级构件，各构件都有用 ES5 进行定制扩展的功能，下面扼要介绍它的实现原理。
 
-```javascript
+``` js
     // define widget class (TPanel_) with ES6
     //--------------------------------------
     class TPanel_ extends TWidget_ {
@@ -60,7 +60,7 @@ Shadow Widget 要求构件开发者采用 ES6 的 class 定义各级构件，各
 &nbsp;&nbsp;&nbsp; `<span $=Button key='btn'>Click me</span>`   
 这个构件引用 `Button` 定义，假定它的绝对路径是 `".body.toolbar.btn"`，接着我们用 javascript 定义它的表现行为：
 
-```
+``` js
     main['.body.toolbar.btn'] = {
       getInitialState: function() {
         return this._getInitialState();

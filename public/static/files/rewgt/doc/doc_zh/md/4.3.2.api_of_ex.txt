@@ -144,7 +144,7 @@
 
 > 用于给传入参数 `modifier` 追加对首层成员的时间标签设置，返回追加了标签的结果值。比如：`modifier` 为 `{membA:{$set:{attr:value}}}`，调用 `ex.tagValue(modifier)` 后相当于得到如下值：
 
-```
+``` js
     { membA: {$set: 
       { attr: value,
         time: ex.time()    // this line is added

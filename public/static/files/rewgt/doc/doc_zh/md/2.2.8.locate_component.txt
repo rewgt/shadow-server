@@ -9,7 +9,7 @@
 
 W 节点是指 W 树中的节点，R 节点是 react component 节点，它必与 W 树中某节点对应。除了这两者，还有 DOM 节点的概念，所有活动态的 react component  都能找到真实 DOM 节点，想从 R 节点取得它的 DOM 节点，调用一个 API 即可，如下： 
 
-```
+``` js
   var node = comp.getHtmlNode();
 ```
 
@@ -39,7 +39,7 @@ W 节点是指 W 树中的节点，R 节点是 react component 节点，它必�
 
 应对 R 节点随时增删 ，我们常用 on-the-fly 方式注册侦听动作，比如：
 
-```
+``` js
   this.componentOf('//input').listen('data',this);
 ```
 

@@ -60,7 +60,7 @@ Panel 另一个常用 klass 是 `default-wrap_reverse-nowrap`，该值指示 CSS
 
 margin、borderWidth、padding 的含义分别对应于 style.margin、style.borderWidth、style.padding，这 3 者取值格式相同，要求取 Array 或 number 值，其比如：
 
-```
+``` html
   <div $=Panel width='{100}' height='{100}' margin='{0}' border-width='{[1,2,1,2]}'></div>
 ```
 

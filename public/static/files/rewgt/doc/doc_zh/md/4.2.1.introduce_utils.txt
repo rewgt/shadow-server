@@ -9,7 +9,7 @@ utils 模块提供数个控制实体，如 `utils.popWin, utils.pageCtrl` 等，
 
 基本用法：
 
-```
+``` js
   var utils = W.$utils;
   
   var id = utils.identicalId();

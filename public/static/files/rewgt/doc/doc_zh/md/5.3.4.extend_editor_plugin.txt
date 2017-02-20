@@ -9,7 +9,7 @@
 
 在可视设计器里，一个构件被选中，如果它没定义扩展工具集 ID 时（即该节点没定义 `data-group.optid` 属性值），系统自动调用选中构件 WTC 类的 `_getGroupOpt` 方法，调用 `_getGroupOpt()` 要求返回如下格式的数据：
 
-```
+``` js
   {
     type: sType,           // 'mono', 'extend'
     editable: sEditable,   // 'all', 'some', 'none'
@@ -95,7 +95,7 @@ Shadow Widget 支持这种需求，但要求将属性命名成 `"segment1.segmen
 
 从 resource 页拖入 `*.json.svg` 样板文件时，系统自动在 `event.dataTransfer` 设置如下信息：
 
-```
+``` js
   var json = JSON.stringify({dragType:'template', dragUrl:sUrl, option:_widget});
   event.dataTransfer.setData('text/plain',sUrl);
   event.dataTransfer.setData('application/json',json);
@@ -103,7 +103,7 @@ Shadow Widget 支持这种需求，但要求将属性命名成 `"segment1.segmen
 
 拖入图片文件时，系统自动在 `event.dataTransfer` 设置如下信息：
 
-```
+``` js
   var sMeta = 'image/png';  // png, jpeg, gif, x-icon, svg+xml
   var json = JSON.stringify({dragType:'image', dataType:sMeta, dragUrl:sUrl});
   event.dataTransfer.setData('text/plain',sUrl);
@@ -113,7 +113,7 @@ Shadow Widget 支持这种需求，但要求将属性命名成 `"segment1.segmen
 
 拖入其它文件时，系统自动在 `event.dataTransfer` 设置如下信息：
 
-```
+``` js
   event.dataTransfer.setData('text/plain',sUrl);
   event.dataTransfer.setData('text/uri-list',sUrl);
 ```

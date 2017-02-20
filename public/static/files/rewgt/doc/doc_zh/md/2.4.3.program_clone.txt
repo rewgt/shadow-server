@@ -14,7 +14,7 @@
 
 下面代码（参见 demo24）用 `elementOf()` 找到被克隆的源节点，再调用  `React.cloneElement()` 克隆，同时新定义 style 让字体改用红色，最好用 `setChild()` 挂入已克隆的节点。
 
-```
+``` js
     var sour = this.elementOf('.body.top.hello');
     var targ = React.cloneElement(sour,{key:'', style:{color:'red'}});
     
@@ -35,7 +35,7 @@
 
 一次 setChild 调用，可以操作多个节点，比如增两个节点，删一个节点。但一次操作的多个节点之间不能有依赖关系，比如先删子节点，再在删除位置插入一个节点。如果有依赖关系时，应该借助 callback 回调，多调一次（或多次）setChild 函数。比如：
 
-```
+``` js
   comp.setChild('+btn', element, function(changed) {
     if (changed)
       comp.setChild('-btn');

@@ -40,6 +40,7 @@ var WIDGET_PASTE_TAG_ = 'SHADOW_WIDGET_COMPONENT,';
 var RE_UPCASE_ALL_ = /([A-Z])/g;
 
 var allTagFlags = null;
+var allIsPres = null;
 
 function streamReactTree_(bTree,iLevel,iOwnerFlag) { // iOwnerFlag must be number
   iLevel = iLevel || 0;
@@ -93,10 +94,11 @@ function streamReactTree_(bTree,iLevel,iOwnerFlag) { // iOwnerFlag must be numbe
     sRet += '<span $=' + JSON.stringify(dProp['$'] || '');
   }
   else {
-    if (iFlag == 3)
+    if (iFlag == 3)  // inline tag should not use 'isPre.'
       sRet += '<span $=' + sName;
     else {
       isPre = dProp['isPre.'];
+      if (!isPre && allIsPres[sName]) isPre = true; // check MarkedDiv, MarkedTable ...
       if (isPre) iChildNum = 0;   // force to no children
       sRet += (isPre?'<pre $=':'<div $=') + sName;
     }
@@ -189,7 +191,9 @@ window.addEventListener('load', function(event) {
   
   function initGui() {
     var sHtml = inValue[0];  // sPath = inValue[1]
-    allTagFlags = inValue[2] || {};
+    allTagFlags = inValue[2] || [{},{}];
+    allIsPres = allTagFlags[1]; allTagFlags = allTagFlags[0];
+    
     previewHtml.style.height = (window.innerHeight - 70) + 'px';
     markedEditor.parentNode.style.height = (window.innerHeight - 70) + 'px';
     markedEditor.value = sHtml;

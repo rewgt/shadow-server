@@ -3,6 +3,8 @@ var USE_CLUSTER = false;
 var cluster = USE_CLUSTER? require('cluster'): null,
     app = require('./application'),
     http = require('http'),
+    // https = require('https'),
+    // fs = require('fs'),
     debug = require('debug')('shadow-server:server');
 
 function normalizePort(val) {
@@ -73,4 +75,12 @@ else {
   });
   
   server.listen(port);
+  
+/* var port_https = (port || 0) + 443;
+  app.set('httpsport',port_https);
+  var privateKey = fs.readFileSync('ssl/sample_key.pem');
+  var certificate = fs.readFileSync('ssl/sample_cert.pem');
+  var serverHttps = https.createServer({key:privateKey, cert:certificate},app);
+  serverHttps.listen(port_https);
+  serverHttps.on(...) */
 }

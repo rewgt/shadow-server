@@ -16,7 +16,8 @@
 
 > 其它：
 > - [`HiddenSpan`](#4.4.5.!hidden_span)
-> - [`Br/A/Q/Abbr/Audio/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/Textarea/Progress/Img/Video/Canvas/Picture/Map/Area/Time/Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/Option/B/I/S/U/Ins/Del/Code/Var/Summary/Em/Strong/Big/Small/Dfn/Samp/Kdb/Cite/Dialog/Meter/Embed/Object/Param/Ruby/Rp/Rt`](#4.4.5.!br)
+> - [`Audio/Video`](#4.4.5.!audio)
+> - [`Br/A/Q/Abbr/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/Textarea/Progress/Img/Canvas/Picture/Map/Area/Time/Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/Option/B/I/S/U/Ins/Del/Code/Var/Summary/Em/Strong/Big/Small/Dfn/Samp/Kdb/Cite/Dialog/Meter/Embed/Object/Param/Ruby/Rp/Rt`](#4.4.5.!br)
 
 &nbsp;
 
@@ -99,7 +100,15 @@
 
 > **新增 duals 属性：** 无。
 
-##### <a name="br"></a>`Br/A/Q/Abbr/Audio/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/Textarea/Progress/Img/Video/Canvas/Picture/Map/Area/Time/Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/Option/B/I/S/U/Ins/Del/Code/Var/Summary/Em/Strong/Big/Small/Dfn/Samp/Kdb/Cite/Dialog/Meter/Embed/Object/Param/Ruby/Rp/Rt`
+##### <a name="audio"></a>`Audio/Video`
+
+> 本类继承自 [`Span`](#4.4.5.!span)。在常规 `<audio>` 与 `<video>` 规格基础上增加胶片演示所需的单步控制接口，包括 `stepPlay(), stepPause(), stepIsDone()` 三个函数。
+
+> **`getDefaultProps()` 新增属性：** 无。
+
+> **新增 duals 属性：** 无。
+
+##### <a name="br"></a>`Br/A/Q/Abbr/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/Textarea/Progress/Img/Canvas/Picture/Map/Area/Time/Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/Option/B/I/S/U/Ins/Del/Code/Var/Summary/Em/Strong/Big/Small/Dfn/Samp/Kdb/Cite/Dialog/Meter/Embed/Object/Param/Ruby/Rp/Rt`
 
 > 本类继承自 [`Span`](#4.4.5.!span)。
 

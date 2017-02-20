@@ -56,7 +56,7 @@ Shadow Widget 对所有 Panel 类、Div 类及 P 类构件的 `margin-left` 与 
 
 比如在根节点下定义如下构件（见样例 demo35）：
 
-```
+``` html
   <div $=Panel style='display:absolute' left='{100}' top='{100}' width='{0.5}' height='{200}'>
     <div $=P>Hello, world!</div>
   </div>
@@ -72,5 +72,7 @@ Shadow Widget 对所有 Panel 类、Div 类及 P 类构件的 `margin-left` 与 
 #### `zIndex` 取值范围
 
 构件的 `style.zIndex` 取值范围建议在 `-999 ~ 999` 之间，超出此范围可能与可视化设计界面有冲突。可视化设计器提供一些服务于编辑的浮动按钮、标尺、操作面板等，如果用户产品中使用 `zIndex <= -1000` 或 `zIndex >= 1000` 的绝对定位构件，可能会出现编辑按钮被意外盖住、设计区越界显示等问题。
+
+一个胶片页中的构件，如果 `style.zIndex` 取值为 `-999` 或 `-998`，表示它被系统用作底层背景，选中时不自动浮到其它构件上面。在设计界面拖动鼠标选取多个构件时，不会纳入 `zIndex` 为 `-999` 的构件。
 
 &nbsp;

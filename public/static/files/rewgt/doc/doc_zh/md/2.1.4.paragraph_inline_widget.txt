@@ -19,7 +19,7 @@ Shadow Widget 对控件类型与层次包含关系，有严格限制。面板控
 
 请体会一下面 3 个 P 构件的使用异同（源码见 demo9）。
 
-```
+``` html
   <div $=Panel klass='auto-hidden-visible'>
     <div $=P width='{0.9999}'>Paragraph A </div>
     <div $=P>Paragraph B, </div>
@@ -35,7 +35,7 @@ Shadow Widget 对控件类型与层次包含关系，有严格限制。面板控
 
 行内构件也称 Span 类构件，Shadow Widget 对行内构件的属性接管更少，相比段落构件，连上述 11 个通用属性也未作封装，需用 `style.attr` 达到相同效果，比如段落构件的 `width`，行内构件要用 `style.width` 表达：
 
-```
+``` js
   console.log(comp.duals.style.width);
   comp.duals.style = {width: "200px"};
 ```
