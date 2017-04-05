@@ -38,11 +38,11 @@
 > 2. `width` 与 `height`，指定弹窗的宽与高，取值为 0～0.9999，表示百分比，取值大于等于1，表示使用像素值，这两者缺省值均为 0.8（表示 80%）。
 > 3. `bodyStyle`，用于附加定义弹窗内容（即由 bodyEle 参数指明的节点）的风格，比如取值 `{backgroundColor:'#ccc'}`，可改变弹窗内容区域的背景颜色，本配置项可缺省。
 > 4. `maskColor`，指定蒙板（在弹窗背后）的背景颜色，用 CSS 颜色字串表示，一般选用带透明度的颜色，缺省值为 `"rgba(238,238,238,0.84)"`。
-> 5. `frame`，定义弹窗边框属性，缺省时自动取这个值 `{left: undefined, top:undefined, width:0.8, height:0.8}`，其中 left 与 top 的格式要求与上面 left 与 top 相同，width 与 height 的格式也与上面 width 与 height 要求相同。`frame` 下还可定义 `path` 路径字串（相对路径或绝对路径均可），用来指示将选用的边框 Element。弹窗边框的 width 与 height 宜大于弹窗的 width 与 height，这样，弹窗 Element 覆盖在边框 Element 之上，四周露出部分就是边框的显示效果。
-> 6. `frameElement`，指定弹窗边框所用的 Element。当本配置项未定义且由选项构件触发弹窗时，系统将自动到 `frame.path` 指示的位置查找，如果 `frame.path` 也缺省，表示当前弹窗不指定边框。
+> 5. `frame`，定义弹窗边框属性，缺省时自动值为 `{left: undefined, top:undefined, width:0.8, height:0.8}`，其中 `left` 与 `top` 的格式要求与上面 `left, top` 相同，`width` 与 `height` 的格式要求与上面 `width, height` 也相同。`frame` 下还可选定义 `path` 路径字串（相对路径或绝对路径均可），用来指示要选用的边框 Element。弹窗边框的 `width` 与 `height` 应大于或等于弹窗的 `width` 与 `height`，这样，弹窗 Element 在边框 Element 之上显示，四周露出部分就是边框的显示效果。
+> 6. `frameElement`，指定弹窗边框 Element，只有上面 `frame` 选项定义了，本项才有效。如果本项未定义且由选项构件触发弹窗时，系统将自动尝试用 `frame.path` 指示的 Element（这时如果 `frame.path` 未定义，表示弹窗不指定边框）。
 > 7. `manualClose`，取值为 `true` 或 `false`，用来指示弹窗是否手工关闭，如果取值 false 表示自动关闭，即，当鼠标点击背景蒙板时，弹窗自动关闭。本配置项缺省值为 false。
 > 8. `beforeClose`，窗口关闭前用于获得结果值的回调函数，该回调函数不带参数，其调用的返回值用作弹窗的返回值。本项可缺省，如果缺省，当弹窗自动关闭时返回值自动取 `undefined`。
-> 9. `callback`，弹窗关闭后自动调用的回调函数，格式为 `function(retData)`，参数 `retData` 是弹窗返回值，本项可缺省。
+> 9. `callback`，弹窗关闭后自动调用的回调函数，本项可缺省，回调格式为 `function(retData)`，其中参数 `retData` 是弹窗关闭时的返回数据。
 
 > 除了以上配置项，还有一个 `popOption.state.opened` 变量用于记录弹窗状态，它由系统自动设置（值为 true 或 false），不用作传入参数。开发者在编程中可以读其值，但不要给它赋值。
 

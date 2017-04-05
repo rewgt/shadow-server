@@ -7,15 +7,14 @@ var M = exports = module.exports = main.modules['trunk.js'];
 
 // import modules
 //---------------
-var fs = require('fs'), crypto = require('crypto');
+var fs = require('fs'); // var crypto = require('crypto');
 
 // module global definition
 //-------------------------
 var re_decode64_ = /[^A-Za-z0-9\+\/\=]/g;
-var re_win32ln_  = /\r\n/g;
 var base64Key_   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
-var Base64 = {
+var Base64 = {   // only for utf-8 text
   encode: function(input) {
     var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
     var output = '', i = 0;
@@ -67,7 +66,7 @@ var Base64 = {
   },
 
   _utf8_encode: function(string) {
-    string = string.replace(re_win32ln_,'\n');
+    // string = string.replace(/\r\n/g,'\n');  // not replace win32 \r\n
     
     var utftext = '';
     for (var n = 0; n < string.length; n++) {
@@ -89,15 +88,14 @@ var Base64 = {
   },
 
   _utf8_decode: function(utftext) {
-    var i = 0, string = '';
-    var c = 0, c1 = 0, c2 = 0;
+    var c,c2,c3, i = 0, string = '';
     while ( i < utftext.length ) {
       c = utftext.charCodeAt(i);
       if (c < 128) {
         string += String.fromCharCode(c);
         i++;
       }
-      else if(c > 191 && c < 224) {
+      else if (c > 191 && c < 224) {
         c2 = utftext.charCodeAt(i+1);
         string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
         i += 2;
@@ -463,7 +461,8 @@ function handleGitRequest(sMethod,sPath,req,res) {
   if (sMethod == 'GET') {
     if (sCmdType === 'contents') {
       var sFile = path.join(config.USER_DIR,sRepo,sLeftPath); // sLeftPath maybe ''
-      if (fs.existsSync(sFile) && sFile.indexOf(config.USER_PATH) == 0) {
+      var isExist = fs.existsSync(sFile), safeInRoot = sFile.indexOf(config.USER_PATH) == 0;
+      if (isExist && safeInRoot) {
         var st = fs.lstatSync(sFile);
         if (st.isDirectory()) {
           var bRet = [];
@@ -489,17 +488,27 @@ function handleGitRequest(sMethod,sPath,req,res) {
         else {
           var sFileName = bPath.length > 0? bPath[bPath.length-1]: '';
           var sContent = fs.readFileSync(sFile,'utf-8');
-          var shaSum = crypto.createHash('sha1');
-          shaSum.update('blob ' + sContent.length + '\0');
-          shaSum.update(sContent);
+          // var shaSum = crypto.createHash('sha1');
+          // shaSum.update('blob ' + sContent.length + '\0');
+          // shaSum.update(sContent);
+          // var sSha = shaSum.digest('hex'),
           
           res.json( { type:'file', size:st.size, name:sFileName,
             path: sLeftPath,  // no encoding,url,*_url,_links
             content: Base64.encode(sContent),
-            sha: shaSum.digest('hex'),
           });
         }
         return;
+      }
+      else if (!isExist && safeInRoot) {
+        var sUpPath, iTmp = sFile.lastIndexOf('/');
+        if (iTmp > 0 && fs.existsSync(sUpPath=sFile.slice(0,iTmp))) {
+          var st = fs.lstatSync(sUpPath);
+          if (st.isDirectory()) {  // maybe meet new created folder
+            res.json([]);
+            return;
+          }
+        }
       }
       
       res.status(404).send('can not find file: /' + sRepo + '/' + sLeftPath);
@@ -514,19 +523,20 @@ function handleGitRequest(sMethod,sPath,req,res) {
         var sFile = path.join(sRepoPath,sLeftPath);
         if ( fs.existsSync(sRepoPath) && typeof dBody == 'object' && 
              typeof dBody.content == 'string' && sFile.indexOf(sRepoPath+'/') == 0) {
-          var srcText = Base64.decode(dBody.content);
+          var srcBuff = new Buffer(dBody.content,'base64');
           var bSeg = sLeftPath.split('/'), sFileName = bSeg.pop();
           if (bSeg.length) recursiveMkDir(sRepoPath,bSeg.join('/'));
           
-          fs.writeFileSync(sFile,srcText,'utf-8');
+          fs.writeFileSync(sFile,srcBuff);
           
-          var shaSum = crypto.createHash('sha1'), st = fs.lstatSync(sFile);
-          shaSum.update('blob ' + srcText.length + '\0');
-          shaSum.update(srcText);
+          // var shaSum = crypto.createHash('sha1');
+          // shaSum.update('blob ' + srcBuff.length + '\0');
+          // shaSum.update(srcBuff);
+          // var sSha = shaSum.digest('hex');
           
+          var st = fs.lstatSync(sFile);
           var dRet = { content:{ name:sFileName, path:sLeftPath,
-            sha:shaSum.digest('hex'),
-            type:'file', size:srcText.length,  // no url,*_url,_links
+            type:'file', size:srcBuff.length,  // no url,*_url,_links
             ctime:st.ctime.toISOString(), mtime:st.mtime.toISOString(),
           }};
           res.json(dRet);

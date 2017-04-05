@@ -296,8 +296,6 @@ function getCompSchema_(comp,dTypeInfo,noExpr) {
   else {  // isLinker
     wdgtOption.linkPath = sLink;
     wdgtOption.linkStyles = comp.props.styles;
-    bStated = [];
-    bSilent = [];
   }
   wdgtOption.flag = iFlag;
   
@@ -305,7 +303,7 @@ function getCompSchema_(comp,dTypeInfo,noExpr) {
   var keyid_, sKeyid_;
   if (isLinker) {
     var oldProp = comp.props['link.props'];
-    if (oldProp) { // has linked, use old props['data-*'], props['aria-*']
+    if (oldProp) { // has linked, use old props
       props = Object.assign({},oldProp);
       AStyle = props.style || {};
       delete props.style;
@@ -339,19 +337,12 @@ function getCompSchema_(comp,dTypeInfo,noExpr) {
     if (typeof keyid_ != 'string')
       sKeyid_ = keyid_ = '';
     else sKeyid_ = keyid_;
-    
-    comp.$gui.dataset.forEach( function(item) {
-      var value = comp.state[item];
-      if (value !== undefined)
-        props[item] = value;    // use stated data-* aria-*
-    });
   }
   
   // step 3: replace stated props, remove silent props
   bStated.forEach( function(item) {
-    var value = comp.state[item];
-    if (value !== undefined)
-      props[item] = value;
+    if (props.hasOwnProperty(item))
+      props[item] = comp.state[item];
   });
   bSilent.forEach( function(item) {
     delete props[item];
@@ -427,7 +418,11 @@ function getCompSchema_(comp,dTypeInfo,noExpr) {
         dCfg.type = 'string';
       
       var valType = typeof value;
-      if (valType != 'string') {
+      if (valType == 'string') {
+        if (!value)
+          dCfg.type = 'string';    // take empty string as 'string'
+      }
+      else {
         if (valType == 'function') {
           console.log('warning: can not edit function property (' + item + ')');
           return;
@@ -514,6 +509,10 @@ function getCompSchema_(comp,dTypeInfo,noExpr) {
     }
     return '';
   }
+  
+  function getWidgetTempInfo(t) {
+    return [t._className,t._statedProp || [],t._silentProp || [],t._defaultProp || {}, t._htmlText];
+  }
 }
 
 main.$$onLoad.push( function(callback) {
@@ -588,12 +587,26 @@ main.$$onLoad.push( function(callback) {
     });
   };
   
-  containNode_.getDocHtml = function() {
+  containNode_.getDocHtml = function(childOfBody) {
     var bTree = [];
     containNode_.dumpTree(bTree=[]);
-    if (bTree.length == 1)
-      return containNode_.streamTree(bTree[0],0,1);
-    else return '';
+    if (bTree.length == 1) {
+      var body = bTree[0];
+      
+      if (childOfBody) {
+        var sRet = '', firstItem = body[0];
+        if (Array.isArray(firstItem)) {
+          for (var i=1,item; item=body[i]; i++) {
+            var s = containNode_.streamTree(item,0,1);
+            if (s) sRet += s;
+          }
+        }
+        return sRet;
+      }
+      
+      else return containNode_.streamTree(body,0,1);
+    }
+    return '';
   };
   
   containNode_.resetRootShow = function(callback) {
@@ -1306,8 +1319,15 @@ main.$$onLoad.push( function(callback) {
       var addInScene = sceneObj && !srcIsScene;
       if (needCopy) {
         var dProp = {'keyid.':'',key:''};
-        if (autoKey && tarOwnerObj2.props['isScenePage.'])
-          dProp['keyid.'] = dProp.key = 'auto' + (tarOwnerObj2.$gui.removeNum + tarOwnerObj2.$gui.comps.length);
+        if (autoKey && tarOwnerObj2.props['isScenePage.']) {
+          var iAuto2 = tarOwnerObj2.$gui.removeNum + tarOwnerObj2.$gui.comps.length;
+          var sAuto2 = 'auto' + iAuto2;
+          while (typeof tarOwnerObj2.$gui.compIdx[sAuto2] == 'number') {
+            iAuto2 += 1;
+            sAuto2 = 'auto' + iAuto2;
+          }
+          dProp['keyid.'] = dProp.key = sAuto2;
+        }
         
         if (sLnkAttr) dProp[sLnkAttr] = sLnkPath;
         if (addInScene) { dProp.left = iX; dProp.top = iY; }
@@ -1519,8 +1539,15 @@ main.$$onLoad.push( function(callback) {
       
       var dProp = creator.getCompRenewProp(srcNodeObj) || {};
       if (needCopy) {
-        if (autoKey && (tarOwnerObj2.props['isScenePage.'] || srcIsScene))
-          dProp['keyid.'] = dProp.key = 'auto' + (tarOwnerObj2.$gui.removeNum + tarOwnerObj2.$gui.comps.length);
+        if (autoKey && (tarOwnerObj2.props['isScenePage.'] || srcIsScene)) {
+          var iAuto2 = tarOwnerObj2.$gui.removeNum + tarOwnerObj2.$gui.comps.length;
+          var sAuto2 = 'auto' + iAuto2;
+          while (typeof tarOwnerObj2.$gui.compIdx[sAuto2] == 'number') {
+            iAuto2 += 1;
+            sAuto2 = 'auto' + iAuto2;
+          }
+          dProp['keyid.'] = dProp.key = sAuto2;
+        }
         else dProp['keyid.'] = dProp.key = '';
       }
       // else, autoKey must be false
@@ -1713,7 +1740,12 @@ main.$$onLoad.push( function(callback) {
       b = Object.keys(style);
       b.forEach( function(item) {
         hasSome = true;
-        style2[item] = style[item] + '';  // force to string
+        var s = style[item] + '';  // force to string
+        if (s.search(/^#[a-fA-F0-9]{6}$/) == 0) {
+          if (s[1] == s[2] && s[3] == s[4] && s[5] == s[6])
+            s = '#' + s[1] + s[3] + s[5];
+        }
+        style2[item] = s;
       });
       if (hasSome)
         style = style2;
@@ -1728,6 +1760,12 @@ main.$$onLoad.push( function(callback) {
       if (keyid) {
         if ((parseInt(keyid)+'') == keyid)   // ignore number
           keyid = '';
+        else {
+          if (oldKeyid !== keyid && owner[keyid]) { // renamed key already has existing widget
+            utils.instantShow('error: duplication of key name.');
+            return doCallback();
+          }
+        }
       }
       if (!keyid && typeof oldKeyid == 'string') clearKey = true;
     }
@@ -1939,7 +1977,17 @@ main.$$onLoad.push( function(callback) {
       return doCallback();
     }
     
+    var bStated = comp._._statedProp || [];
+    var bSilent = comp._._silentProp || [];
     var dProp = Object.assign({},srcEle.props['link.props']);
+    bStated.forEach( function(item) {
+      if (dProp.hasOwnProperty(item))
+        dProp[item] = comp.state[item];
+    });
+    bSilent.forEach( function(item) {
+      delete dProp[item];
+    });
+    
     var lnkKey = keyid + '';
     if (lnkKey[0] != '$') lnkKey = '$' + lnkKey;
     dProp['keyid.'] = dProp.key = lnkKey;
@@ -2018,7 +2066,17 @@ main.$$onLoad.push( function(callback) {
         }
         if (!lnkPath) return doCallback(); // system error
         
+        var bStated = comp._._statedProp || [];
+        var bSilent = comp._._silentProp || [];
         dProp = Object.assign({},dProp);   // includes dProp.styles
+        bStated.forEach( function(item) {
+          if (dProp.hasOwnProperty(item))
+            dProp[item] = comp.state[item];
+        });
+        bSilent.forEach( function(item) {
+          delete dProp[item];
+        });
+        
         dProp['$'] = lnkPath;
         if (sNewTxt)
           dProp['html.'] = sNewTxt;
@@ -2361,8 +2419,15 @@ main.$$onLoad.push( function(callback) {
       if (needCopy || sLnkAttr || inScene) {
         var dProp = {};
         if (needCopy) {
-          if (autoKey && ownerObj.props['isScenePage.'])
-            dProp['keyid.'] = dProp.key = 'auto' + (ownerObj.$gui.removeNum + ownerObj.$gui.comps.length);
+          if (autoKey && ownerObj.props['isScenePage.']) {
+            var iAuto2 = ownerObj.$gui.removeNum + ownerObj.$gui.comps.length;
+            var sAuto2 = 'auto' + iAuto2;
+            while (typeof ownerObj.$gui.compIdx[sAuto2] == 'number') {
+              iAuto2 += 1;
+              sAuto2 = 'auto' + iAuto2;
+            }
+            dProp['keyid.'] = dProp.key = sAuto2;
+          }
           else dProp['keyid.'] = dProp.key = '';
         }
         // else, autoKey must be false

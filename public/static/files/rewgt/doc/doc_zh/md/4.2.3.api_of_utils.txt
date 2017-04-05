@@ -69,6 +69,15 @@
 
 > 用于转换 markdown 文本到 html 标签代码，输入 `sMarkdown` 是符合 markdown 格式规范的文本，返回值是 html 标签代码。
 
+> 说明1：shadow-widget 内置 <a target="_blank" href="https://github.com/chjj/marked">chjj/marked</a> 的 markdown 分析器，本函数就是该分析器的调用入口。
+
+> 说明2：`chjj/marked` 分析器内置支持用 <a target="_blank" href="https://github.com/isagalaev/highlight.js">highlight.js</a> 对源码作高亮处理，此特性在 shadow-widget 同样有效，只需预先在当前网页将 `highlight.js` 导入进来。
+
+``` html
+  <link rel="stylesheet" href="/path/to/styles/default.css">
+  <script src="/path/to/highlight.pack.js"></script>
+```
+
 ##### <a name="ajax"></a>`ajax(config)`
 
 > 用于发起 ajax 请求，参数 `config` 的格式为 `{configItem: configValue}`，各配置项含义如下：
@@ -101,11 +110,11 @@
 
 ##### <a name="base64_encode"></a>`Base64.encode(input)`
 
-> 对输入字串 `input` 进行 Base64 编码，返回编码结果。
+> 对输入字串 `input` 进行 Base64 编码，返回编码结果，`input` 要求是 utf-8 格式的字串。
 
 ##### <a name="base64_decode"></a>`Base64.decode(input)`
 
-> 对输入字串 `input` 进行 Base64 解码，返回解码结果。
+> 对已编码字串 `input` 进行 Base64 解码，返回解码结果，本函数是 `Base64.encode()` 的逆向还原。
 
 ##### <a name="shallow_equal"></a>`shallowEqual(obj1,obj2)`
 

@@ -23,6 +23,8 @@
 </div>
 
 <script>
+var APP_BASE = '/app/files/rewgt/web';
+
 (function() {
   var menuBtn = document.querySelector('img[name="menu"]');
   var mainMenuArea = document.getElementById('menu-list');
@@ -108,7 +110,7 @@
               var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:[0,bProj,[],innerLen,true]}); // true means from homepage
               bodyFrame.contentWindow.postMessage(sCmd,'*');
             };
-            bodyFrame.src = '/app/files/rewgt/web/list_projects.html';
+            bodyFrame.src = APP_BASE + '/list_projects.html';
           }
         }
         catch(e) { }  // ignore error
@@ -120,7 +122,7 @@
         var sCmd = '[PROJECT_NAME]' + JSON.stringify({method:'init',param:[0,optData]});
         bodyFrame.contentWindow.postMessage(sCmd,'*');
       };
-      bodyFrame.src = '/app/files/rewgt/web/doc/index.html';
+      bodyFrame.src = APP_BASE + '/doc/index.html';
     }
   };
   

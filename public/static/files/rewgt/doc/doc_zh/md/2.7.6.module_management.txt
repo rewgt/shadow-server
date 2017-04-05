@@ -13,7 +13,7 @@
 <script src="js/moduleA.js"></script>
 <script src="js/moduleB.js"></script>
 
-<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
@@ -36,15 +36,17 @@ var main = W.$main, utils = W.$utils, ex = W.$ex;
 });
 ```
 
-虽然这些 JS 模块各自独立，保存到不同 js 文件，但它们的主体代码用于定义 main 模块实体，比如把投影类定义挂到 main 下，定义 main.$onload 初始化列表等，所以，这些 JS 模块有时也统称为 main 模块。 
+虽然这些 JS 模块各自独立，保存到不同 js 文件，但它们的主体代码用于定义 main 模块实体，比如把投影类定义挂到 main 下，定义 `main.$onLoad` 初始化列表等，所以，这些 JS 模块也统称为 main 模块。 
 
-#### base.css 样式定义
+shadow-widget 库（即 `shadow-widget.min.js`）负责导入在上述 `W.$modules` 中预登记的各个 main 模块，然后驱动 `main.$onLoad` 中各初始化函数运行。需注意：shadow-widget 库应在所有 main 模块之后用 `<script>` 标签导入。
 
-所有基于 Shadow Widget 开发的程序，都要求在 html 页面用 `<link>` 标签导入 base.css 文件，因为许多内置构件的 CSS 规格在此文件定义，比如 Panel 的 flex 布局、TablePanel 的表格布局等，另外 base.css 还确立 Shadow Widget 程序对字号的使用规则。
+#### sw_base.css 样式定义
 
-缺省情况下（指用户不重新定义 base.css 内容，或另行定义样式覆盖它），Shadow Widget 采用 CSS3 规范中的相对单位 rem 方式配置字体大小，根节点（即 `html` 节点）的 `font-size` 为 `16px`，如果编程中需要指定字号，建议一律采用 rem 方式指定，这样，把产品适配到不同终端设备时，多数情况下只需修改根节点的 rem 值。
+所有基于 Shadow Widget 开发的程序，都要求在 html 页面用 `<link>` 标签导入 sw_base.css 文件，因为许多内置构件的 CSS 规格在此文件定义，比如 Panel 的 flex 布局、TablePanel 的表格布局等，另外 sw_base.css 还确立 Shadow Widget 程序对字号的使用规则。
 
-为了方便编程，base.css 定义了 S1、S2、S3、S4、S5、S6 共 6 个类，分别对应如下字号：
+缺省情况下（指用户不重新定义 sw_base.css 内容，或另行定义样式覆盖它），Shadow Widget 采用 CSS3 规范中的相对单位 rem 方式配置字体大小，根节点（即 `html` 节点）的 `font-size` 为 `16px`，如果编程中需要指定字号，建议一律采用 rem 方式指定，这样，把产品适配到不同终端设备时，多数情况下只需修改根节点的 rem 值。
+
+为了方便编程，sw_base.css 定义了 S1、S2、S3、S4、S5、S6 共 6 个类，分别对应如下字号：
 
 ```
   S1:  3.75rem  = 60px

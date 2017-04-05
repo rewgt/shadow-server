@@ -11,13 +11,15 @@
 &nbsp;&nbsp;&nbsp; `<p><span>Hello, world!</span></p>`   
 上面转义后的 `P` 与 `Span` 都是 Shadow Widget 内置支持的构件类，其语义分别等效于原生的 p 与 span 标签，Shadow Widget 已内置描述了大部分 html 标签，命名均采用首字母大写，剩下字母小写且与原生 tag 相同，如：`input` 在 Shadow Widget 对应的构件名为 `Input`，`textarea` 对应的是 `Textarea`。
 
-借助 tag 转义，用 span 表达任何行内标签（inline tag），用 div 可表达任何非行内标签，两者合一起可表达全部 tag。注意，这两者所支持的转义 tag 不可混用，比如 `<div $=Span></div>`  是错误用法，因为 Span 是行内标签。
+借助 tag 转义，用 span 表达任何行内标签（inline tag），用 div 可表达任何非行内标签，两者合一起可表达全部标签。注意，这两者所支持的转义 tag 不可混用，比如 `<div $=Span></div>`  是错误用法，因为 Span 是行内标签。
 
 经上述转义后，我们可以直接把这种语句写在 *.html 文件中了，比如在 html 的 `<body>` 标签下编写如下代码：   
 &nbsp;&nbsp;&nbsp; `<div $=Panel height='{60}'>`   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `<div $=P><span $=Span>Hello, world!</span></div>`   
 &nbsp;&nbsp;&nbsp; `</div>`   
 这里 Panel 是 Shadow Widget 提供的面板控件，其属性 height 是大括号括起来的字串，首与尾大括号表示它是 JSON 数据，系统自动调用 JSON.parse() 分析其内容，比如这个 height 属性值为 60，是 number 而不是 string 类型。
+
+上述借助 HTML 标签描述界面的技术，叫做 **“转义标签”** （Escape Tag）。
 
 #### 用 ES5 做前端上层开发
 

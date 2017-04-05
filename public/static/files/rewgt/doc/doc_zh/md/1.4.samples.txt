@@ -30,13 +30,13 @@
 本例只用到一个 index.html 文件，接下来我们讲解它的实现过程。在文件的末尾有如下四行：
 
 ``` html
-  <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/base.css" />
+  <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
   <script src="/app/files/rewgt/web/js/react.min.js"></script>
   <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
   <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 ```
 
-分别将依赖的 base.css 及 react、react-dom、shadow-widget 的 js 库文件包含进来，base.css 是所有用 Shadow Widget 开发的程序都必须使用的依赖项。
+分别将依赖的 base.css 及 react、react-dom、shadow-widget 的 js 库文件包含进来，sw_base.css 是所有用 Shadow Widget 开发的程序都必须使用的依赖项。
 
 然后定义文档 body 下的节点： 
 

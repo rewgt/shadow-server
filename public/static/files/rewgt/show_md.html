@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8"/>
 <title>Markdown content</title>
-<script src="/app/files/rewgt/web/js/marked.min.js"></script>
 
 <style>
 html {
@@ -45,8 +44,9 @@ code {
 <body>
 <div class="rewgt-static"></div>
 
-<script>
+<script src="js/marked.min.js"></script>
 
+<script>
 function getUrlParam(s) {
   var dRet = {}, b = s.split('&');
   b.forEach( function(item) {

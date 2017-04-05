@@ -171,12 +171,7 @@ main.pluginServices['$list'] = [function(req,res,sCateProj,sServPath) { // sCate
           }
         }
         
-        var bTmp = [item,d.meta,d.icon];
-        if (d.template || d.preview) {
-          bTmp.push(d.template);
-          bTmp.push(d.preview);
-        }
-        bFile.push(bTmp);
+        bFile.push([item,d.meta,d.icon]);
       }
       else bFolder.push(item);
     });

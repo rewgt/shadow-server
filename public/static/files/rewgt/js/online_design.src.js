@@ -173,6 +173,8 @@ var backupLastUndoId_ = 0; // 0 means last operation is not undo
 
 var dTemplateTools_ = {};  // {toolId:['mono/all',bTool,withOrigin],vendorProj:false} // tool.baseUrl has added
 
+var creator = null;
+var switchPageList_ = null;
 var getKeyFromNode_ = function(node) { return '' };
 
 function segmentOfToolId(sOptid) {
@@ -201,8 +203,10 @@ function checkToolConfig(optid,bRetInfo) {
   var sVendor = b[0], sPrjPath = sVendor + b[1];
   if (dTemplateTools_.hasOwnProperty(sPrjPath)) return;
   
-  var sWdgtFull = sPrjPath + '/' + b[2];
-  var sUrl = '/app/' + sPrjPath + '/web/TOOL.json';
+  var sUrl, sWdgtFull = sPrjPath + '/' + b[2];
+  if (creator.isGithub)
+    sUrl = b[1] + '/TOOL.json';
+  else sUrl = '/app/' + sPrjPath + '/web/TOOL.json';
   getAsynRequest(sUrl, function(err,sJson) {
     if (err) {
       console.log('error: read file failed (' + sUrl + ')');
@@ -581,7 +585,11 @@ function restoreFromBackup(sValue) {
 function afterModifyDoc(iDelay,wdgtPath) {
   if (currRootPageType == 'ScenePage')
     updateSceneThumb(currRootPageKeyid);
-  if (wdgtPath) renewSchemaEditor(wdgtPath);
+  if (wdgtPath) {
+    setTimeout( function() {
+      renewSchemaEditor(wdgtPath);
+    },100);
+  }
   pendingBackup(iDelay);
 }
 
@@ -876,7 +884,7 @@ function setFloatBtnShow(dBtn,bTool,noExpr,isSceneWdgt) { // dBtn:{move:1} // mo
           else sIconUrl = sBaseUrl + '/' + sIcon;
         }
       }
-      else sIconUrl = '/app/files/rewgt/web/res/tools.png';
+      else sIconUrl = creator.appBase() + '/res/tools.png';
       
       var btn = document.createElement('img');
       btn.setAttribute('extend','true');
@@ -1577,6 +1585,13 @@ function docOnMouseDown(event) {
   haloResizeType_ = 0;
   if (nowInModal()) return;
   
+  var currTarg_ = event.target;
+  if (currTarg_.nodeName == 'IMG') {
+    currTarg_ = currTarg_.parentNode;
+    if (currTarg_.nodeName == 'DIV' && currTarg_.getAttribute('name') === 'float-btn')
+      return;  // ignore any click from float button 
+  }
+  
   var x = event.clientX, y = event.clientY;
   if (!inDesignArea(x,y)) return;
   
@@ -1973,7 +1988,7 @@ function docOnMouseUp(event) {
 
 // window.onload processing
 //-------------------------
-window.addEventListener('load', function(event) {
+function initCreator() {
   var draggingId_ = 0;
   var draggingNode_ = null;
   
@@ -2057,10 +2072,10 @@ window.addEventListener('load', function(event) {
   // step 2: create leftPanel/topPanel/rightPanel
   //------------------------------
   topPanel = document.createElement('div');
-  topPanel.setAttribute('style','position:absolute; left:0px; top:0px; width:100%; height:' + TOP_PANEL_HEIGHT + 'px; background:#e8e8e8 url(/app/files/rewgt/web/res/ruler_top.png) no-repeat fixed ' + (LEFT_PANEL_WIDTH + mainFrameOffsetX) + 'px ' + (TOP_PANEL_HEIGHT - 28) + 'px; z-index:3006;');
+  topPanel.setAttribute('style','position:absolute; left:0px; top:0px; width:100%; height:' + TOP_PANEL_HEIGHT + 'px; background:#e8e8e8 url(' + creator.appBase() + '/res/ruler_top.png) no-repeat fixed ' + (LEFT_PANEL_WIDTH + mainFrameOffsetX) + 'px ' + (TOP_PANEL_HEIGHT - 28) + 'px; z-index:3006;');
   document.body.appendChild(topPanel);
   leftPanel = document.createElement('div');
-  leftPanel.setAttribute('style','position:absolute; left:0px; top:0px; width:' + LEFT_PANEL_WIDTH + 'px; height:100%; background:#e8e8e8 url("/app/files/rewgt/web/res/ruler_left.png") no-repeat fixed ' + (LEFT_PANEL_WIDTH - 14) + 'px ' + (TOP_PANEL_HEIGHT + mainFrameOffsetY) + 'px; z-index:3020;');
+  leftPanel.setAttribute('style','position:absolute; left:0px; top:0px; width:' + LEFT_PANEL_WIDTH + 'px; height:100%; background:#e8e8e8 url(' + creator.appBase() + '/res/ruler_left.png) no-repeat fixed ' + (LEFT_PANEL_WIDTH - 14) + 'px ' + (TOP_PANEL_HEIGHT + mainFrameOffsetY) + 'px; z-index:3020;');
   document.body.appendChild(leftPanel);
   rightPanel = document.createElement('div');
   rightPanel.setAttribute('style','position:absolute; right:0px; top:0px; width:' + RIGHT_PANEL_WIDTH + 'px; height:100%; background-color:#e8e8e8; z-index:3020; overflow:hidden;');
@@ -2071,7 +2086,7 @@ window.addEventListener('load', function(event) {
   var topTool = document.createElement('div');
   topTool.setAttribute('style','position:relative; left:3px; top:3px; line-height:1.2; width:100%; height:' + TOP_PANEL_HEIGHT + 'px;');
   leftPanel.appendChild(topTool);
-  var b = [['Main menu','/app/files/rewgt/web/res/menu.png','menu'],['Show pages/widgets','/app/files/rewgt/web/res/grid.png','thumb']];
+  var b = [['Main menu',creator.appBase()+'/res/menu.png','menu'],['Show pages/widgets',creator.appBase()+'/res/grid.png','thumb']];
   b.forEach( function(item) {
     var sTitle = item[0], sUrl = item[1], sName = item[2];
     var btn = document.createElement('img');
@@ -2095,15 +2110,14 @@ window.addEventListener('load', function(event) {
   var leftTool = document.createElement('div');
   leftTool.setAttribute('style','position:relative; left:3px; top:0px; line-height:1.2; width:100%;');
   leftPanel.appendChild(leftTool);
-  var b = [['Switch viewport','/app/files/rewgt/web/res/switch.png','switch'],
-    ['Align center','/app/files/rewgt/web/res/align.png','align'], ['','',''],
-  //   ['Copy to clipboard','/app/files/rewgt/web/res/clipcopy.png','clipcopy'],
-    ['Remove widget','/app/files/rewgt/web/res/delete.png','delete'],
-    ['Undo','/app/files/rewgt/web/res/undo.png','undo'],
-    ['Redo','/app/files/rewgt/web/res/redo.png','redo'], ['','',''],
-    ['Save','/app/files/rewgt/web/res/save.png','save'],
-    ['Open or create page','/app/files/rewgt/web/res/open.png','open'],
-    ['Config','/app/files/rewgt/web/res/config.png','config'],
+  var b = [['Switch viewport',creator.appBase()+'/res/switch.png','switch'],
+    ['Align center',creator.appBase()+'/res/align.png','align'], ['','',''],
+    ['Remove widget',creator.appBase()+'/res/delete.png','delete'],
+    ['Undo',creator.appBase()+'/res/undo.png','undo'],
+    ['Redo',creator.appBase()+'/res/redo.png','redo'], ['','',''],
+    ['Save',creator.appBase()+'/res/save.png','save'],
+    ['Open or create page',creator.appBase()+'/res/open.png','open'],
+    ['Config',creator.appBase()+'/res/config.png','config'],
   ];
   b.forEach( function(item) {
     var sTitle = item[0], sUrl = item[1], sName = item[2];
@@ -2113,8 +2127,12 @@ window.addEventListener('load', function(event) {
       leftTool.appendChild(space);
     }
     else {
+      var sStyle = 'width:22px; height:22px; border:1px solid #e8e8e8;';
+      if (creator.useHtmlProxy && (sName == 'open' || sName == 'config'))
+        sStyle += 'display:none';
+      
       var btn = document.createElement('img');
-      btn.setAttribute('style','width:22px; height:22px; border:1px solid #e8e8e8;');
+      btn.setAttribute('style',sStyle);
       btn.setAttribute('src',sUrl);
       btn.setAttribute('title',sTitle);
       btn.setAttribute('name',sName);
@@ -2249,7 +2267,7 @@ window.addEventListener('load', function(event) {
   selectInfoBtn = document.createElement('img');
   selectInfoBtn.setAttribute('draggable','true');
   selectInfoBtn.setAttribute('style','display:none; position:relative; left:0px; top:3px; width:16px; height:16px; border:1px solid #e8e8e8; margin:0px 6px 0px 0px;');
-  selectInfoBtn.setAttribute('src','/app/files/rewgt/web/res/empty.png');
+  selectInfoBtn.setAttribute('src',creator.appBase()+'/res/empty.png');
   selectInfo.appendChild(selectInfoBtn);
   selectInfoName = document.createElement('span');
   selectInfoName.setAttribute('style','padding:2px 8px 2px 0px; color:#444;');
@@ -2259,7 +2277,7 @@ window.addEventListener('load', function(event) {
   selectInfo.appendChild(selectInfoSpan);
   var selectInfoChild = document.createElement('img');
   selectInfoChild.setAttribute('style','display:none; position:relative; left:0px; top:2px; width:16px; height:16px;');
-  selectInfoChild.setAttribute('src','/app/files/rewgt/web/res/insert.png');
+  selectInfoChild.setAttribute('src',creator.appBase()+'/res/insert.png');
   selectInfo.appendChild(selectInfoChild);
   topPageTool = document.createElement('div');
   var iWd = window.innerWidth-LEFT_PANEL_WIDTH-RIGHT_PANEL_WIDTH;
@@ -2717,7 +2735,7 @@ window.addEventListener('load', function(event) {
         if (isRef) {
           var isSceneWdgt = (bPath.length == 2 && bPath[1][0] == 'ScenePage');
           
-          selectInfoBtn.setAttribute('src','/app/files/rewgt/web/res/linker.png');
+          selectInfoBtn.setAttribute('src',creator.appBase()+'/res/linker.png');
           selectInfoBtn.setAttribute('name','linker');
           selectInfoBtn.setAttribute('title',sPath + '.' + sName);
           selectInfoBtn.isSceneWdgt = isSceneWdgt;
@@ -2961,19 +2979,36 @@ window.addEventListener('load', function(event) {
   
   var appBasePath = location__('./').pathname;
   if (appBasePath[0] != '/') appBasePath = '/' + appBasePath; // avoid bug of IE10
-  var listResUrl = '/app/files/rewgt/web/list_resource.html?base=' + encodeURIComponent(appBasePath);
+  var listResUrl = creator.appBase()+'/list_resource.html?base=' + encodeURIComponent(appBasePath);
   var sFirstPg = '';
   if (!noPropPg) {
     sFirstPg = 'property';
-    rightPageDiv.addPage('property','/app/files/rewgt/web/prop_page.html');
+    rightPageDiv.addPage('property',creator.appBase()+'/prop_page.html');
+  }
+  
+  var sRepoInfo = '';
+  if (creator.useHtmlProxy) {
+    if (creator.repoName)
+      sRepoInfo += '&repo=' + encodeURIComponent(creator.repoName);
+    if (creator.accessToken)
+      sRepoInfo += '&token=' + encodeURIComponent(creator.accessToken);
+    if (creator.accessUser)
+      sRepoInfo += '&user=' + encodeURIComponent(creator.accessUser);
+    if (creator.accessSite)
+      sRepoInfo += '&site=' + encodeURIComponent(creator.accessSite);
   }
   if (!noResPg) {
     if (!sFirstPg) sFirstPg = 'resource';
-    rightPageDiv.addPage('resource',listResUrl + '&home=1');
+    var listResUrl2 = listResUrl + '&home=1';
+    if (creator.resourceBase) listResUrl2 += '&url=' + encodeURIComponent(creator.resourceBase);
+    if (creator.useHtmlProxy)
+      listResUrl2 += '&upload=1' + sRepoInfo;
+    rightPageDiv.addPage('resource',listResUrl2);
   }
   bPage.forEach( function(item) {
     if (!sFirstPg) sFirstPg = item[0];
-    rightPageDiv.addPage(item[0]+'',listResUrl + '&url=' + encodeURIComponent(item[1]+''));
+    var listResUrl2 = listResUrl + '&url=' + encodeURIComponent(item[1]+'') + sRepoInfo;
+    rightPageDiv.addPage(item[0]+'',listResUrl2);
   });
   
   getAsynRequest('$utils?cmd=get_config', function(err,sJson) {
@@ -2985,7 +3020,7 @@ window.addEventListener('load', function(event) {
           var bPage = d.resourcePages || [];
           bPage.forEach( function(item) {
             if (!sFirstPg) sFirstPg = item[0];
-            rightPageDiv.addPage(item[0]+'',listResUrl + '&url=' + encodeURIComponent(item[1]+''));
+            rightPageDiv.addPage(item[0]+'',listResUrl + '&url=' + encodeURIComponent(item[1]+'') + sRepoInfo);
           });
         }
       }
@@ -3120,15 +3155,15 @@ window.addEventListener('load', function(event) {
   haloFrame = document.createElement('div');
   haloFrame.setAttribute('style','display:none; position:absolute; z-index:3010; pointer-events:none; border:1px dotted red;');
   document.body.appendChild(haloFrame);
-  var b = [ ['Drag to move, double click to relay','/app/files/rewgt/web/res/move.png','move',true],    // draggable = true
-    ['Drag to insert, double click to relay','/app/files/rewgt/web/res/copy.png','copy',true],
-    ['Drag to link, double click to relay','/app/files/rewgt/web/res/linker.png','linker',true],
-    ['Modify child styles','/app/files/rewgt/web/res/styles.png','styles',false],
-    ['Edit text content','/app/files/rewgt/web/res/edit_txt.png','edit_txt',false],
-    ['Select uplevel','/app/files/rewgt/web/res/goup.png','uplevel',false],
-    ['Copy as linker','/app/files/rewgt/web/res/copy2.png','copy_lnk',false],
-    ['Pop to top','/app/files/rewgt/web/res/up.png','up',false],
-    ['Push to bottom','/app/files/rewgt/web/res/down.png','down',false],
+  var b = [ ['Drag to move, double click to relay',creator.appBase()+'/res/move.png','move',true],    // draggable = true
+    ['Drag to insert, double click to relay',creator.appBase()+'/res/copy.png','copy',true],
+    ['Drag to link, double click to relay',creator.appBase()+'/res/linker.png','linker',true],
+    ['Modify child styles',creator.appBase()+'/res/styles.png','styles',false],
+    ['Edit text content',creator.appBase()+'/res/edit_txt.png','edit_txt',false],
+    ['Select uplevel',creator.appBase()+'/res/goup.png','uplevel',false],
+    ['Copy as linker',creator.appBase()+'/res/copy2.png','copy_lnk',false],
+    ['Pop to top',creator.appBase()+'/res/up.png','up',false],
+    ['Push to bottom',creator.appBase()+'/res/down.png','down',false],
   ];
   floatButtons = document.createElement('div');
   floatButtons.setAttribute('name','float-btn');
@@ -3148,6 +3183,9 @@ window.addEventListener('load', function(event) {
     event.stopPropagation();
     if (event.target.getAttribute('draggable') != 'true')
       event.preventDefault();  // avoid select
+  },false);
+  floatButtons.addEventListener('mouseup', function(event) {
+    event.stopPropagation();   // avoid affect body.onmouseXX onclick
   },false);
   floatButtons.addEventListener('mouseover', function(event) {
     var targ = event.target;
@@ -3243,7 +3281,7 @@ window.addEventListener('load', function(event) {
           sWdgtPath = b[0];
           sWdgtName = selectInfoName.getAttribute('wdgt_name');
           var dTool = { name:'default', title:'styles editor',
-            url: '/app/files/rewgt/web/edit_styles.html',
+            url: creator.appBase()+'/edit_styles.html',
             halfScreen:false, clickable:true,
             width: 0.8, height: 0.8,
             get: getStyles, set: setStyles,
@@ -3259,7 +3297,7 @@ window.addEventListener('load', function(event) {
           sWdgtPath = b[0];
           sWdgtName = selectInfoName.getAttribute('wdgt_name');
           var dTool = { name:'default', title:'text editor',
-            url: '/app/files/rewgt/web/edit_content.html',
+            url: creator.appBase()+'/edit_content.html',
             halfScreen:true, clickable:true,
             width: 0.8, height: 0.8,
             get: getTextContent, set: setTextContent,
@@ -3421,7 +3459,7 @@ window.addEventListener('load', function(event) {
   haloFrame2.appendChild(floatKeyName);
   haloFrame2Ins = document.createElement('img');
   haloFrame2Ins.setAttribute('style','display:none; position:absolute; right:0px; bottom:0px; width:16px; height:16px;');
-  haloFrame2Ins.setAttribute('src','/app/files/rewgt/web/res/insert.png');
+  haloFrame2Ins.setAttribute('src',creator.appBase()+'/res/insert.png');
   haloFrame2.appendChild(haloFrame2Ins);
   
   if (supportBackup)
@@ -3444,6 +3482,8 @@ window.addEventListener('load', function(event) {
   mainMenuArea.setAttribute('style','position:absolute; z-index:3022; display:none; left:30px; top:30px; min-width:60px; background-color:#f4f4f4; border:1px solid #eee; margin:0px; padding:2px; line-height:1.4; border-radius:4px; box-shadow:-2px 4px 4px rgba(0,0,0,0.2); list-style:none; -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none');
   mainMenuArea.innerHTML = '<li name="list_prj" style="padding:0px 8px">List projects</li><li name="show_doc" style="padding:0px 8px">Online document</li>';
   document.body.appendChild(mainMenuArea);
+  if (creator.useHtmlProxy) mainMenuArea.querySelector('li[name="list_prj"]').style.display = 'none';
+  
   mainMenuArea.addEventListener('mouseover', function(event) {
     var targ = event.target;
     if (targ.nodeName == 'LI') {
@@ -3479,7 +3519,7 @@ window.addEventListener('load', function(event) {
               var dTool = {
                 name: 'default',
                 title: 'list project',
-                url: '/app/files/rewgt/web/list_projects.html',
+                url: creator.appBase()+'/list_projects.html',
                 halfScreen: true,
                 width: 0.9,
                 height: 0.9,
@@ -3495,7 +3535,7 @@ window.addEventListener('load', function(event) {
         var dTool = {
           name: 'default',
           title: 'online help',
-          url: '/app/files/rewgt/web/doc/index.html',
+          url: creator.appBase()+'/doc/index.html',
           halfScreen: false,
           width: 0.9,
           height: 0.9,
@@ -3679,7 +3719,8 @@ window.addEventListener('load', function(event) {
     };
     
     modalMaskMiddle.appendChild(maskFrame);
-    maskFrame.setAttribute('src','$proxy?url='+encodeURIComponent(sUrl));
+    var proxyPath = creator.useHtmlProxy? '$proxy.html': '$proxy';
+    maskFrame.setAttribute('src',proxyPath+'?url='+encodeURIComponent(sUrl));
     
     if (!isFullScrn && !toolOpt.noMove) {
       maskMoveArea = document.createElement('div');
@@ -3932,7 +3973,7 @@ window.addEventListener('load', function(event) {
       if (editFlag >= 2) return;  // under 'none'
       
       var dTool = { name:'default', title:'default editor',
-        url: '/app/files/rewgt/web/edit_prop.html',
+        url: creator.appBase()+'/edit_prop.html',
         halfScreen:true, clickable:false,
         width: 0.9, height: 0.9,
       };
@@ -3960,6 +4001,8 @@ window.addEventListener('load', function(event) {
     if (b) {
       var sWdgtPath = b[0], currWdgt = b[1], bPath = b[2], sName = sWdgtPath.split('.').pop();
       var inScene = (bPath.length >= 2 && bPath[1][0] == 'ScenePage');
+      
+      var needAdjust = false;
       if (inScene && srcFromScene && !byShift) {
         var sceneInfo = bPath[1][2];
         sWdgtPath = sceneInfo[1];
@@ -3973,33 +4016,40 @@ window.addEventListener('load', function(event) {
           else return; // can not link to ScenePage
         }
         else { // copy or move
-          currWdgt = sceneInfo[2];
-          bPath = bPath.slice(0,2);
-          sName = bPath[1][1];
-          // sWdgtPath is '.body.scene'
+          if (bNodeList.length >= 3)
+            needAdjust = true;
+          else {
+            currWdgt = sceneInfo[2];
+            bPath = bPath.slice(0,2);
+            sName = bPath[1][1];
+            // sWdgtPath is '.body.scene'
+          }
         }
       }
       else if (inScene && fromJson) {
-        if (!isLinker && bNodeList.length >= 3) {
-          var iTmp = bNodeList.length - 1;
-          while (iTmp >= 2) {
-            currWdgt = bNodeList[iTmp];
-            if (currWdgt.getAttribute('data-is.ground')) { // ignore ground widget, try parent level
+        if (!isLinker && bNodeList.length >= 3)
+          needAdjust = true;
+      }
+      
+      if (needAdjust) { // try ignore background node
+        var iTmp = bNodeList.length - 1;
+        while (iTmp >= 2) {
+          currWdgt = bNodeList[iTmp];
+          if (currWdgt.getAttribute('data-is.ground')) { // ignore ground widget, try parent level
+            iTmp -= 1;
+            continue;
+          }
+          else {
+            bPath = bPath.slice(0,iTmp+1);
+            sName = bPath[iTmp][1];
+            iTmp -= 1;
+            
+            sWdgtPath = sName;
+            while (iTmp >= 0) {
+              sWdgtPath = bPath[iTmp][1] + '.' + sWdgtPath;
               iTmp -= 1;
-              continue;
             }
-            else {
-              bPath = bPath.slice(0,iTmp+1);
-              sName = bPath[iTmp][1];
-              iTmp -= 1;
-              
-              sWdgtPath = sName;
-              while (iTmp >= 0) {
-                sWdgtPath = bPath[iTmp][1] + '.' + sWdgtPath;
-                iTmp -= 1;
-              }
-              break;
-            }
+            break;
           }
         }
       }
@@ -4127,7 +4177,7 @@ window.addEventListener('load', function(event) {
   };
   
   // define action for thumbnail button, switch pages/widgets
-  function switchPageList() {
+  switchPageList_ = function() {
     if (topPageList.style.display == 'none') {
       if (firstShowPages_) {
         firstShowPages_ = false;
@@ -4145,7 +4195,7 @@ window.addEventListener('load', function(event) {
   topTool.querySelector('img[name="thumb"]').onclick = function(event) {
     event.stopPropagation();
     mainMenuArea.hideMenu();
-    switchPageList();
+    switchPageList_();
   };
   
   // define action for switch button, hide or show top and right panel
@@ -4277,20 +4327,26 @@ window.addEventListener('load', function(event) {
     if (!rootNode.getDocHtml) return;
     // if (!canUndoRedo('save')) return;  // no need check, backup undo may delay
     
-    var sHtml = rootNode.getDocHtml();
+    var sHtml = rootNode.getDocHtml(creator.useHtmlProxy);
     if (!sHtml) {
       rootNode.instantShow('warning: dump document failed.');
       return;
     }
     
-    var data = {page:currEditHtmlPage, html:sHtml};
-    postAsynRequest('$save?page=' + encodeURIComponent(currEditHtmlPage),data, function(err,sInfo) {
+    if (creator.useHtmlProxy)
+      creator.savePages(sHtml,nextStep);
+    else {
+      var data = {page:currEditHtmlPage, html:sHtml};
+      postAsynRequest('$save?page=' + encodeURIComponent(currEditHtmlPage),data,nextStep);
+    }
+    
+    function nextStep(err,sInfo) {
       if (err) {
         rootNode.instantShow('error: save document failed' + (sInfo?' ('+sInfo+').':'.'));
         console.log(err);
       }
       else rootNode.instantShow('save document successful.');
-    });
+    }
   };
   
   // define action for open button
@@ -4310,7 +4366,7 @@ window.addEventListener('load', function(event) {
           var dTool = {
             name: 'default',
             title: 'open pages',
-            url: '/app/files/rewgt/web/list_pages.html',
+            url: creator.appBase()+'/list_pages.html',
             halfScreen: true,
             // icon: '', noMove: false,
             // left: 0.05, top: 0.05,
@@ -4335,7 +4391,7 @@ window.addEventListener('load', function(event) {
     var dTool = {
       name: 'default',
       title: 'edit configure',
-      url: '/app/files/rewgt/web/edit_config.html',
+      url: creator.appBase()+'/edit_config.html',
       halfScreen: false,
       // icon: '', noMove: false,
       // left: 0.05, top: 0.05,
@@ -4534,10 +4590,24 @@ window.addEventListener('load', function(event) {
       }
     }
   },false);
-  
+}
+
+setTimeout( function() {
   var checkReadyNum_ = 0;
-  hookReadyEvent( function() {
-    if (typeof W == 'object' && W.$main) {
+  hookReadyEvent( function(succ) {
+    if (!succ || typeof W != 'object' || !W.$creator) {
+      alert('load shadow-widget system failed!');
+      return;
+    }
+    
+    var styNode = document.createElement('style');
+    styNode.innerHTML = '@-moz-document url-prefix(){button{padding:0px;}}';
+    document.head.appendChild(styNode);
+    
+    creator = W.$creator;
+    initCreator();
+    
+    if (W.$main) {
       W.$main.inDesign = true;
       if (rootNode.keyOfNode)
         getKeyFromNode_ = rootNode.keyOfNode;
@@ -4549,7 +4619,11 @@ window.addEventListener('load', function(event) {
       for (var i=0,node; node=bdNode.children[i]; i++) {
         if (node.classList.contains('rewgt-scene')) { // try show first ScenePage
           var sName = getKeyFromNode_(node);
-          if (sName) nextStep(sName);
+          if (sName) {
+            setTimeout( function() {
+              nextStep(sName);
+            },800);
+          }
           return;
         }
       }
@@ -4558,7 +4632,7 @@ window.addEventListener('load', function(event) {
     function nextStep(sName) {
       showRootPage(sName,false);
       setTimeout( function() {
-        switchPageList();  // show thumbnail list
+        switchPageList_();  // show thumbnail list
       },2000);  // wait ready for cloning thumb nodes
     }
   });
@@ -4566,25 +4640,19 @@ window.addEventListener('load', function(event) {
   function hookReadyEvent(callback) {
     if (!callback) return;
     checkReadyNum_ += 1;
-    if (checkReadyNum_ > 16) {   // force callback after 8 seconds
+    if (checkReadyNum_ > 180) {   // timeout: 90 seconds
       setTimeout( function() {
-        callback();
+        callback(false);
       },0);
       return;
     }
     
     setTimeout( function() {
-      if (!window.W)
-        hookReadyEvent(callback);
-      else {
-        if (W.$main) {
-          if (W.$main.inRunning)
-            callback();
-          else hookReadyEvent(callback);
-        }
-      }
+      if (window.W && W.$main && W.$main.inRunning)
+        callback(true);
+      else hookReadyEvent(callback);
     },500);
   }
-},false);
+},800);
 
 })();

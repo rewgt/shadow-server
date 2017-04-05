@@ -4,6 +4,12 @@
 <meta charset="utf-8" />
 <title>Empty page</title>
 <style>
+@-moz-document url-prefix() {
+  button {
+    padding: 0px;
+  }
+}
+
 .noselect-txt {
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -27,8 +33,8 @@ body {
 }
 
 .tool-btn, .tool-img {
-  padding: 0px 1px 1px 0px;
-  border: 1px solid rgba(0,0,0,0);
+  padding: 0px;
+  border: 1px solid transparent;
   width: 16px;
   height: 16px;
 }
@@ -58,9 +64,8 @@ body {
   <tr id='filelist-title'>
     <th style='width:20px'><img class='tool-btn' title='refresh' src='res/refresh.png'></th>
     <th style='text-align:left'>
-      <img class='tool-btn' title='current directory' style='display:none' src='res/home_page.png'>
-      <span style='display:inline; margin:10px 12px; height:0px'></span>
-      <span style='position:relative; left:36px; top:1px; vertical-align:super'></span>
+      <div style='display:inline-block; width:54px; height:18px; overflow:hidden'><img class='tool-btn' title='current directory' style='display:none' src='res/home_page.png'><img class='tool-btn' style='display:none' src='res/upload.png'><input type='file' title='upload file' style='display:none; position:relative; left:-18px; top:-6px; width:18px; height:22px; opacity:0' multiple /></div>
+      <span style='position:relative; left:6px; top:1px; vertical-align:super'></span>
     </th>
   </tr>
   <tr id='goto-uplevel'>
@@ -80,8 +85,15 @@ body {
 <div id='open-md' style='display:none; position:absolute; top:0px; right:8px'>
   <button>view</button>
 </div>
+<div id='rmv-file' style='display:none; position:absolute; top:0px; right:20px'>
+  <button>remove</button>
+</div>
+<div id='new-folder' style='display:none; position:absolute; top:0px; right:8px'>
+  <button>new folder</button>
+</div>
 
 <script>
+
 (function() {
 
 var fileTBodyNode  = null;
@@ -89,18 +101,50 @@ var titleTdNode    = null;
 var uplevelTrNode  = null;
 var widgetListNode = null;
 var previewImgNode = null;
+var removFileNode  = null;
 var viewMdFileNode = null;
+var newFolderNode  = null;
 var homeImgNode    = null;
-var homeSpanNode   = null;
+var uploadImgNode  = null;
+var uploadFileNode = null;
 var titleSpanNode  = null;
 
+var proxyDirList   = false;
 var canShowHomeBtn = false;
+var canShowUpldBtn = false;
 
 var inputJson    = null;
 var hasProjBase  = false;
 var sWorkDirUrl  = '';
+var sWorkDirBase = '';
+var sWorkDirHome = '';
 var sLastListUrl = '';
 
+var Git = null, userObj = null, braObj = null;
+var utils = window.W? W.$utils: null;
+
+//------
+function getCacheImg(sPath) {
+  return '';
+}
+
+function listGitFiles(sUrl,callback) {
+  return callback('system error');
+}
+
+function uploadOnSelect(event) {
+  // do nothing
+}
+
+function removeFileClick(event) {
+  // do nothing
+}
+
+function tryCreateFolder(sName) {
+  // do nothing
+}
+
+//------
 function htmlEncode(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -145,24 +189,58 @@ function getAsynRequest(sUrl,callback) {  // callbac must passed
   }
 }
 
-function updateInputJson(sUrl) {
-  getAsynRequest(sUrl, function(err,sJson) {
-    var sErr = '';
-    if (err) {
-      sErr = 'Request failed';
-      console.log('request failed: ' + sUrl);
-      console.log(err);
-    }
-    else {
-      try {
-        inputJson = JSON.parse(sJson);
+function newOneFolder(sName) {
+  var tr = document.createElement('tr');
+  var td = document.createElement('td');
+  var img = document.createElement('img');
+  img.setAttribute('class','tool-img');
+  img.setAttribute('src','res/file_folder.png');
+  td.appendChild(img);
+  tr.appendChild(td);
+  
+  var td2 = document.createElement('td');
+  td2.innerHTML = htmlEncode(sName);
+  tr.appendChild(td2);
+  
+  tr.setAttribute('data-name',sName);
+  tr.addEventListener('dblclick',sublevelOnDbClick,false);
+  return tr;
+}
+
+function hideAllFloatBtn(event) {
+  if (removFileNode) removFileNode.style.display = 'none';
+  if (previewImgNode) previewImgNode.style.display = 'none';
+  if (viewMdFileNode) viewMdFileNode.style.display = 'none';
+  if (newFolderNode) newFolderNode.style.display = 'none';
+}
+
+function updateInputJson(sUrl,callback) {  // callback must passed
+  if (braObj) {
+    listGitFiles(sUrl,whenGetJson);
+  }
+  else {
+    var sUrl2 = sWorkDirUrl + '?base=' + encodeURIComponent(sWorkDirBase) + '&url=' + encodeURIComponent(sUrl);
+    getAsynRequest(sUrl2, function(err,sJson) {
+      var sErr = '';
+      if (err) {
+        sErr = 'Request failed';
+        console.log('request failed: ' + sUrl);
+        console.log(err);
       }
-      catch(e) {
-        sErr = 'Invalid JSON';
-        console.log('parse JSON failed: ' + e);
+      else {
+        try {
+          inputJson = JSON.parse(sJson);
+        }
+        catch(e) {
+          sErr = 'Invalid JSON';
+          console.log('parse JSON failed: ' + e);
+        }
       }
-    }
-    
+      whenGetJson(sErr);
+    });
+  }
+  
+  function whenGetJson(sErr) {
     // reset GUI
     titleSpanNode.innerHTML = '';
     uplevelTrNode.style.display = 'none';
@@ -170,54 +248,39 @@ function updateInputJson(sUrl) {
       fileTBodyNode.removeChild(fileTBodyNode.children[2]);
     }
     widgetListNode.innerHTML = '';
-    previewImgNode.style.display = 'none';
-    viewMdFileNode.style.display = 'none';
+    hideAllFloatBtn();
     
     // update content
-    if (sErr)
+    if (sErr) {
       titleSpanNode.innerHTML = sErr;
-    else setupByJson();
-  });
-  
-  function setupByJson() {
-    // step 1: setup title, uplevel
-    var showGoHome = false;
-    if (canShowHomeBtn && sWorkDirUrl)
-      showGoHome = true;
-    if (showGoHome) { // show go home button
-      homeImgNode.style.display = 'inline';
-      homeSpanNode.style.display = 'none';
+      callback(false);
     }
     else {
-      homeImgNode.style.display = 'none';
-      homeSpanNode.style.display = 'inline';
+      setupByJson();
+      callback(true);
     }
+  }
+  
+  function setupByJson() {
+    if (!inputJson) return;
+    
+    // step 1: setup title, uplevel
+    var showGoHome = canShowHomeBtn && sWorkDirUrl;
+    homeImgNode.style.display = showGoHome? 'inline': 'none';
+    uploadFileNode.style.display = uploadImgNode.style.display = (canShowUpldBtn? 'inline': 'none');
+    
     titleSpanNode.innerHTML = htmlEncode(inputJson.title || '');
     titleSpanNode.setAttribute('title',inputJson.path); // inputJson.path must be string
     uplevelTrNode.style.display = inputJson.atTop? 'none': 'table-row';
     
     // step 2: setup folders
     (inputJson.folders || []).forEach( function(item) {
-      var tr = document.createElement('tr');
-      var td = document.createElement('td');
-      var img = document.createElement('img');
-      img.setAttribute('class','tool-img');
-      img.setAttribute('src','res/file_folder.png');
-      td.appendChild(img);
-      tr.appendChild(td);
-      
-      var td2 = document.createElement('td');
-      td2.innerHTML = htmlEncode(item);
-      tr.appendChild(td2);
-      
-      tr.setAttribute('data-name',item);
-      tr.addEventListener('dblclick',sublevelOnDbClick,false);
-      fileTBodyNode.appendChild(tr);
+      fileTBodyNode.appendChild(newOneFolder(item));
     });
     
     // step 3: setup files
     (inputJson.files || []).forEach( function(item) {
-      var sName = item[0], sMeta = item[1], sUrl = item[2], template = item[3], preview = item[4];
+      var sName = item[0], sMeta = item[1], sUrl = item[2], sSha = item[3];
       var tr = document.createElement('tr');
       
       var td = document.createElement('td');
@@ -236,8 +299,7 @@ function updateInputJson(sUrl) {
       
       tr.setAttribute('data-name',sName);
       tr.setAttribute('data-type',sMeta);
-      if (template) tr.template = template; // template data
-      if (preview) tr.preview = preview;    // preview data
+      if (sSha) tr.setAttribute('data-sha',sSha);
       tr.addEventListener('click',fileOnClick,false);
       fileTBodyNode.appendChild(tr);
     });
@@ -290,15 +352,19 @@ function updateInputJson(sUrl) {
 function refreshOnClick(event) {
   event.stopPropagation();  
   if (sWorkDirUrl && sLastListUrl) {
-    var sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
-    updateInputJson(sUrl);
+    updateInputJson(sLastListUrl, function(succ) {
+      // sLastListUrl not changed
+    });
   }
 }
 
 function goHomeOnClick(event) {
   event.stopPropagation();  
-  if (hasProjBase && sWorkDirUrl)
-    updateInputJson(sWorkDirUrl);
+  if (hasProjBase && sWorkDirUrl) {
+    updateInputJson(sWorkDirHome, function(succ) {
+      if (succ) sLastListUrl = sWorkDirHome;
+    });
+  }
 }
 
 function uplevelOnDbClick(event) {
@@ -306,18 +372,19 @@ function uplevelOnDbClick(event) {
   if (!inputJson || inputJson.atTop) return;
   
   if (sWorkDirUrl && sLastListUrl) {
-    var s = sLastListUrl;
+    var sNewUrl, s = sLastListUrl;
     if (s.slice(-1) == '/') s = s.slice(0,-1);
     var b = s.split('/');
     if (b.length >= 2) {
       b.pop();
       s = b.join('/');
-      sLastListUrl = s || '/';
+      sNewUrl = s || '/';
     }
-    else sLastListUrl = '/';
+    else sNewUrl = '/';
     
-    var sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
-    updateInputJson(sUrl);
+    updateInputJson(sNewUrl, function(succ) {
+      if (succ) sLastListUrl = sNewUrl;
+    });
   }
 }
 
@@ -335,14 +402,37 @@ function sublevelOnDbClick(event) {
       targ = targ.parentNode;
     }
     
-    var sName = node && node.getAttribute('data-name');
+    var sNewUrl, sName = node && node.getAttribute('data-name');
     if (!sName) return;
     
     if (sLastListUrl.slice(-1) == '/')
-      sLastListUrl += sName;
-    else sLastListUrl += '/' + sName;
-    var sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
-    updateInputJson(sUrl);
+      sNewUrl = sLastListUrl + sName;
+    else sNewUrl = sLastListUrl + '/' + sName;
+    updateInputJson(sNewUrl, function(succ) {
+      if (succ) sLastListUrl = sNewUrl;
+    });
+  }
+}
+
+function goUpOnClick(event) {
+  event.stopPropagation();
+  
+  var targ = event.target, node = null;
+  while (targ) {
+    if (targ.nodeName == 'TR') {
+      node = targ;
+      break;
+    }
+    targ = targ.parentNode;
+  }
+  if (!node || node.id !== 'goto-uplevel') return;
+  
+  hideAllFloatBtn();
+    
+  if (canShowUpldBtn && braObj) {
+    var rect = node.getBoundingClientRect();
+    newFolderNode.style.top = (rect.top - 1) + 'px';
+    newFolderNode.style.display = 'block';
   }
 }
 
@@ -362,27 +452,46 @@ function fileOnClick(event) {
   var sName = node.getAttribute('data-name');
   if (!sName) return;
   
-  var rect, sMeta = node.getAttribute('data-type') || '';
+  hideAllFloatBtn();
+  
+  var showMdBtn = false, img = null;
+  var sMeta = node.getAttribute('data-type') || '';
+  var sUrl = inputJson.path? inputJson.path + '/' + sName: sName;
+  var rect = node.getBoundingClientRect();
   if (sMeta == 'text/x-markdown') {
-    var sUrl = inputJson.path? inputJson.path + '/' + sName: sName;
-    var rect = node.getBoundingClientRect();
     viewMdFileNode.style.top = (rect.top - 1) + 'px';
     viewMdFileNode.style.display = 'block';
     viewMdFileNode.setAttribute('mdsrc',sUrl);
+    showMdBtn = true;
   }
   else if (sMeta.indexOf('image/') == 0) {
+    var sDataUrl = getCacheImg(sUrl);
+    var sUrl2 = sDataUrl? sDataUrl: sUrl;
+    
     rect = node.getBoundingClientRect();
-    var sUrl = inputJson.path? inputJson.path + '/' + sName: sName;
-    var img = previewImgNode.querySelector('img');
-    if (img.getAttribute('src') == sUrl && img.complete)
+    img = previewImgNode.querySelector('img');
+    if (img.getAttribute('src') === sUrl2 && img.complete)
       imgOnLoad();
     else {
       img.onload = imgOnLoad;
       img.setAttribute('title',sName);
-      img.setAttribute('src',sUrl);
+      img.setAttribute('src',sUrl2);
       img.setAttribute('data-name',sName);
       img.setAttribute('data-type',sMeta);
     }
+  }
+  
+  if (canShowUpldBtn && braObj && sUrl.startsWith('/'+braObj.repoName+'/')) {
+    var repoPath = sUrl.slice(braObj.repoName.length+2);
+    if (repoPath.split('/').length > 1) {
+      var rightWd = 8, sSha = node.getAttribute('data-sha') || '';
+      if (showMdBtn) rightWd += (viewMdFileNode.clientWidth || 0);
+      removFileNode.style.top = (rect.top - 1) + 'px';
+      removFileNode.style.right = rightWd + 'px';
+      removFileNode.style.display = 'block';
+      removFileNode.setAttribute('rmvsrc',repoPath);
+      removFileNode.setAttribute('data-sha',sSha);
+    } // else, can not remove file that direct under repo
   }
   
   function imgOnLoad(event) {
@@ -408,7 +517,6 @@ function fileDragStart(event) {
   }
   if (!targ) return;
   
-  // targ.template, targ.preview not used yet
   var sName = targ.getAttribute('data-name'), sMeta = targ.getAttribute('data-type');
   if (!sName || !sMeta) return;
   var sUrl = inputJson.path || '';
@@ -437,7 +545,7 @@ function fileDragEnd(event) {
   }
 }
 
-function thumbDragStart(event) {
+function thumbDragStart(event) {  // for template image node
   var targ = event.target, isJsonSvg = true;
   if (targ.nodeName == 'IMG')
     isJsonSvg = false;
@@ -470,17 +578,41 @@ function thumbDragEnd(event) {
   }
 }
 
+var re_abs_url_ = /^\/|http:|https:/;
+
 window.addEventListener('load', function(event) {
   var param = getUrlParam(window.location.search.slice(1));
   var sPrjBase = decodeURIComponent(param.base || '');
   if (sPrjBase && sPrjBase.slice(-1) == '/') sPrjBase = sPrjBase.slice(0,-1);
+  proxyDirList = !!param.repo;
+  canShowHomeBtn = !!param.home;  // home=1
+  canShowUpldBtn = !!(param.upload && param.repo);
+  
+  if (proxyDirList && utils && utils.gitOf) {
+    var repoName = decodeURIComponent(param.repo);
+    var siteHost  = window.location.hostname, sitePort = window.location.port;
+    if (param.site) siteHost = decodeURIComponent(param.site); // param.site = 'api.github.com'
+    var sHostPort = sitePort? siteHost + ':' + sitePort: siteHost;
+    Git = (siteHost == 'localhost' || siteHost == '127.0.0.1')
+        ? utils.gitOf(sHostPort,'http')   // fixed to http
+        : utils.gitOf(sHostPort,'https'); // fixed to https, location.port should be ''
+    
+    userObj = new Git.User(param.user?decodeURIComponent(param.user):'pinp');
+    if (!userObj.isLocal && param.token)
+      Git.siteAuth = 'OAuth ' + decodeURIComponent(param.token);
+    braObj = new Git.Branch(userObj,repoName,'gh-pages');
+  }
+  
   var sUrl = decodeURIComponent(param.url || ''), needJump = false;
   if (!sUrl) {
     if (sPrjBase)
       sUrl = sPrjBase; // default list resouce of current project
-    else sUrl = '/app/files/rewgt/web/templates';
+    else sUrl = 'templates';
   }
   else {
+    if (sPrjBase && sUrl.search(re_abs_url_) != 0)
+      sUrl = sPrjBase + '/' + sUrl;
+    
     if (sUrl.slice(-5) == '.html') {
       setTimeout( function() {
         window.open(sUrl+(param.base?'?base='+param.base:''),'_self');
@@ -488,14 +620,15 @@ window.addEventListener('load', function(event) {
       return;
     }
   }
-  
-  canShowHomeBtn = !!param.home; // home=xx
+  if (canShowHomeBtn) sWorkDirHome = sUrl;
   
   fileTBodyNode  = document.querySelector('#file-list tbody');
   uplevelTrNode  = document.querySelector('#goto-uplevel');
   widgetListNode = document.querySelector('#widget-list');
   previewImgNode = document.querySelector('#preview-img');
+  removFileNode  = document.querySelector('#rmv-file');
   viewMdFileNode = document.querySelector('#open-md');
+  newFolderNode  = document.querySelector('#new-folder');
   
   // define preview image dragging event
   var previewImg_ = previewImgNode.querySelector('img');
@@ -532,13 +665,18 @@ window.addEventListener('load', function(event) {
     }
   };
   
+  removFileNode.addEventListener('click',removeFileClick,false);
   viewMdFileNode.addEventListener('click', function(event) {
     var targ = event.target;
     if (!targ || targ.parentNode !== viewMdFileNode) return;
     event.stopPropagation();
     
     var sUrl = viewMdFileNode.getAttribute('mdsrc') || '';
-    if (sUrl) window.open('/app/files/rewgt/web/show_md.html?url='+encodeURIComponent(sUrl),'_blank');
+    if (sUrl) window.open('show_md.html?url='+encodeURIComponent(sUrl),'_blank');
+  },false);
+  newFolderNode.addEventListener('click', function(event) {
+    event.stopPropagation();
+    tryCreateFolder();
   },false);
   
   // initial config
@@ -547,27 +685,28 @@ window.addEventListener('load', function(event) {
     b[0].addEventListener('click',refreshOnClick,false);
     titleTdNode = b[1];
     
-    homeImgNode = titleTdNode.querySelector('img');
+    var b2 = titleTdNode.querySelectorAll('img');
+    homeImgNode = b2[0]; uploadImgNode = b2[1];
     homeImgNode.addEventListener('click',goHomeOnClick,false);
-    var nodes = titleTdNode.querySelectorAll('span');
-    homeSpanNode = nodes[0];
-    titleSpanNode = nodes[1];
+    uploadFileNode = titleTdNode.querySelector('input');
+    uploadFileNode.onmouseover = function(ev) {uploadImgNode.style.borderColor='#fff #aaa #aaa #fff'};
+    uploadFileNode.onmouseout = function(ev) {uploadImgNode.style.borderColor='transparent'};
+    uploadFileNode.addEventListener('change',uploadOnSelect,false);
+    titleSpanNode = titleTdNode.querySelector('span');
   }
+  if (canShowUpldBtn && braObj)
+    uplevelTrNode.addEventListener('click',goUpOnClick,false);
   uplevelTrNode.addEventListener('dblclick',uplevelOnDbClick,false);
   previewImgNode.addEventListener('click', function(event) {
     event.stopPropagation();
   },false);
-  document.addEventListener('click', function(event) {
-    previewImgNode.style.display = 'none';
-    viewMdFileNode.style.display = 'none';
-  },false);
+  document.addEventListener('click',hideAllFloatBtn,false);
   
   hasProjBase = !!sPrjBase;
   sWorkDirUrl = sPrjBase? sPrjBase + '/$list': '/files/$list';
-  sWorkDirUrl += '?base=' + encodeURIComponent(sPrjBase || '');
+  sWorkDirBase = sPrjBase || '';
   sLastListUrl = sUrl;
-  sUrl = sWorkDirUrl + '&url=' + encodeURIComponent(sLastListUrl);
-  updateInputJson(sUrl);
+  updateInputJson(sLastListUrl,function(succ){});
 },false);
 
 })();

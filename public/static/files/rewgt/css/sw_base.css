@@ -1,4 +1,4 @@
-/* base.css */
+/* sw_base.css */
 
 html {
   font-size: 16px;      /* base of rem */
@@ -141,6 +141,9 @@ h6.small-default-large, .S6.small-default-large {
   flex: 0 0 auto;   /* same to 'none' */
   -ms-flex-item-align: auto;
   align-self: auto; /* not support box */
+}
+hr.rewgt-unit {
+  border-color: #222;
 }
 
 .rewgt-inline {
