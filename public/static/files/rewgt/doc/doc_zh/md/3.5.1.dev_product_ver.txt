@@ -9,7 +9,7 @@
 
 所以，对于运行在本机的调测环境而言，开发版与发行版是同一工程的两种启动方式。
 
-其次，对于运行中的工程，它能识别当前运行在开发态与发行态，Shadow Widget 采用 `W.__debug__` 指示当前版本以 development 方式运行，还是以 production 方式运行，编程中我们可以广泛插入如下代码来辅助调测：
+对于运行中的工程，系统通过 `W.__debug__` 取值识别当前版本是否处于调测态，编程中我们可以广泛插入如下代码来辅助调测：
 
 ``` js
     if (W.__debug__) {
@@ -17,9 +17,26 @@
     }
 ```
 
-最后，当产品调测通过，要正式发布时，须经转译、压缩等一系列打包过程，发布到市场的产品代码应该是整洁的、精简无重复的。所以，一个开发中的工程在本机至少有 3 种运行方式：未经打包时既能以 development 方式运行，也能以 production 方式运行，还有一种是打包后的 production 方式。
+对于经 browserify 或 webpack 组织的开发项目，调测通过后，发布产品有三种方式：
 
-#### 发布前的版本如何调测
+其一，直接使用 browserify（或 webpack）输出的 JS 打包文件（bundle.js），这个 bundle.js 已是 ES5 规格，是否 minify 压缩可选，业界已有许多 `JS minify` 工具，选择一款做压缩即可。
+
+其二，也使用 bundle.js，但将它包含的标准库（如 React、Shadow Widget 等）剔除，改用 `<script>` 导入这些库的 cdn 版本。
+
+比如在网页文件中这么书写：
+
+``` html
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js'></script>
+  <script src='js/shadow-widget.min.js'></script>
+  <script src='js/bundle.js'></script>
+```
+
+如何生成剔除标准库的 bundle.js 文件在下文介绍。
+
+其三，将 bundle.js 分拆成底层依赖的标准库与自己的代码两部分，标准库如 React 等采用 cdn 版本，自己的代码则改造成 main 模块，如何改造在下文介绍。这么做的好处理是实现代码分离，方便了重用，如果代码都一股脑打包在 bundle.js 中，换个开发场景很难重的。
+
+#### 发布前的版本如何调测？
 
 如果不搭建工程环境，像 [“简单示例”](#1.4.) 举例的 demo1 工程那样，只在 html 网页中编程，运行被测工程比较简单，只两步：
 
@@ -28,40 +45,73 @@
 
 如果像 [“搭建工程环境”](#3.1.) 描述的那样建立 browserify 或 webpack 工程环境，在网页 html 文件中，用 `'<script src="bundle.js"></script>'` 导入 bundle.js（这正是打包工具缺省输出的文件）。同样在本机 WebService 启动后，再在浏览器访问工程目录，当前工程即被运行。
 
-打包工具缺省输出的 bundle.js 文件，已将所有依赖的 JS 库一并打包了，包括：react、react-dom、shadow-widget 等。接下来要介绍的为发行版本做适配，无非改变一下 bundle.js 的组织方式。
+上述 3 种产品发布方式无非改变 bundle.js 的组织形式，不影响调测操作。
 
-#### 制作发行版本的打包过程
+#### 生成剔除标准库的 bundle.js
 
-发行版本既可以像调测用的 bundle.js 那样，把所有依赖库打包在一起，也可以把标准库从输出的 JS 文件剔除，这样，在网页文件中要用多条 `<script>` 语句把各个标准库导入进来，比如：
-
-``` html
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js'></script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js'></script>
-  <script src='js/shadow-widget.min.js'></script>
-```
-
-我们建议采用后一方式，即：将依赖的标准库独立出来使用。因为标准库通常较大，有时不只 Shadow Widget 工程依赖它，其它网页也可能依赖它，因近期用过的标准库可被浏览器缓存，将标准库独立出来分别导入，可减少远程加载次数，另外，上层依赖标准库的版本也能灵活替换，尽量让底层库统一到同一版本。
-
-剥离 react、react-dom 标准库，并经压缩的 Shadow Widget 发行版本，也称为 cdn 版本。在网页中用 `<script>` 标签导入该 cdn 库后，系统自动创建 `window.W` 变量，该变量就是 `requrie('shadow-widget')` 的结果值。这种做法与导入 react 与 react-dom 的发行版自动登记变量 `window.React, window.ReactDOM` 是一致的。
-
-制作发行版本第一步：生成剔除标准库的 bundle.js 包文件。
-
-若用 browserify 打包工具，将标准库从 bundle.js 剔除用 `-u` 选项，原 `npm start` 执行如下命令（见 package.json 中 start 命令）：
+若用 browserify 打包工具，将标准库从 bundle.js 剔除用 `-u` 选项，原有 `npm start` 执行如下命令（见 package.json 中 start 命令）：
 
 ``` bash
     watchify index.js -v -o bundle.js -t [ babelify --presets [ es2015 react ] ]
 ```
 
-剔除 3 个 cdn 库，start 命令改为：
+剔除 3 个 cdn 库，`npm start` 改用：
 
 ``` bash
     watchify -u react -u react-dom -u shadow-widget index.js -v -o bundle.js -t [ babelify --presets [ es2015 react ] ]
 ```
 
+参数 `-u` 用来指示剔除哪个依赖库。
+
 若用 webpack 打包，应在 webpack.config.js 中配置 externals，将 `react, react-dom, shadow-widget` 三个库定义为 external 即可，详情请参考 webpack 用户手册。
 
-第二步：压缩 bundle.js 文件。因为 bundle.js 已转化为 ES5 规格，业界已有许多 `JS Minify` 工具，选择一款做压缩即可。
+产品正式发布时，我们建议将依赖的标准库独立出来，标准库用 cdn 版本。因为，标准库通常较大，有时不只当前工程依赖它，其它网页也可能依赖它，近期用过的标准库能被浏览器缓存，将标准库独立出来分别导入，可减少远程加载次数，另外，上层依赖标准库的版本也能灵活替换，尽量让用到的底层库统一到某个版本，否则，同一底层库在一个网页有数个版本被加载，容易引发不可预知的问题。
 
-以上扼要介绍打包过程，实际的打包操作可能很复杂，比方还涉及 css 转换、图片合并等，请尽量采用第 3 方工具（如 gulp），把打包过程自动化起来。
+打包过程可能很复杂，上面只涉及 js 文件，实践中可还会涉及 css 转换、图片合并等，请尽量采用第 3 方工具（如 gulp），把打包过程自动化起来。
+
+####  main 模块的导入过程
+
+如 [模块化管理](#2.7.6.) 一节介绍，main 模块不是一个模块，而是一系列模块，这些模块要在 shadow-widget 库之前用 `<script>` 导入进来，各 main 模块均按如下格式编写：
+
+``` js
+if (!window.W) { window.W = new Array(); W.$modules = [];}
+W.$modules.push( function(require,module,exports) {
+
+// ...
+
+});
+```
+
+上述代码实质是在 `W.$modules` 登记本模块代码，然后等 shadow-widget 库就绪后，由 shadow widget 逐一导入各 main 模块的代码，此时，“就绪” 意味着：
+
+1. React 与 Shadow Widget 库已导入
+2. 在 HTML 网页定义的转义标签尚未导入
+3. 已准备好 require 函数，所以，各 main 模块中可用如下 require 语句：
+
+``` js
+  var React = require('react');
+  var ReactDOM = require('react-dom');
+  var W = require('shadow-widget');
+```
+
+各 main 模块在 `main.$$onLoad, main.$onReady, main.$onLoad` 注册初始化函数（参见 [API 手册：初始化列表](#4.1.3.)），当所有 main 模块导入后，系统接着导入在网页中定义的转义标签，之后，依次执行在 `main.$$onLoad, main.$onReady, main.$onLoad` 注册的初始化函数。
+
+#### 将 bundle.js 中的代码改造成 main 模块
+
+经 browserify 或 webpack 管理的 JS 模块，已将所有用到 JS 文件，包括依赖库，一并打包了。像 react、react-dom、shadow-widget 等源码缺省也一起打包，除非用了特别指令（如 browserify 的 `-u`）将特定的库排除。
+
+如果想把自己编的代码从 bundle.js 挪出来，改造成 main 模块，只需：
+
+1. 创建一个新的 JS 文件，编写如下代码   
+`if (!window.W) { window.W = new Array(); W.$modules = [];}`   
+`W.$modules.push( function(require,module,exports) {`   
+`// write your code here ...`   
+`});`
+
+2. 从 bundle.js 中找出相关代码，拷贝到上面注释行位置，存盘
+
+3. 之后，在 HTML 页面用 `<script>` 导入这个 JS 文件即可
+
+这种 main 模块可以用作 cdn 版本，Shadow Widget 官方的 [shadow-slide 项目](https://github.com/rewgt/shadow-slide) 就是按上述方法制作 cdn 版本的。
 
 &nbsp;

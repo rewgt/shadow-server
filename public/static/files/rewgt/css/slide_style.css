@@ -191,3 +191,32 @@ article.rewgt-scene.no-frame {
 #react-container[__design__="1"] .rewgt-timer {
   visibility: visible;
 }
+
+.flip_x-y-default {
+  -o-transform: scale(-1,1);
+  -moz-transform: scale(-1,1);
+  -webkit-transform: scale(-1,1);
+  -ms-transform: scale(-1,1);
+  transform: scale(-1,1);
+}
+.flip_x-y-default > .rewgt-unit {
+  -o-transform: scale(-1,1);
+  -moz-transform: scale(-1,1);
+  -webkit-transform: scale(-1,1);
+  -ms-transform: scale(-1,1);
+  transform: scale(-1,1);
+}
+.y-default-flip_x {
+  -o-transform: scale(1,-1);
+  -moz-transform: scale(1,-1);
+  -webkit-transform: scale(1,-1);
+  -ms-transform: scale(1,-1);
+  transform: scale(1,-1);
+}
+.y-default-flip_x > .rewgt-unit {
+  -o-transform: scale(1,-1);
+  -moz-transform: scale(1,-1);
+  -webkit-transform: scale(1,-1);
+  -ms-transform: scale(1,-1);
+  transform: scale(1,-1);
+}

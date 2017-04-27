@@ -31,7 +31,7 @@ shadow-server 是 Shadow Widget 开发系统在本机提供的 WebService 服务
 
 在 Shadow Widget 中编辑或浏览一个 SPA（Single Page Application），或一篇文档，均以 “工程” 为单位。尽管工程目录与其它目录一样，在浏览器中都用 URL 存取内容，但工程目录是一种特殊目录，在它之上会附加特定操作，比如我们的可视设计器用 `"project/$creator"` 打开 `project` 工程的 `index.html` 文件进行编辑，`$creator` 是一种服务，而不是某个文件名，类似的还有 `$save` 等内置服务，专供可视设计器调用。
 
-诸如 `$creator, $save` 等服务只在工程目录下提供，这意味着，我们的可视化编辑器只针对工程目录下的网页，非工程目录直属的文件无法被编辑。无法直接可视化编辑，但编辑后整体搬移是允许的，若想让一个网页文件能任意搬移，需以相对路径方式引用所有资源（如图片、js、css 等文件等）。
+诸如 `$creator, $save` 等服务只在工程目录下提供，这意味着，我们的可视化编辑器只针对工程目录下的网页，非工程目录直属的文件无法被编辑。无法直接可视化编辑，但编辑后整体搬移是允许的，若想让一个网页文件能任意搬移，应以相对路径方式引用所有资源（如图片、js、css 等文件等）。
 
 #### 绝对路径引用
 
@@ -42,9 +42,9 @@ shadow-server 是 Shadow Widget 开发系统在本机提供的 WebService 服务
   /app/user/shadow-widget/web/bundle.js
 ```
 
-前者是常规应用形式，后者为 **“安装项引用”**，是 `localhost` 与 `pinp.me` 两个站点均兼容的应用形式。这两者在本机 localhost 下使用都是正确的。
+前者是常规应用形式，后者为 **“安装项引用”**，是 `localhost` 与 `pinp.me` 两个站点均兼容的应用形式。这两种形式在本机 localhost 下使用都是正确的。
 
-“安装项引用” 将引用对象看作已安装 APP 中的文件，URL 路径固定用 `"/app/"` 开头，后面附加的 `"user"` 与 `"web"`，分别用来指示用户名与版本分支名， 在本机使用时，`"user"` 可取任意名称（不影响使用效果），`"web"` 则是固定用法，不能改成别的名称，且紧跟在工程名（如这里的 `"shadow-widget"`）之后书写。这两项额外增加的信息表明：本机的 `shadow-widget` 软件，对应于 `user` 用户在 `pinp.me` 站点中 `shadow-widget` 版本的 `web` 分支。
+“安装项引用” 将引用对象看作已安装 APP 的文件，URL 路径固定用 **`"/app/user"`** 开头，以此定位 APP 位置，若仅在 localhost 本机使用，`"user"` 可取任意名称（不影响效果）。URL 的工程名（如这里的 `"shadow-widget"`）之后插入 **`"web"`** 段，指示使用 APP 的 `web` 版本分支， `"web"` 是固定用法，不能改成别的名称。
 
 前面所提 “总根目录” 的 `user` 与 “安装项引用” 中的 `user` 同义，在`localhost` 本机访问时，因为它不必在文件定位中发挥作用（总根目录是固定的，就一个），总根目录名也可改成其它任意名，不影响使用效果。比如将它改成 `shadow-widget` 在 github 注册的账户名 `"rewgt"`，这样，工程 `rewgt/shadow-server` 与 `rewgt/shadow-widget` 在本机与 github.com 同时存在，本机目录与 github 上的目录统一了，理解起来更方便。
 
@@ -54,12 +54,12 @@ shadow-server 是 Shadow Widget 开发系统在本机提供的 WebService 服务
   <script src="/shadow-widget/bundle.js"></script>
 ``` 
 
-或者用：
+或者这么用（插入了 `/app/rewgt` 与 `web`）：
 
 ``` html
   <script src="/app/rewgt/shadow-widget/web/bundle.js"></script>
 ``` 
 
-新建的工程既能上传到 `github.com`，也能上传到 `pinp.me` 站点，但只有采用后者 “安装项引用” 方式，`pinp.me` 下的网页才能在线正常打开。
+新建的工程既能上传到 `github.com`，也能上传到 `pinp.me` 站点，但只有采用后者 “安装项引用” 方式，`pinp.me` 下的网页才能在线正常打开。所以，如果弃用相对路径方式，改用绝对路径，您须事先想清楚最终版本要发布到哪个网站。
 
 &nbsp;

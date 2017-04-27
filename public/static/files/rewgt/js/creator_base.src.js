@@ -5,6 +5,9 @@ if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( func
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+var createClass_ = React.createClass;
+if (!createClass_) console.log('fatal error: invalid React.createClass'); // before v15.5
+
 var W = require('shadow-widget');
 var main = W.$main, utils = W.$utils, T = W.$templates, creator = W.$creator;
 
@@ -534,7 +537,7 @@ main.$$onLoad.push( function(callback) {
     var topObj = topmostWidget_ && topmostWidget_.component;
     if (!topObj) return doCallback();
     
-    var ele = React.createElement(React.createClass(T.Panel._extend()), {
+    var ele = React.createElement(createClass_(T.Panel._extend()), {
       'hookTo.':topmostWidget_, key:'$pop', 'keyid.':'$pop',
       left:0, top:0, width:0, height:0,
       style:{position:'absolute', zIndex:3016, overflow:'visible'}, 
@@ -2262,6 +2265,7 @@ main.$$onLoad.push( function(callback) {
   
   containNode_.pasteWidget = function(sTargPath,sText,rmvPath,callback) {
     var inputNum = 0, succNum = 0, beUnselect = true;
+    var oldKeys = null, retNode = null, ownerObj = null;
     function doCallback(sMsg) {
       if (rmvPath) {
         if (succNum && succNum == inputNum) { // remove cut-widget only when all paste OK
@@ -2290,7 +2294,18 @@ main.$$onLoad.push( function(callback) {
       if (sMsg) utils.instantShow(sMsg);
       if (callback) {
         setTimeout( function() {
-          callback(succNum,beUnselect);
+          if (oldKeys && ownerObj) {
+            var b = Object.keys(ownerObj.$gui.compIdx);
+            for (var i = b.length-1; i >= 0; i--) {
+              var item = b[i];
+              if (item[0] != '$' && oldKeys.indexOf(item) < 0) {
+                var tmp = ownerObj.widget[item];
+                tmp = tmp && tmp.component;
+                if (tmp) retNode = tmp.getHtmlNode();
+              }
+            }
+          }
+          callback(succNum,beUnselect,retNode);
         },0); // maybe remove some widget, return in next tick
       }
     }
@@ -2308,7 +2323,7 @@ main.$$onLoad.push( function(callback) {
     var targ = W.W(sTargPath), targObj = targ && targ.component;
     if (!targObj) return doCallback();
     
-    var owner = null, ownerObj = null;
+    var owner = null;
     var inScene = targObj.props['isScenePage.']; // if inScene, fix to append child to owner, else insert before targ
     if (!inScene) {
       owner = targ.parent;
@@ -2336,7 +2351,10 @@ main.$$onLoad.push( function(callback) {
     });
     if (meetErr) return doCallback('paste failed: invalid format.');
     inputNum = bEle.length;
-    if (inputNum == 0) return doCallback('nothing to paste.');
+    if (inputNum == 0)
+      return doCallback('nothing to paste.');
+    else if (inputNum == 1 && inScene)
+      oldKeys = Object.keys(ownerObj.$gui.compIdx);
     
     // step 3: add widgets
     var tarType = 0, tarIsRow = false;

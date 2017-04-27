@@ -30,10 +30,10 @@ npm install
 
 在命令行运行 `webpack` 即启转译与打包，成功后，在 dist 目录输出 bundle.js 与 index.html 文件。然后在浏览器打开 `http://localhost:3000/sample_webpack/dist/`，看看是否正确显示 "Hello, world!" 信息。同样，您需事先启动 Shadow Widget 的本地 WebService 服务，否则浏览器打不开上述页面。
 
-由于 Shadow Widget 提供的 WebServer 并不支持 webpack 的 hot loader，如果想用 hot loader 特性，您须自行搭建 webpack-dev-server 服务环境。不过，hot loader 在 Shadow Widget 中用处不大，因为 Shadow Widget 的在线可视化开发环境，已提供一种 “热更新” 机制，参见 [可视化设计使用手册](#5.)。
+由于 Shadow Widget 提供的 WebServer 并不支持 webpack 的 hot loader，如果想用 hot loader 特性，您须自行搭建 webpack-dev-server 服务环境。不过，hot loader 在 Shadow Widget 中用处不大，因为 Shadow Widget 的在线可视化开发环境，已经具备 “热更新” 特性，参见 [可视化设计使用手册](#5.)。
 
 #### 选择 browserify 还是 webpack？
 
-如果您的团队对这两者没有特别的倾向性喜好，建议选择 browserify，如果您从事的并非巨型产品，建议用 browerify。webpack 的优点是功能强大，缺点是复杂、难用，有不少坑，如果可以不碰就尽量不碰。
+如果您的团队对这两者没有特别的倾向性喜好，建议选择 browserify，如果您从事的并非巨型产品，也建议用 browerify。webpack 的优点是功能强大，缺点是复杂、难用，有不少坑，如果可以不碰就尽量不碰。
 
 &nbsp;

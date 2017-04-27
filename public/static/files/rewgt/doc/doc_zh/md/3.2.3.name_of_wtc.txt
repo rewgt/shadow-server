@@ -29,7 +29,7 @@ WTC 实例名的首字符要求大写，因为 React 对自定义 tag 都要求�
 
 如果您开发的项目是中间组件，对外提供一种 lib 库时，我们要求所有对外共享 WTC 符号都定义到 `T.account` 之下，这里 account 是您在 pinp 社区注册的账户名，由注册账户的唯一性，保证任何厂商共享的构件库命名都不冲突。
 
-如果账户名以 `'-'` 分割多段，要求取 camelCased 命名，如 `'abc-def'` 取名 `abcDef`。
+如果账户名以 `'-'` 分割多段，要求取 camelCased 风格命名，如 `'abc-def'` 取名 `abcDef`。
 
 #### <a name="lib_ui"></a>库化 UI 的命名
 

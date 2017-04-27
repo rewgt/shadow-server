@@ -13,7 +13,7 @@
 
 4. ![button](md/res/align_btn.png) Align center 按钮，恢复主设计区位置（即：让上标尺与左标尺的中间标记回到中间位置）
 
-5. ![button](md/res/delete_btn.png) Remove widget 按钮，删除选中的按钮
+5. ![button](md/res/delete_btn.png) Remove widget 按钮，删除选中的构件
 
 6. ![button](md/res/undo_btn.png) Undo 按钮，回退上一步修改
 

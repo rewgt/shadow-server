@@ -24,7 +24,7 @@ main 模块下定义三种初始化列表 `$$onLoad`，`$onReady`与 `$onLoad`�
 
 #### <a name="onready"></a>`$onReady`
 
-`main.$onReady` 是 array 类型，数组成员为不带参数的函数。
+`main.$onReady` 是 array 类型，数组成员为不带参数的初始化函数，这些函数在 `main.$onLoad` 中各函数被调用之前运行。
 
 注意：在可视化设计环境中（即 `W.__design__` 条件成立），`main.$onReady` 中的所有初始化函数将被忽略。即，`main.$onReady` 不在设计态使用。
 
@@ -32,6 +32,6 @@ main 模块下定义三种初始化列表 `$$onLoad`，`$onReady`与 `$onLoad`�
 
 `main.$onLoad` 是 array 类型，数组成员为不带参数的函数，这些函数也不在设计态使用。
 
-某些在可视化设计时也需执行的初始化处理，应登记在 `main.$$onLoad` 中。另外，`main.$onReady` 在 `main.$onLoad`  之前使用，后者用于登记常规初始化函数，前者登记需提前执行的初始化函数。
+某些在可视化设计时也需执行的初始化处理，应登记在 `main.$$onLoad` 中。另外，`main.$onReady` 在 `main.$onLoad`  之前被使用，后者用于登记常规初始化函数，前者登记需提前执行的初始化函数。
 
 &nbsp;

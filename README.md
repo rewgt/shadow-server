@@ -3,7 +3,9 @@ shadow-server：Shadow Widget 的本地 WebService 系统
 
 &nbsp;
 
-**注意**：当前版本只在 Mac 环境（OSX 10.9）测试通过，非 Mac 环境暂不建议使用！
+**提示**：
+1. 当前版本只在 Mac 环境（OSX 10.9）测试通过，非 Mac 环境暂不建议使用！
+2. 当前 0.1.x 版本即将升级到 1.0，V1.0 以后为正式推荐的稳定版本。
 
 &nbsp;
 

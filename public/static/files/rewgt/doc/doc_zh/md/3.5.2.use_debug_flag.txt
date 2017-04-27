@@ -32,9 +32,20 @@ W.__debug__ = 1;
 </script>
 ```
 
-将非 0 整数值赋给 `W.__debug__` 表示启用 Shadow Widget 的调试开关，此开关打开后，系统内部将实施更多的条件检查，当有错误或警告时，相关信息将在浏览器控制台打印。
+将非 `0` 整数值赋给 `W.__debug__` 表示启用 Shadow Widget 的调试开关，若赋 `0` 值则关闭调试开关。缺省情况下 `__debug__` 是关闭的，当此开关打开后，系统内部将实施更多的条件检查，当有错误或警告时，相关信息将在浏览器控制台打印。
 
 开发者视需要还可以定义调试级别，比如用 `W.__debug__ = 9` 指定级别为 9，编程时可以依据不同级别做不同深度的检测，各级别具体含义由开发团队自行约定。
+
+开发者还可在被测主页的 React 根节点（即 id 为 `"react-container"` 的节点），用属性设置 `__debug__` 值，比如：
+
+``` html
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" __debug__="1">
+  <div $=BodyPanel key='body'>
+  </div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+```
 
 #### 使用两个为调测服务的 API
 
@@ -76,5 +87,21 @@ addShortcut 用于往 W 节点添加若干在 R 节点定义的类方法，例�
 `W.$dataSrc` 缺省值为 `null`，含义为 “不附加任何数据源”，我们须用赋值语句 `W.$dataSrc = {}` 启用它。而且，是否启用 `W.$dataSrc` 不依赖于 `W.__debug__` 取值，您既可以在调试或测试时用它，也可以在正式发行版本中使用它。
 
 被附加的属性数据等效于在转义标签中直接定义，因为附加数据可从界面定义剥离，很符合调测口味，所以，我们常用它构造自动化测试框架。
+
+#### 启用 `__nobinding__` 开关
+
+如 ["idSetter预定义"](#3.4.4.) 一节介绍，使用 idSetter 函数与在 `W.$main` 定义投影类等效，当开发者只用前者 idSetter，而没用后者时，为了加快页面首次打开的速度，不妨启用 `__nobinding__` 开关。
+
+按如下方式启用该开关：
+
+``` html
+<script>
+W.__nobinding__ = 1;
+</script>
+```
+
+这与启用 `W.__debug__` 类似，同样，在 React 根节点用 `__nobinding__` 属性也能启用它。
+
+`W.__nobinding__` 缺省取值为 "非真"，当它取真值时，表示系统导入转义标签时，将忽略捆绑 `W.$main` 中定义的投影类，所以，运行效率有所提高。
 
 &nbsp;

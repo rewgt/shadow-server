@@ -87,7 +87,7 @@ W.$main.$onLoad.push(onLoad);
 
 `W.$idSetter`（简称 idSetter 模块）用来预先登记各节点的 `$id__` 函数，然后在 JSX 中，用类似 `$id__='.body.top'` 的方式引用，让系统从 `idSetter['.body.top']` 查找预先定义的 idSetter 函数。这样，直接给 `$id__` 传递 setter 函数，与传递路径字串是等效的。
 
-用来从 idSetter 模块检索的一般要求用路径字串，如上面举例的 `".body.top"`，也可以用其它字串，只要保证检索不冲突就行，另外还得避开厂商名前缀（比如 `".rewgt."`，`rewgt` 是经合法注册的厂商名称），参见 [“idSetter 保留路径”](#3.2.3.!idsetter)。
+用来从 idSetter 模块检索的一般要求用路径字串，如上面举例的 `".body.top"`，也可以用其它字串，只要保证检索不冲突就行，另外还得避开厂商名前缀（比如 `".rewgt."`，因为 `rewgt` 是经合法注册的厂商名称），参见 [“idSetter 保留路径”](#3.2.3.!idsetter)。
 
 #### 给 `$id__` 传函数还是传路径字串？
 

@@ -423,7 +423,7 @@ function pendingBackup(iDelayTm) {   // pendingBackup(0) for no delay, default d
       if (operatorStack.length) {
         if (tryNum >= 4) {
           var sOp = operatorStack[0][1];
-          rootNode.instantShow('warning: can not save backup when system not in idle' + (sOp?' (still in '+sOp+')':'') + '.');
+          rootNode.instantShow('hint: can not save backup when system not in idle' + (sOp?' (still in '+sOp+')':'') + '.');
         }
         else {
           iDelayTm = 1000;
@@ -4266,11 +4266,15 @@ function initCreator() {
       }
     }
     
-    if (rmvInfo && rootNode.removeWidget) {
+    if (rmvInfo)
+      doRemove(rmvInfo,currSelectedWdgt,confirmIt);
+    
+    function doRemove(rmvInfo,selectedWdgt,confirmIt) { // currSelectedWdgt may changed when confirm() called
+      if (!rootNode.removeWidget) return;
       if (confirmIt && !confirm('do you want delete selected widget?')) return;
       
       var nextPageKeyid = '';   // try get next page's keyid
-      if (currRootPageType == 'ScenePage' && currSelectedWdgt && currSelectedWdgt.classList.contains('rewgt-scene')) {
+      if (currRootPageType == 'ScenePage' && selectedWdgt && selectedWdgt.classList.contains('rewgt-scene')) {
         var meetCurr = false;
         for (var i=0,node; node = topPageList.children[i]; i++) {
           var sTmp = node.getAttribute('keyid');
@@ -4457,11 +4461,16 @@ function initCreator() {
       }
       
       checkFirstBackup();
-      rootNode.pasteWidget(sTargPath,sText,rmvPath, function(succNum,unselect) {
+      rootNode.pasteWidget(sTargPath,sText,rmvPath, function(succNum,unselect,retNode) {
         if (succNum) {
           rootNode.instantShow(succNum + ' widget(s) pasted.');
           if (unselect)
             unselectWidget();
+          if (retNode) {
+            setTimeout( function() {
+              setSelectByNode(retNode,false,false);
+            },300);
+          }
           afterModifyDoc(300,'');
         }
       });
