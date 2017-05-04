@@ -166,6 +166,9 @@ article.rewgt-scene.no-frame {
 .rewgt-paperview > * {
   position: absolute;
 }
+.rewgt-paperview > .rewgt-panel {
+  background-repeat: no-repeat;
+}
 .grid_paper-none {
   background-repeat: repeat;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAAB90RVh0U29mdHdhcmUATWFjcm9tZWRpYSBGaXJld29ya3MgOLVo0ngAAAAWdEVYdENyZWF0aW9uIFRpbWUAMDEvMTgvMTfHAUlpAAAALUlEQVQ4jWN0cXERYaAiYGFgYGDYvXv3G2oZyEQtg0YNHDVw1MBRA0cNpLGBALy7BCdAPOpCAAAAAElFTkSuQmCC");
