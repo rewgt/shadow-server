@@ -143,11 +143,11 @@
 
 > 获取父节点 Component，如果失败（可能父节点不存在，或已 unmount）则返回 `null`。
 
-> **8) `componentOf(sPath)`**
+> **8) `componentOf(path)`**
 
-> 取 `sPath` 指示的 Componet 节点，`sPath` 既可以是绝对路径，也可以是相对路径。
+> 取 `path` 指示的 Componet 节点，如果失败返回 `null`。`path` 既可以是绝对路径，也可以是相对路径，还可以是 `0, -1, -2` 等数值，表示取指定层 callspace 所在的节点，如果当前节点未在 MJI 解释器的上下文执行环境中，将返回 `null`。
 
-> `sPath` 可以是如下形式的字串：
+> `path` 是字串时，可以是如下形式：
 
 ```
     ".body.p.btn"    /* 绝对路径 */
@@ -158,9 +158,9 @@
     "../seg"         /* 以上一个导航段为基点，向下定位 */
 ```
 
-> **9) `elementOf(sPath)`**
+> **9) `elementOf(path)`**
 
-> 取 `sPath` 指示的 Element 节点，`sPath` 既可以是绝对路径，也可以是相对路径，取值与 `componentOf(sPath)` 中的 `sPath` 要求相同。
+> 取 `path` 指示的 Element 节点，`path` 既可以是绝对路径，也可以是相对路径，还可以是 `0, -1, -2` 等数值，其格式与 `componentOf(path)` 中的 `path` 要求相同。
 
 > **10) `prevSibling()`**
 

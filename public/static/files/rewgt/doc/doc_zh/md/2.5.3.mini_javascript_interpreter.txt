@@ -92,6 +92,10 @@ Javascript 的 Math 模块已预置，诸如 `Math.max, Math.floor, Math.random`
 
 运行中，如果可计算表达式使用 `ex.setVar()` 登记一个新变量，会保存到当前调用空间（即 0 层空间）。
 
+#### 用 `componentOf()` 查找某层 callspace 所在的节点
+
+在 ["查找节点"](#2.2.8.) 一节，我们已介绍如何用 `comp.componentOf(sPath)` 定位一个节点，当函数参数 `sPath` 不是路径字串，而是 `0, -1, -2` 等数值时，这个函数将用于查找指定某层 callspace 所在的节点。
+
 #### 动态节点
 
 如下可计算属性用来描述动态节点：

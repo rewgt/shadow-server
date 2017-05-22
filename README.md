@@ -42,6 +42,8 @@ npm start
 [shadow-slide 开源项目](https://github.com/rewgt/shadow-slide)
 [shadow-gits 开源项目](https://github.com/rewgt/shadow-gits)
 
+[Shadow Widget 产品博客](https://rewgt.github.io/product-blogs/)
+
 ### 版权（BSD开源协议）
 
 Copyright 2015, PINP.ME Development Group. All rights reserved.

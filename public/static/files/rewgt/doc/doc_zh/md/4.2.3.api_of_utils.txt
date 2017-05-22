@@ -89,7 +89,7 @@
 > 5. `success`，请求成功时的回调函数，回调格式为 `success(data,statusText,xhr)`，其中 `data` 是ajax 请求的返回数据，对于 `text` 格式它的值是字串，对于 `json` 与 `pre-json`，它的值是经 `JSON.parse()` 转换后的 JSON 数据，`statusText` 是状态描述，`xhr` 是 XmlHttp 对象。
 > 6. `error`，请求失败时的回调函数，回调格式为 `error(xhr,statusText)`
 > 7. `timeout`，请求的超时等待时间，以毫秒为单位，值为 0 表示永久等待，缺省等待 60 秒。
-> 8. `headers`，发送请求要附加的 header 配置，如 `{'Origin':'*'}`。
+> 8. `headers`，发送请求要附加的 header 配置，如 `{'Origin':'http://example.com'}`。
 > 9. `username` 与 `password`，发送请求要附加的 username 与 password。
 
 ##### <a name="jsonp"></a>`jsonp(config)`

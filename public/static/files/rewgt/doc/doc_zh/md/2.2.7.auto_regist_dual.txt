@@ -32,11 +32,11 @@ Shadow Widget 在底层基类定义了如下 component 约定的方法：
 
 这几个类方法中，`render()` 比较特殊，一般情况不必重新定义它，因为我们提供了不少封装好的构件，直接使用（不必重定义 render 函数）即可，另外 duals 机制也让大量应在 render 中处理的语句，改在 duals setter 函数中实现，定制 `render` 函数是不必要的。
 
-静态方法 `getDefaultProps()` 也能重新定义，如下举例针对 Button 构件：
+另外，`getDefaultProps()` 也能重新定义，但因为基类中同名函数是静态方法，我们不能用 `this._getDefaultProps(this)` 的方式，而要用 `T.BaseWTC.getDefaultProps()` 的方式，下面针对基类是 Button 的投影类举个例子：
 
 ``` js
   getDefaultProps: function() {
-    var props = W.$templates.Button.getDefaultProps();  // find from WTC
+    var props = T.Button.getDefaultProps();  // T is W.$templates
     // props.attr = value;
     return props;
   },
@@ -45,8 +45,6 @@ Shadow Widget 在底层基类定义了如下 component 约定的方法：
     return this._getInitialState(this);
   },
 ```
-
-注意：要到构件模板类实例（WTC 实例）找到基类的 `getDefaultProps` 函数，如上面要从 `W.$templates.Button` 找到。
 
 #### 自动注册的双源属性
 

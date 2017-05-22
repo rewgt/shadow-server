@@ -72,11 +72,11 @@
 > - `nodes: []`   
 用 array 数组记录在 markdown 文本中定义的所有转义标签节点，数组内容项为 `[sKey, element]`，对应各节点的 key 与 Element 值。如果转义标签显式定义 key 值，本属性还额外定义 `nodes[sKey] = element`。
 > - `colSpan: undefined`   
-用 string 字串指示 `<td>` 标签的 `colspan` 属性值。仅当父节点是 `MarkedTable` 时，才定义此双源属性。
+用 string 字串指示 `<td>` 标签的 `colspan` 属性值。仅当本节点是 `MarkedTable`（或继承自 `MarkedTable`）时，才定义此双源属性。
 > - `rowSpan: undefined`   
-用 string 字串指示 `<td>` 标签的 `rowspan` 属性值。仅当父节点是 `MarkedTable` 时，才定义此双源属性。
+用 string 字串指示 `<td>` 标签的 `rowspan` 属性值。仅当本节点是 `MarkedTable`（或继承自 `MarkedTable`）时，才定义此双源属性。
 > - `tdStyle`   
-用来为 `<td>` 标签指定 `style` 属性。仅当父节点是 `MarkedTable`，且有初始 `props.tdStyle` 定义时，才有此双源属性。
+用来为 `<td>` 标签指定 `style` 属性。仅当本节点是 `MarkedTable`（或继承自 `MarkedTable`），且有初始 `props.tdStyle` 定义时，才有此双源属性。
 
 ##### <a name="marked_table"></a>`MarkedTable`
 

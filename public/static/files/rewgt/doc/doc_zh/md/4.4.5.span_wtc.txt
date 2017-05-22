@@ -68,7 +68,7 @@
 
 ##### <a name="opt_a"></a>`OptA/OptButton/OptInput/OptOption`
 
-> 本类继承自 [`OptSpan`](#4.4.5.!opt_span) 。
+> 本类继承自 [`OptSpan`](#4.4.5.!opt_span) 。其中 `OptInput` 的 `checked` 属性因含义与 `data-checked` 重合，要求统一用 `data-checked`。
 
 > **`getDefaultProps()` 新增属性：** 无。
 
@@ -110,7 +110,7 @@
 
 ##### <a name="br"></a>`Br/A/Q/Abbr/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/Textarea/Progress/Img/Canvas/Picture/Map/Area/Time/Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/Option/B/I/S/U/Ins/Del/Code/Var/Summary/Em/Strong/Big/Small/Dfn/Samp/Kdb/Cite/Dialog/Meter/Embed/Object/Param/Ruby/Rp/Rt`
 
-> 本类继承自 [`Span`](#4.4.5.!span)。
+> 本类继承自 [`Span`](#4.4.5.!span)。因为 React 为 `input, textarea, select` 标签增加了 `defaultValue` 属性，并且要求用户通过 `onChange` 事件同步 `state.value` 与 `event.target.value`，这里提供的 `Input, Textarea, Select` 对 `defaultValue` 与 `onChange` 同步都做了封装。React 为 `input` 也增加 `defaultChecked` 属性及 `state.checked` 同步的要求，我们同样在 `Input` 构件做了封装。所以，编程中请注意不必重复处理。
 
 > **`getDefaultProps()` 新增属性：** 无。
 
