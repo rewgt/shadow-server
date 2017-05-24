@@ -89,11 +89,7 @@ window.onhashchange = function() {
   
   if (sHash) {
     utils.gotoHash(decodeURIComponent(sHash), function(sRetHash) {
-      if (sRetHash) {  // jump successful
-        var sNewHash = '#' + sHash;
-        if (window.location.hash != sNewHash)
-          window.history.pushState(null,'',sNewHash);
-      }
+      if (sRetHash) console.log('Jump successful:',sRetHash);
     });
   }
 };

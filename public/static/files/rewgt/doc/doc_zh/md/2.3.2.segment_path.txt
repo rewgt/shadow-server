@@ -63,7 +63,7 @@ Shadow Widget 支持在 URL 的 hash 部分指定段路径实现跳转，比如�
 
 #### 结合段路由的 hash 导航
 
-在 Shadow Widget 中很容易构造类似 react-router 那样的路由机制，下面给一个例子（见样例 demo17），大致思路是：用 window.onhashchange 捕获当前网页的 URL 变化，提取出 location 的 hash 部分字串，得到段路径。然后用 `utils.gotoHash()` 实现跳转，跳转成功后用 `window.history.pushState()` 将当前 URL 纳入为历史页，以供网页 “后退”、“前进” 时使用。
+在 Shadow Widget 中很容易构造类似 react-router 那样的路由机制，下面给一个例子（见样例 demo17），大致思路是：用 window.onhashchange 捕获当前网页的 URL 变化，提取出 location 的 hash 部分字串，得到段路径。然后用 `utils.gotoHash()` 实现跳转。
 
 主要代码如下所示：
 
@@ -74,11 +74,7 @@ Shadow Widget 支持在 URL 的 hash 部分指定段路径实现跳转，比如�
     
     if (sHash) {
       utils.gotoHash(decodeURIComponent(sHash), function(sRetHash) {
-        if (sRetHash) {  // jump successful
-          var sNewHash = '#' + sHash;
-          if (window.location.hash != sNewHash)
-            window.history.pushState(null,'',sNewHash);
-        }
+        if (sRetHash) console.log('Jump successful:',sRetHash);
       });
     }
   };

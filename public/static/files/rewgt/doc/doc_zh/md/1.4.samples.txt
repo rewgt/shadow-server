@@ -15,6 +15,7 @@
 
 ``` bash
   cd shadow-server
+  npm install
   npm start
 ```
 

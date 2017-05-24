@@ -22,7 +22,7 @@ var config = main.config;
 var utils = main.utils;
 
 main.pluginServices['$proxy'] = [function(req,res,sCateProj,sServPath) { // sCateProj: $$cate/project, sServPath: $service/...
-  var sUrl = req.query.url;
+  var sUrl = req.query.url;  // sUrl fix using '/'
   if (req.method == 'GET' && sUrl) {  // only support get 'text/html; charset=utf-8' content
     if (sUrl.indexOf('http') == 0 && (sUrl[4] == ':' || sUrl.slice(4,6) == 's:')) {
       delete req.query.url;

@@ -20,7 +20,7 @@ var is_in_develop_ = app.get('env') === 'development';
 var config = main.config;
 var systemSamples = null;
 
-function recursiveMkDir(sBase,sPath) {
+function recursiveMkDir(sBase,sPath) {  // sPath fix using '/'
   var b = sPath.split('/'), sTarg = sBase;
   while (b.length) {
     var item = b.shift();
@@ -51,8 +51,8 @@ function locateHtmlTitle(sText) {
 }
 
 function tryScanCateProj(bRet,sDir,sFile,sPrefix) {  // sDir/sFile must be directory, and sFile is $$xxx 
-  var sCate = sPrefix + '/' + sFile;
-  sDir = path.join(sDir,sFile);
+  var sCate = sPrefix + '/' + sFile;  // sCate,sPrefix,sFile,sPrefix fix using '/'
+  sDir = path.join(sDir,sFile);       // sDir fix using path.sep
   
   try {
     var b2 = fs.readdirSync(sDir);

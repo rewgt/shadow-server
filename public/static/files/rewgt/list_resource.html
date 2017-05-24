@@ -21,6 +21,7 @@
 html {
   width: 100%;
   height: 100%;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 body {
   width: 98%;
@@ -481,7 +482,7 @@ function fileOnClick(event) {
     }
   }
   
-  if (canShowUpldBtn && braObj && sUrl.startsWith('/'+braObj.repoName+'/')) {
+  if (canShowUpldBtn && braObj && sUrl.indexOf('/'+braObj.repoName+'/') == 0) {
     var repoPath = sUrl.slice(braObj.repoName.length+2);
     if (repoPath.split('/').length > 1) {
       var rightWd = 8, sSha = node.getAttribute('data-sha') || '';

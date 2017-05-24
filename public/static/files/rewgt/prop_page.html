@@ -12,6 +12,9 @@
   }
 }
 
+html {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
 body {
   background-color: #e8e8e8;
   margin: 1px;
@@ -108,7 +111,7 @@ window.addEventListener('message', function(msg) {
         var sUrl = '';
         if (opt.name && opt.doc) {
           sUrl = opt.doc;
-          if (opt.baseUrl && !sUrl.startsWith('http:') && !sUrl.startsWith('https:') && sUrl[0] != '/') {
+          if (opt.baseUrl && sUrl.indexOf('http:') != 0 && sUrl.indexOf('https:') != 0 && sUrl[0] != '/') {
             if (opt.baseUrl.slice(-1) == '/')
               sUrl = opt.baseUrl + sUrl;
             else sUrl = opt.baseUrl + '/' + sUrl;

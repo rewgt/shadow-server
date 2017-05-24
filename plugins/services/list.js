@@ -48,7 +48,7 @@ main.pluginServices['$list'] = [function(req,res,sCateProj,sServPath) { // sCate
   }
   
   var appWebRoot = false;
-  var sTargDir, sUrl = req.query.url || '';
+  var sTargDir, sUrl = req.query.url || '';  // sUrl fix using '/'
   if (!sUrl) {
     sTargDir = sDir;
     sUrl = '/' + sCateProj;

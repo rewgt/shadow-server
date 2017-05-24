@@ -2,6 +2,7 @@
 
 html {
   font-size: 16px;      /* base of rem */
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 body {
   font-family: Arial,Helvetica,'sans-serif',STHeiti;

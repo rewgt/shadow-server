@@ -74,6 +74,7 @@ else {
     debug('Listening on ' + sBind);
   });
   
+  console.log('Start server at port (' + port + ') ...');
   server.listen(port);
   
 /* var port_https = (port || 0) + 443;

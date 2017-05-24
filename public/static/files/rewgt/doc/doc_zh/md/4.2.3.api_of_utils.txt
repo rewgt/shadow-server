@@ -247,9 +247,9 @@
 
 > 用来触发在 `comp.duals.trigger` 预定义的一个或多个动作，参数 `data` 可以缺省，如果不缺省，表示先将 `data` 赋给 `comp.duals.trigger`，然后触发动作。
 
-> 参数 `data` 可以是以下几种类型的数据，也可以是这些类型数据组成的 array 数组，一是用 string 类型的路径（相对路径或绝对路径）指定目标选项构件，其预定动作是让目标构件选中。二是用 `{$trigger:sPath}` 指明定义弹窗配置的选项构件，预定动作是弹出弹窗。三是用 `[sPath,modifier,attr]` 更新 `sPath` 所指示节点（不限定为选项构件）的 `duals[attr]` 属性值。
+> 参数 `data` 可以是以下几种类型的数据，也可以是这些类型数据组成的 array 数组，一是用 string 类型的路径（相对路径或绝对路径）指定目标选项构件，其预定动作是让目标构件选中。二是用 `{$trigger:sPath}` 指明定义弹窗配置的选项构件，预定动作是弹出弹窗。三是用 `[sPath,modifier,attr]` 更新 `sPath` 所指示节点（不限定为选项构件）的 `duals[attr]` 属性值，这里的 `attr` 可缺省，缺省时自动取 `'data'` 值。
 
-> 由于节点的 `$trigger` 及 `fireType` 属性与 `duals.trigger` 紧密相关，当 `comp` 节点的 `props.fireType` 为 `'onsite'` 时，调用本函数时会先计算 `$trigger`，结果值更新到 `duals.trigger` ，然后触发动作。如果 `props.fireType` 取其它值，`$trigger` 则不对本函数调用产生影响。
+> 由于节点的 `$trigger` 及 `fireType` 属性与 `duals.trigger` 紧密相关，当 `comp` 节点的 `props.fireType` 为 `'onsite'` 时，调用本函数时会先计算 `$trigger`，结果值更新到 `duals.trigger` ，然后触发动作。如果 `props.fireType` 取其它值，`$trigger` 不对本函数调用产生影响。
 
 <pre $=".rewgt.book_top"></pre>
 

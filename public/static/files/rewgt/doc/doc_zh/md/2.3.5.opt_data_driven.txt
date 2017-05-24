@@ -5,7 +5,7 @@
 
 #### 用 trigger 驱动双源属性更新
 
-在 trigger 预设的动作中，如果指定 `[sPath,modifier,attr]`，表示找到 sPath 指示的目标构件，得到它的 `duals[attr]` 属性后，用 `ex.update(duals[attr],modifier)` 更新 `duals[attr]` 取值。这里第 3 项 `attr` 可以缺省，省略时更新 `duals.data` 属性，即 `attr` 自动取 `'data'` 值。
+如果 trigger 预定义了由 `[sPath,modifier,attr]` 指示的动作，表示找到 `sPath` 指示的目标构件，得到它的 `duals[attr]` 属性，然后用 `ex.update(duals[attr],modifier)` 更新 `duals[attr]` 的值。这里 `attr` 可以缺省，缺省时将更新 `duals.data` 属性（即 `attr` 自动取 `'data'` 值）。
 
 举例如下：
 
@@ -30,14 +30,14 @@
     duals.data = ex.update(duals.data,{$set:["text",1]});
 ```
 
-触发动作前后，我们可以这么检验赋值有没成功：在浏览器控制台运行脚本 `comp = W.body.top.nav.opt.txt.component` 得到目标节点 `comp`，再运行 `comp.duals.data` 查看当前值是否变化。
+触发动作前后，我们可以这么检验赋值有没成功：在浏览器控制台运行脚本 `comp = W.body.top.nav.opt.txt.component` 得到目标节点 `comp`，再运行 `comp.duals.data` 查看当前值是否有变化。
 
 注意：
-1. 若想更新多个 `duals.attr`，在 `trigger` 数组中依次罗列各项 `[sPath,modifier,attr]` 即可。
+1. 若想更新多个 `duals.attr`，在 `trigger` 用数组依次罗列各项 `[sPath,modifier,attr]` 即可。
 2. `[sPath,modifier,attr]` 中的 `sPath` 可以是空字串，代表 `trigger` 属性所在的自身节点，如果 `sPath` 是相对路径，以 `trigger` 所在节点为参考。可更新任意目标节点的 `duals.attr` 属性值，并不限于选项构件。
-3. 非选项构件也支持 `trigger` 双源属性，但不像选项构件那样选中即自动触发，可能要借助编程手段触发（调用 `utils.fireTrigger()` ），或经由其它选项构件的 trigger 动作驱动。
+3. 非选项构件也支持 `trigger` 双源属性，但不像选项构件那样选中即自动触发，要借助编程手段触发（调用 `utils.fireTrigger()` ），或经由其它选项构件的 trigger 动作驱动。
 
-属性 `duals.trigger` 只是静态列出该响应的动作，须有显式条件触发它们，触发条件包括：
+属性 `duals.trigger` 只是静态列出该响应的动作，需有显式条件触发它们，触发条件包括：
 
 1. 若在选项构件定义 `trigger`，构件被选中（比如在界面点击）时自动触发 trigger 动作   
 由于在 `trigger` 属性中可指定其它选项触发器的动作，所以，多个选项构件可以串联起来使用。

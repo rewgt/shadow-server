@@ -34,12 +34,12 @@
 所有构件都内置 trigger 双源属性，它用来登记待触发的动作。举例来说，我们在上例基础上再增加一个带 trigger 定义的按钮，让该按钮点击时自动触发动作：
 
 ``` html
-  <span $=OptButton key='btn2' trigger='{["//btn"]}'>trigger</span>
+  <span $=OptButton key='btn2' trigger='//btn'>trigger</span>
 ```
 
 选项构件在选中时会自动触发在 `trigger` 登记的动作。本例在 demo19 给出，请自行参考相关源码。
 
-trigger 取值要求是以下三者之一（定义单项动作），或者，用若干下述三种数据组成 array 数组（如：`["//btn", {$trigger: "./pop_win"}]`），来定义多项动作：
+trigger 要求是以下三者之一（定义单项动作），或者，用若干下述三种数据组成 array 数组（如：`["//btn", {$trigger: "./pop_win"}, ["./",{$set:data},"data"]]`），来定义多项动作：
 
 1. 用 `sPath` 指出目标节点，目标节点须是选项构件，预设动作是让目标构件也被点选。   
 这里，`sPath` 既可以是绝对路径，也可以是相对路径，若为空字串表示自身节点。

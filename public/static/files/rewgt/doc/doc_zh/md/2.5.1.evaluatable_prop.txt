@@ -107,6 +107,8 @@ Shadow Widget 支持在任意节点定义 `$trigger` 属性，`$trigger` 如何�
 
 当一个节点的 `props.fireType` 未定义时，`$trigger` 自动按 `'auto'` 的方式处理。
 
+一个构件定义 `trigger` 或 `$trigger`，这两个属性只能二选一，`fireType` 属性只与 `$trigger` 配合起作用。
+
 #### 借助 `$trigger` 逆向同步数据
 
 使用 `trigger` 可定义界面开发中最常用的三种动作，而 `$trigger` 一方面提供自动侦测数据变化的驱动机制，另一方面，它启用脚本驱动，让转义标签具备一定编程能力。两者一结合，大大强化了转义标签的表现力。借助 `$trigger` 表达式能灵活的实现各种复杂控制，比如，取得相关节点的 `props.attr` 或 `state.attr` 值，运用加减乘除、与或非等常规计算，组装字串，列表排序（`ex.order()`），列表重组（`ex.map()`）、列表过滤（`ex.filter()`）等。

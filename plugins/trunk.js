@@ -111,7 +111,7 @@ var Base64 = {   // only for utf-8 text
   }
 };
 
-function recursiveMkDir(sBase,sPath) {
+function recursiveMkDir(sBase,sPath) {  // sPath fix using '/'
   var b = sPath.split('/'), sTarg = sBase;
   while (b.length) {
     var item = b.shift();
@@ -456,7 +456,7 @@ rootRouter.regist('POST','/:project/*', function(req,res,next) {  // only suppor
 function handleGitRequest(sMethod,sPath,req,res) {
   var bPath = sPath.split('/'), sOwner = bPath.shift(), sRepo = bPath.shift(), sCmdType = bPath.shift();
   if (bPath.length > 0 && !bPath[bPath.length-1]) bPath.pop();  // remove tail '/'
-  var sLeftPath = bPath.join('/');
+  var sLeftPath = bPath.join('/');  // fix to '/' 
   
   if (sMethod == 'GET') {
     if (sCmdType === 'contents') {
@@ -472,12 +472,12 @@ function handleGitRequest(sMethod,sPath,req,res) {
             var sPath2 = path.join(sFile,item), st2 = fs.lstatSync(sPath2);
             if (st2.isDirectory()) {
               bRet.push( { type:'dir', size:0, name:item,
-                path:path.join(sLeftPath,item),  // no sha,url,*_url,_links
+                path: sLeftPath + '/' + item,    // fix to '/', no sha,url,*_url,_links
               });
             }
             else {
               bRet.push( { type:'file', size:st2.size, name:item,
-                path:path.join(sLeftPath,item),  // no sha,url,*_url,_links
+                path: sLeftPath + '/' + item,    // fix to '/', no sha,url,*_url,_links
                 ctime: st2.ctime.toISOString(),  // new added
                 mtime: st2.mtime.toISOString(),  // new added
               });
@@ -501,7 +501,7 @@ function handleGitRequest(sMethod,sPath,req,res) {
         return;
       }
       else if (!isExist && safeInRoot) {
-        var sUpPath, iTmp = sFile.lastIndexOf('/');
+        var sUpPath, iTmp = sFile.lastIndexOf(path.sep);
         if (iTmp > 0 && fs.existsSync(sUpPath=sFile.slice(0,iTmp))) {
           var st = fs.lstatSync(sUpPath);
           if (st.isDirectory()) {  // maybe meet new created folder
@@ -520,9 +520,9 @@ function handleGitRequest(sMethod,sPath,req,res) {
       if (sRepo && sLeftPath) {
         var dBody = req.body;
         var sRepoPath = path.join(config.USER_DIR,sRepo);
-        var sFile = path.join(sRepoPath,sLeftPath);
+        var sFile = path.join(sRepoPath,sLeftPath);   // will auto change '/' to '\\'
         if ( fs.existsSync(sRepoPath) && typeof dBody == 'object' && 
-             typeof dBody.content == 'string' && sFile.indexOf(sRepoPath+'/') == 0) {
+             typeof dBody.content == 'string' && sFile.indexOf(sRepoPath+path.sep) == 0) {
           var srcBuff = new Buffer(dBody.content,'base64');
           var bSeg = sLeftPath.split('/'), sFileName = bSeg.pop();
           if (bSeg.length) recursiveMkDir(sRepoPath,bSeg.join('/'));
@@ -550,7 +550,7 @@ function handleGitRequest(sMethod,sPath,req,res) {
       
       if (sRepo && sLeftPath) {
         var sFile = path.join(config.USER_DIR,sRepo,sLeftPath);
-        if (fs.existsSync(sFile) && sFile.indexOf(path.join(config.USER_DIR,sRepo,'/')) == 0)
+        if (fs.existsSync(sFile) && sFile.indexOf(path.join(config.USER_DIR,sRepo,path.sep)) == 0)
           fs.unlinkSync(sFile);
         
         res.json({content:null});
@@ -566,7 +566,7 @@ rootRouter.regist('PUT','/:project/*', function(req,res,next) {  // only support
   var sProj = req.params.project, sPath = req.params[0] || '';
   
   if (sProj == 'repos') {    // github like API
-    handleGitRequest('PUT',sPath,req,res)
+    handleGitRequest('PUT',sPath,req,res)  // sPath fix using '/'
     return;
   }
   
@@ -593,7 +593,7 @@ rootRouter.regist('GET','/:project/*', function(req,res,next) {
   }
   
   if (sProj == 'repos') {    // github like API
-    handleGitRequest('GET',sPath,req,res)
+    handleGitRequest('GET',sPath,req,res);    // sPath using '/'
     return;
   }
   
@@ -642,22 +642,23 @@ rootRouter.regist('GET','/:project/*', function(req,res,next) {
     else {
       var sDir = path.join(config.STATIC_DIR,sProj);
       if (fs.existsSync(sDir))
-        sFile = path.join(sDir,sPath || '/');
+        sFile = path.join(sDir,sPath || path.sep);
       else {
         sDir = path.join(config.USER_DIR,sProj)
         if (fs.existsSync(sDir))
-          sFile = path.join(sDir,sPath || '/');
+          sFile = path.join(sDir,sPath || path.sep);
       }
     }
   }
   
   if (sFile) {
-    if (sFile.slice(-1) == '/')
+    if (sFile.slice(-1) == path.sep)
       sFile += 'index.html';
+
     if (fs.existsSync(sFile) && sFile.indexOf(config.USER_PATH) == 0 && main.returnStaticFile(sFile,res))
       return;
   }
-  res.status(404).send('can not find file: ' + path.join('/',sProj,savedSeg,sPath));
+  res.status(404).send('can not find file: ' + path.join(path.sep,sProj,savedSeg,sPath));
 });
 
 };  // end of M.onload()

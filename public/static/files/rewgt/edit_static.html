@@ -5,7 +5,7 @@
 <title>Static text editor</title>
 
 <link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/popline/css/normalize.css" />
-<link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/css/sw_base.css" />
 
 <link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/popline/css/font-awesome.css" />
 <link rel="stylesheet" type="text/css" href="/app/files/rewgt/web/popline/themes/popclip.css" />
@@ -148,7 +148,7 @@ window.addEventListener('load', function(event) {
     if (appBase[0] != '/') appBase = '/' + appBase; // avoid bug of IE10
     var urlPath = location__(sUrl).pathname;
     if (urlPath[0] != '/') urlPath = '/' + urlPath;
-    if (urlPath.startsWith(appBase))
+    if (urlPath.indexOf(appBase) == 0)
       urlPath = urlPath.slice(appBase.length);
     return urlPath;
   }
@@ -268,6 +268,9 @@ window.addEventListener('load', function(event) {
 </script>
 
 <style>
+html {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
 .editor {
   width: 100%;
   height: 100%;

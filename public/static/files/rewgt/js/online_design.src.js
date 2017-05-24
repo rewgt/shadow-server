@@ -4436,7 +4436,7 @@ function initCreator() {
     event.preventDefault();  // ignore default paste text
     var types = event.clipboardData.types, sText = '';
     for (var i=0,item; item=types[i]; i+=1) {
-      if (item == 'Text' || item.startsWith('text/')) {
+      if (item == 'Text' || item.indexOf('text/') == 0) {
         sText = event.clipboardData.getData(item);
         break;
       }
