@@ -69,7 +69,7 @@ row2-col2
 
 ``` html
   <div $=NavPanel $for='' dual-data='{[]}'>
-    <pre $=MarkedDiv key='mark' style='{{"display":"none"}}' 
+    <pre $=MarkedDiv key='mark' sty__='{{"display":"none"}}' 
       $trigger='["./",{$set:duals("./mark").nodes}]'>
 <pre $=P key='first'>First paragraph.</pre>
 <pre $=P key='next'>Next paragraph.</pre>

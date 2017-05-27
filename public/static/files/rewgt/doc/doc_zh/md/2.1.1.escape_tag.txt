@@ -65,11 +65,15 @@ Shadow Widget 推荐采用 **以 "-" 字母分割各个状态** 的命名方式�
 
 #### 特殊属性：style
 
-因为 style 极为常用，Shadow Widget 特别增强了它的功能，其一，在转义标签中，既可以将 style 写成字串格式，也可写成 react 要求的 Object 格式，比如，下面两种书写方式都是正确的。
+某些浏览器会检验并自动调整 `style` 属性值，比如 IE11 认为 `style='{{"dispaly":"none"}}'` 不合法，自动将它改为 `style=''`，Firefox 会删除 `style` 中它不支持的属性。为避免让浏览器干扰 `style` 转义表达，我们改用 `sty__` 表示 `style`。
+
+说明：我们仅在转义标签中用 `sty__` 代替 `style`，其它地方，如 `duals.style` 仍用 `style`。
+
+因为 `style` 极为常用，Shadow Widget 特别增强了它的功能，其一，在转义标签中，既可以将 `style` 写成字串格式，也可写成 react 要求的 Object 格式，比如，下面两种书写方式都是正确的。
 
 ``` html
-  <div $=P style='background-color:#ccc'>example</div>
-  <div $=P style='{{"backgroundColor":"#ccc"}}'>example2</div>
+  <div $=P sty__='background-color:#ccc'>example</div>
+  <div $=P sty__='{{"backgroundColor":"#ccc"}}'>example2</div>
 ```
 
 其二，style 自动被定义成双源属性，运行中可以用 javascript 语句这么赋值：   

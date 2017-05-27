@@ -12,7 +12,7 @@
 ``` html
   <div $=Panel key='top'>
     <div $=NavPanel key='nav' width='{0.9999}' height='{200}'>
-      <div $=Div key='msg' padding='{[0,6]}' style='display:none'>
+      <div $=Div key='msg' padding='{[0,6]}' sty__='display:none'>
         <div $=P>Hello, world!</div>
       </div>
 

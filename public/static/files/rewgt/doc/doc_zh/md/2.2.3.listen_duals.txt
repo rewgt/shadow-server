@@ -24,7 +24,7 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
   <div $=BodyPanel key='body'>
     <div $=Panel key='top'>
       <div $=P key='p' width='{0.9999}'>
-        <span $=Textarea key='input' style='width:300px; height:100px'></span>
+        <span $=Textarea key='input' sty__='width:300px; height:100px'></span>
       </div>
       <pre $=MarkedDiv key='markdown' width='{0.9999}' height='{200}'></pre>
     </div>

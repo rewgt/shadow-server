@@ -40,12 +40,25 @@ main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // s
       if (bTmp.length > 1) bTmp.pop();
       var sPureName = bTmp.join('.');
       
-      var sIdxFile = path.join(sBase,sCateProj,'index.html');
+      var sIdxFile = path.join(sBase,sCateProj,'lib','show_doc.html');
       if (!fs.existsSync(sIdxFile)) {
-        var sErr = 'can not find file (' + path.join(sCateProj,'index.html') + ')';
+        var sErr = 'can not find file (' + path.join(sCateProj,'lib','show_doc.html') + ')';
         res.status(400).send(sErr);
       }
       else {
+        var htmlText = fs.readFileSync(sIdxFile,'utf-8');
+        var markText = fs.readFileSync(sFile,'utf-8');
+        var iPos = htmlText.indexOf('<body>');
+        if (iPos < 0) {
+          res.status(400).send('invalid file (lib/show_doc.html)');
+          return;
+        }
+        
+        htmlText = htmlText.slice(0,iPos) + 
+          '<body>\n\n<pre id="pinp-mrkdn" style="display:none"><code>' +
+          markText + (markText.slice(-1) === '\n'?'':'\n') + 
+          '</code></pre>' + htmlText.slice(iPos+6);
+        
         var output = fs.createWriteStream(path.join(sBase,sCateProj,sPureName+'.zip'));
         var archive = archiver('zip',{zlib:{level:9}});
         
@@ -57,8 +70,8 @@ main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // s
         });
         archive.pipe(output);
         
-        archive.append(fs.createReadStream(sIdxFile),{name:sPureName+'.html'});
-        archive.append(fs.createReadStream(sFile),{name:'md/'+sPureName+'.txt'});
+        archive.append(htmlText,{name:sPureName+'.html'});
+        // archive.append(fs.createReadStream(sFile),{name:'md/'+sPureName+'.txt'});
         
         var sLibDir = path.join(sBase,sCateProj,'lib');
         if (fs.existsSync(sLibDir)) {

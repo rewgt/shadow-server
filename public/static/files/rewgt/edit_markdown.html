@@ -112,6 +112,7 @@ function streamReactTree_(bTree,iLevel,iOwnerFlag) { // iOwnerFlag must be numbe
     
     var value = dProp[sKey];
     if (value === undefined) continue;
+    if (sKey == 'style') sKey = 'sty__';
     
     sRet += ' ' + sKey.replace(RE_UPCASE_ALL_,'-$1').toLowerCase() + '=';
     if (typeof value == 'string' && (sKey[0] == '$' || !value || value[0] != '{' || value.slice(-1) != '}'))

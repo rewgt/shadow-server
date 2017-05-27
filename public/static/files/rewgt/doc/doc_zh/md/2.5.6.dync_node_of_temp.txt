@@ -61,7 +61,7 @@
            $html='"income = " + duals.income + ", outgo = " + duals.outgo'></div>
       <div $=P key='test2' dual-income='{0}' dual-outgo='{0}'>
         <span $=TempSpan key='tmp'><span $=Span key='txt'>example</span></span>
-        <span $='//tmp.txt' key='red' style='color:red'></span>
+        <span $='//tmp.txt' key='red' sty__='color:red'></span>
       </div>
     </div>
 

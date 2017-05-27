@@ -22,22 +22,22 @@
         <div $=P key='hello' width='{0.9999}' html.='template in template'></div>
       </div>
     </div>
-    <div $='//tmp.tmp.hello' style='color:blue'></div>
+    <div $='//tmp.tmp.hello' sty__='color:blue'></div>
     
     <div $=TempDiv key='tmp2'>
       <div $=P key='normal' width='{0.9999}' html.='It is an example.'></div>
-      <div $='//normal' key='hint' style='color:gray'></div>
-      <div $='//normal' key='warning' style='color:red'></div>
-      <div $='//warning' key='error' style='font-weight:600'></div>
+      <div $='//normal' key='hint' sty__='color:gray'></div>
+      <div $='//normal' key='warning' sty__='color:red'></div>
+      <div $='//warning' key='error' sty__='font-weight:600'></div>
     </div>
     <div $='//tmp2.normal'></div>
     <div $='//tmp2.hint'></div>
     <div $='//tmp2.warning'></div>
-    <div $='//tmp2.error' style='font-size:20px'></div>
+    <div $='//tmp2.error' sty__='font-size:20px'></div>
     
     <div $=TempDiv key='tmp3'>
       <div $=P key='normal' width='{0.9999}'>
-        <span $=Span key='txt' style='font-weight:600'>It is an example.</span>
+        <span $=Span key='txt' sty__='font-weight:600'>It is an example.</span>
       </div>
     </div>
     <div $='//tmp3.normal' styles='{{"txt":{"color":"blue"}}}'></div>

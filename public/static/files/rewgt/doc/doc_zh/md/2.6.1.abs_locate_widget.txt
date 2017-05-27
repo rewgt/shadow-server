@@ -57,7 +57,7 @@ Shadow Widget 对所有 Panel 类、Div 类及 P 类构件的 `margin-left` 与 
 比如在根节点下定义如下构件（见样例 demo35）：
 
 ``` html
-  <div $=Panel style='display:absolute' left='{100}' top='{100}' width='{0.5}' height='{200}'>
+  <div $=Panel sty__='display:absolute' left='{100}' top='{100}' width='{0.5}' height='{200}'>
     <div $=P>Hello, world!</div>
   </div>
 ```

@@ -57,7 +57,7 @@
 
 > 除了markdown 基本规则（参见 <a target="_blank" href="https://github.com/chjj/marked">chjj/marked 项目</a>），本系统还额外支持 “块引用” 特性，用 `<pre $=".path.to.ref"></pre>` 的形式引用 W 树中的节点，其中 `$` 用来指明引用的源构件。成功引用后，经复制的目标节点的 `style.display` 会强制设为 `block`（被引用源节点可设为 `'none'` 以便隐藏不显示）。
 
-> markdown 文本中内嵌的 `<pre $=path>` 块引用，需符合转义标签的书写要求（除了 `<pre>`，还支持 `<div $=path>`），而且，被引用的构件要求是块元素，不能是行内元素。`$` 属性除了用来指示引用路径，还可用来指定 WTC 类名，以便创建一个块构件，比如 `<div $="Panel" height="{40}" style='{{"backgroundColor":"#ddd"}}'></div>` 将插入一个深灰背景的面板。
+> markdown 文本中内嵌的 `<pre $=path>` 块引用，需符合转义标签的书写要求（除了 `<pre>`，还支持 `<div $=path>`），而且，被引用的构件要求是块元素，不能是行内元素。`$` 属性除了用来指示引用路径，还可用来指定 WTC 类名，以便创建一个块构件，比如 `<div $=Panel height="{40}" sty__='{{"backgroundColor":"#ddd"}}'></div>` 将插入一个深灰背景的面板。
 
 > &nbsp;
 
