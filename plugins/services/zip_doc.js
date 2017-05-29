@@ -20,6 +20,10 @@ M.onload = function(app) {
 var is_in_develop_ = app.get('env') === 'development';
 var config = main.config;
 
+function adjustMetaText(s) {
+  return s.replace(/[\r\n]+/gm,'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
+}
+
 main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // sCateProj: $$cate/project, sServPath: $service/...
   var sPath, dBody = req.body;
   if (req.method == 'POST' && typeof dBody == 'object' && typeof (sPath=dBody.path) == 'string') {
@@ -54,10 +58,23 @@ main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // s
           return;
         }
         
-        htmlText = htmlText.slice(0,iPos) + 
+        var headPart = htmlText.slice(0,iPos), tailPart = htmlText.slice(iPos+6);
+        var docTitle = dBody.title || '', docDesc = dBody.desc || '', docKey = dBody.keyword || '';
+        if (docTitle || docDesc || docKey) {
+          var i1 = headPart.indexOf('<title>'), i2 = headPart.indexOf('</title>');
+          if (i1 > 0 && i2 > i1) {
+            if (!docTitle) docTitle = 'Blog';
+            headPart = headPart.slice(0,i1+7) + adjustMetaText(docTitle) + '</title>' + 
+              (docDesc?'\n<meta name="description" content="'+adjustMetaText(docDesc)+'">':'') + 
+              (docKey?'\n<meta name="keywords" content="'+adjustMetaText(docKey)+'">':'') + 
+              headPart.slice(i2+8);
+          }
+        }
+        
+        htmlText = headPart + 
           '<body>\n\n<pre id="pinp-mrkdn" style="display:none"><code>' +
           markText + (markText.slice(-1) === '\n'?'':'\n') + 
-          '</code></pre>' + htmlText.slice(iPos+6);
+          '</code></pre>' + tailPart;
         
         var output = fs.createWriteStream(path.join(sBase,sCateProj,sPureName+'.zip'));
         var archive = archiver('zip',{zlib:{level:9}});
