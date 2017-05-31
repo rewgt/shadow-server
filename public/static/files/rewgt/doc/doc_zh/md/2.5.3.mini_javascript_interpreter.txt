@@ -85,7 +85,7 @@ MJI 也用 `while(cond,expr,expr2, ...)` 函数调用形式表达循环语句，
 Javascript 的 Math 模块已预置，诸如 `Math.max, Math.floor, Math.random` 等函数可供调用。
 
 3. `props, duals, props, item, count, index` 函数   
-其中前 3 项支持用 0, -1, -2 等参数指定取哪一层的节点，或用 `sPath` 参数取指定节点，`sPath` 若用相对路径，自动以当前节点为参照。比如：`state("./toolbar").attr` 含义是：找到以 0 层节点为参照，路径为 `"./toolbar"` 的目标节点（`targ`），然后读取 `targ.state.attr` 的值。   
+其中前 3 项支持用 0, -1, -2 等参数指定取哪一层的节点，或用 `sPath` 参数取指定节点，`sPath` 若用相对路径，自动以当前层所在的节点为参照。比如：`state("./toolbar").attr` 含义是：找到以 0 层节点为参照，路径为 `"./toolbar"` 的目标节点（`targ`），然后读取 `targ.state.attr` 的值。   
 关于 `item, count, index` 的用法，请参考下一节 [循环指令](#2.5.4.) 。
 
 4. `typeof` 函数

@@ -1667,7 +1667,7 @@ main.$$onLoad.push( function(callback) {
     var typeInfo = comp._._getSchema(comp);
     var dSchema = getCompSchema_(comp,typeInfo,noExpr);
     if (!dSchema) return null;
-    if (dSchema.properties && !dSchema.properties.style) // set default style={} for easy editing
+    if (dSchema.properties && !dSchema.properties.style && !comp.props['$style']) // set default style={} for easy editing
       dSchema.properties.style = {type:'object',propertyOrder:200,default:{}};
     
     lastSchemaOpt_ = dSchema.wdgtOption;
