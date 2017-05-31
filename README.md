@@ -3,17 +3,11 @@ shadow-server：Shadow Widget 的本地 WebService 系统
 
 &nbsp;
 
-**提示**：
-1. 当前版本只在 Mac 环境（OSX 10.9）测试通过，非 Mac 环境暂不建议使用！
-2. 当前 0.1.x 版本即将升级到 1.0，V1.0 以后为正式推荐的稳定版本。
-
-&nbsp;
-
 ### 简介：Shadow Widget 与 Shadow Server
 
 Shadow Widget 是一种可视化控件框架，它基于 react 技术，将 JSX 及虚拟 DOM 封装成一种易用、易继承、易管理的形式，使界面设计与业务逻辑获得良好分离，进而支持所见即所得的开发模式。简单理解 Shadow Widget 就是 “react + react-router + redux”，再另加一套可视化 GUI 设计工具。
 
-Shadow Server 工程为 Shadow Widget 开发环境提供一套在本地运行的 WebService 系统，既服务于调测，也用于本体系产品在本机的正式运行。
+Shadow Server 工程为 Shadow Widget 开发环境提供一套在本地运行的 WebService 系统，既服务于调测，也用于本开发体系的产品在本机正式运行。
 
 ### 安装
 
@@ -40,7 +34,7 @@ npm start
 [shadow-server 开源项目](https://github.com/rewgt/shadow-server)   
 [shadow-widget 开源项目](https://github.com/rewgt/shadow-widget)   
 [shadow-book 开源项目](https://github.com/rewgt/shadow-book)   
-[shadow-slide 开源项目](https://github.com/rewgt/shadow-slide)
+[shadow-slide 开源项目](https://github.com/rewgt/shadow-slide)   
 [shadow-gits 开源项目](https://github.com/rewgt/shadow-gits)
 
 [Shadow Widget 产品博客](https://rewgt.github.io/product-blogs/)
