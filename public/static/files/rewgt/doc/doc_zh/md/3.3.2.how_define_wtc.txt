@@ -60,7 +60,7 @@ T.HighlightBtn = new THighlightBtn_();
 
 定义 `getInitialState, componentDidMount, componentWillUnmount` 等 React 内置的方法，类似于投影类定义，差别仅在于，在 WTC 中用 `super.method` 调用基类的同名函数，而投影类定义中，要用带 `'_'` 前缀的 “实例方法” 的方式。这些类方法均可缺省，缺省时自动采用基类的同名函数。定义事件函数与投影类中的要求一样，没什么特殊的。
 
-新定义的 WTC 类定义及其实例（用 `new` 创建一个）要登记到 T 模块，如上例最后两行代码，其中类实例供转义标签引用，类定义则可用作其它 WTC 类的基类。
+新定义的 WTC 类定义及其实例（用 `new` 创建一个）一般要求登记到 T 模块，如上例最后两行代码，登记后，转义标签才可按 `<span $=HighlightBtn>test</span>` 的方式引用。
 
 #### 服务于产品开发的内置属性
 
@@ -85,6 +85,46 @@ T.HighlightBtn = new THighlightBtn_();
 
 `_htmlText` 指示是否使用 `'html.'` 属性，取值为 `true` 或 `false`，比如 Panel 类构件该属性设为 `false`，大部分 P 类与 Span 类构件的 `_htmlText` 设为 `true`。
 
-以上 6 种属性均服务于产品开发阶段，自定义 WTC 类时通常不必额外处理，因为基类的 constructor 函数已替你处理。
+以上 6 种属性均服务于产品开发阶段，自定义 WTC 类时通常不需额外处理，因为基类的 constructor 函数已替你处理。
+
+#### 用 `_createClass()` 创建 React class 类
+
+Shadow Widget 一般要求用户在 T 模块注册 WTC，如上面举例 `T.HighlightBtn_` 与 `T.HighlightBtn`，其中 `T.HighlightBtn_` 是 WTC 类定义，`T.HighlightBtn` 是 WTC 类实例。注册到 `T.HighlightBtn`，便于转义标签能以 `<span $=HighlightBtn>` 方式引用。还有一种方式是不往 T 模块注册，把它转化为 React class，只在 JSX 中使用。
+
+WTC 与 React class 都用 javascript 的 class 语法进行定义，比如 React class：
+
+``` js
+class HighlightBtn2 extends React.Component {
+  constructor(props) {
+    // ...
+  }
+
+  componentDidMount() {
+    // ...
+  }
+
+  render() {
+    // ...
+  }
+}
+```
+
+新定义一个 WTC 类必须从已有 WTC 继承，如前面举例的 `HighlightBtn` 从 `T.Button_` 继承，另外，WTC 比 React class 多一层抽象，将 WTC 用作 React class 要做一次转换，比如：
+
+``` js
+var Btn = T.HighlightBtn._createClass();
+var jsx = <Btn>test1</Btn>;
+
+var AlertBtn = T.HighlightBtn._createClass( {
+  $onClick: function(event) {
+    alert('clicked');
+  },
+});
+var jsx2 = <AlertBtn>test2</AlertBtn>;
+```
+
+经 `WTC._createClass()` 做一次捆绑，WTC 才转化为 React class，也就是说，WTC 是 React class 类的类，捆绑过程其实是实例化过程。`_createClass(defs)` 可带一个参数，该参数要符投影类定义规格，另外 `_createClass` 在所有 WTC 的共有基类 `T.Widget_` 中定义，所有 WTC 实例都可调用它实施捆绑。
+
+因为绑定某个具体的投影定义，生成的 React class 就具备特定功能，所以，这种捆绑也称 **"定制化捆绑"**。定义一个 WTC 后，借助定制化捆绑机制，该 WTC 不往 T 模块注册也同样支持常规编程，这么做的好处是，避免污染全局 T 模块空间。
 
 &nbsp;

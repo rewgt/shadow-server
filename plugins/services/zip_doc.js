@@ -20,6 +20,8 @@ M.onload = function(app) {
 var is_in_develop_ = app.get('env') === 'development';
 var config = main.config;
 
+var markdown_splitor_ = /<\!-- SLIDE PAGES V[.0-9]+, DO NOT CHANGE THIS LINE\. -->/;
+
 function adjustMetaText(s) {
   return s.replace(/[\r\n]+/gm,'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');  // "
 }
@@ -52,13 +54,13 @@ main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // s
       else {
         var htmlText = fs.readFileSync(sIdxFile,'utf-8');
         var markText = fs.readFileSync(sFile,'utf-8');
-        var iPos = htmlText.indexOf('<body>');
-        if (iPos < 0) {
+        var iPos = htmlText.indexOf('<body>'), iPos2 = htmlText.lastIndexOf('</body>');
+        if (iPos < 0 || iPos2 < 0) {
           res.status(400).send('invalid file (lib/show_doc.html)');
           return;
         }
         
-        var headPart = htmlText.slice(0,iPos), tailPart = htmlText.slice(iPos+6);
+        var headPart = htmlText.slice(0,iPos), middPart = htmlText.slice(iPos,iPos2), tailPart = htmlText.slice(iPos2);
         var docTitle = dBody.title || '', docDesc = dBody.desc || '', docKey = dBody.keyword || '';
         if (docTitle || docDesc || docKey) {
           var i1 = headPart.indexOf('<title>'), i2 = headPart.indexOf('</title>');
@@ -71,10 +73,17 @@ main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // s
           }
         }
         
-        htmlText = headPart + 
-          '<body>\n\n<pre id="pinp-mrkdn" style="display:none"><code>' +
-          markText + (markText.slice(-1) === '\n'?'':'\n') + 
-          '</code></pre>' + tailPart;
+        var s1 = '', s2 = '', b = markText.split(markdown_splitor_);
+        if (b.length >= 2) {
+          s1 = b[0];
+          s2 = b[1].trim();
+        }
+        else s1 = markText;
+        
+        var sContent = '';
+        if (s1) sContent = '<!-- SLIDE PAGES: PART A' + s1 + ' -->';
+        if (s2) sContent += '<!-- SLIDE PAGES: PART B' + s2 + ' -->';
+        htmlText = headPart + middPart + sContent + '\n\n' + tailPart;
         
         var output = fs.createWriteStream(path.join(sBase,sCateProj,sPureName+'.zip'));
         var archive = archiver('zip',{zlib:{level:9}});

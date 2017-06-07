@@ -27,6 +27,12 @@
 
 ##### <a name="widget"></a>`Widget`
 
+> `T.Widget_` 是所有 WTC 的共有基类，它提供通用的属性与类方法。通常要在继承类中使用本类提供的属性与方法，使用时请注意区分行内构件，还是非行内构件，这两者差别较大。
+
+> 本类提供 `_createClass(defs)` 方法用于定制化捆绑，生成 React class，参数 defs 要求为投影类定义，或者为 `null`，或者缺省不传递。缺省时，defs 自动取 `{}` 值，若传入 `null` 则表示按 `WTC._className` 命名，从全局 T 模块中查找相应 WTC，并返回对应的 React class 定义。
+
+&nbsp;
+
 > **`_statedProp` 新增定义：** `['width','height','left','top']`   
 将属性定义到 `_statedProp`，便于可视化编辑中动态更新的值可被保存，比如面板控件的 `state.width` 可能被分割条经拖拉改变宽度，当控件导出时，自动以 `state.width` 取代 `props.width` 用于存盘。Shadow Widget 内置构件中，只有 `Widget` 与 `MarkedDiv` 使用了 `_statedProp` 定义。   
 &nbsp;
