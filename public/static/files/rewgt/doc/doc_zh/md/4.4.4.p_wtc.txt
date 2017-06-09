@@ -66,6 +66,8 @@
 `Iframe` 为 `[0,0,0,0]`，`Tbody, Th, Tr` 也是 `[0,0,0,0]`，其余对基类定义未作更改。
 > - `borderWidth`   
 `Fieldset` 为 `[2,2,2,2]`，`Hr` 为 `[1,1,1,1]`，其余对基类定义未作更改。
+> - `style`   
+`Fieldset` 为 `{borderColor:'#bbb'}`，其余对基类定义未作更改。
 
 > **新增 duals 属性：** 无。
 

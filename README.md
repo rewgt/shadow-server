@@ -7,7 +7,7 @@ shadow-server：Shadow Widget 的本地 WebService 系统
 
 Shadow Widget 是一种可视化控件框架，它基于 react 技术，将 JSX 及虚拟 DOM 封装成一种易用、易继承、易管理的形式，使界面设计与业务逻辑获得良好分离，进而支持所见即所得的开发模式。简单理解 Shadow Widget 就是 “react + react-router + redux”，再另加一套可视化 GUI 设计工具。
 
-Shadow Server 工程为 Shadow Widget 开发环境提供一套在本地运行的 WebService 系统，既服务于调测，也用于本开发体系的产品在本机正式运行。
+Shadow Server 工程为 Shadow Widget 开发环境提供一套在本地运行的 WebService 系统，既服务于调测，也用于本开发体系的产品在本机正式运行。本工程已包含 shadow-widget 的 cdn 发行库。
 
 ### 安装
 

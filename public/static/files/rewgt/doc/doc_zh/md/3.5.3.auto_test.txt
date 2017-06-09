@@ -11,7 +11,7 @@
 
 首先，**让 ViewModel 从界面显示剥离**。被测构件要保留预定义功能，但不显示界面元素，就像在命令行提供测试接口那样，界面不是必须的，不显示可避免干扰，也免得界面尚未实现时，程序跑不起来。
 
-有两种方法可以做到这一点，方法一，在投影定义中，这么替换 render 函数：
+不妨在投影定义中，这么替换 render 函数：
 
 ``` js
   main['.body.top.p.btn'] = {
@@ -27,40 +27,40 @@
 
 上面代码增加 `W.__debug__` 判断，若在调测态，让本节点不显示界面。
 
-方法二，或者用 `W.$dataSrc` 传递一个 render 函数，比如：
+其次，**仿真 Model 数据**。有两种方法，一是在源码中用 `W.__debug__` 识别调测态，追加特定的调测处理，二是用 `W.$dataSrc` 附加测试数据。
+
+经上述处理，ViewModel 就与它的上层与下层隔离开了，我们用 javascript 编写测试代码，让不易实施的界面测试也轻松做起来。
+
+#### 用 dataSrc 传入特定数据驱动界面测试
+
+在 `W.$dataSrc` 中定义的数据可叠加到被测节点的 `props`，因此它能模拟各种应用场景，下面是一个简单例子：
 
 ``` js
-  var dataSrc = W.$dataSrc = {};
-  
-  function debugRender() {
-    this._render(this);
-    return null;
-  }
-  
-  dataSrc['.body.top.p.btn'] = { render: debugRender };
+  dataSrc['.body.top.list'] = {
+      'dual-data': [{name:'Wayne',age:30},{name:'George',age:40}]
+  };
 ```
 
-其次，**仿真 Model 数据**。同样有两种方法，一是在源码中用 `W.__debug__` 识别调测态，追加特定的调测处理，二是用 `W.$dataSrc` 直接附加测试数据。
+测试数据按 `props['dual-data']` 传入，驱动界面展示，然后我们检查结果是否预期。
 
-经过上述两种处理，ViewModel 就与它的上层与下层隔离开了，我们用 javascript 编写测试代码，让不易实施的界面测试也很容易做起来。
+注意，只在非设计态（即 `W.__design__` 非真）页面导入时，才会叠加 `W.$dataSrc` 中的 `props` 数据，因为是叠加，props 下同名属性将被覆盖。
 
 #### setup 与 teardown
 
-在调试态，Shadow Widget 还额外支持 setup 与 teardown 过程调用。投影类中的 `setup__` 方法将在构件的首次 `render()` 时自动调用，而 `teardown__` 方法将在构件的 `componentWillUnmount()` 中自动调用。
+在调试态（即 `W.__debug__` 为真时），Shadow Widget 还额外支持 setup 与 teardown 过程调用。投影类中的 `setup__` 方法将在构件的首次 `render()` 时自动调用，而 `teardown__` 方法将在构件的 `componentWillUnmount()` 中自动调用。
 
 举个简单例子：
 
 ``` js
   dataSrc['.body.top.p.btn'] = {
     'dual-msg': 'Hello, world!',
-    render: debugRender,
     
     setup__: function() {
-      console.log('in setup...');
+      console.log(this.widget.getPath(), 'in setup...');
     },
     
     teardown__: function() {
-      console.log('in teardown...');
+      console.log(this.widget.getPath(), 'in teardown...');
     },
   };
 ```
