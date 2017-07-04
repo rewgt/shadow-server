@@ -16,25 +16,6 @@ code {
   font-size: 0.875em;   /* 14px, em, not rem */
 }
 
-.rewgt-static > * {
-  margin: 0.75rem 0px;
-}
-.rewgt-static pre {
-  padding: 6px;
-  border: 1px solid #f0f0f0;
-  background-color: #f8f8f8;
-  line-height: 1;
-}
-.rewgt-static blockquote {
-  padding-left: 1.25rem;
-}
-.rewgt-static h1, .rewgt-static h2, .rewgt-static h3, .rewgt-static h4, .rewgt-static h5, .rewgt-static h6 {
-  margin: 1.875rem 0px 1rem;
-}
-.rewgt-static strong {
-  color: #800;
-}
-
 h1, h2 {
   margin: 0.625rem 0;   /* 10px */
   padding: 0;
@@ -48,12 +29,34 @@ h5, h6 {
   padding: 0;
 }
 
-p, ul {
-  margin: 0.375rem 0;   /* 6px 0 */
+p, ul, ol {
+  margin: 0.75rem 0.25rem;    /* 12px 4px */
 }
 
 ul {
   padding-left: 1.25rem; /* 20px */
+}
+
+.rewgt-static > * {
+  margin: 0.75em 0;
+}
+.rewgt-static pre {
+  padding: 6px;
+  border: 1px solid #f0f0f0;
+  background-color: #f8f8f8;
+  line-height: 1;
+}
+.rewgt-static blockquote {
+  padding-left: 1.25em;
+}
+.rewgt-static h1, .rewgt-static h2, .rewgt-static h3, .rewgt-static h4, .rewgt-static h5, .rewgt-static h6 {
+  margin: 1.875em 0px 1em;
+}
+.rewgt-static p, .rewgt-static ul, .rewgt-static ol {
+  margin: 0.75em 0.25em;
+}
+.rewgt-static strong {
+  color: #800;
 }
 
 .large-small-default {

@@ -124,4 +124,19 @@ Shadow Widget 限定 `$children` 只在 `$for='item in expr'` 之下的节点中
 
 另外，在 markdown 中新定义构件宜用 `$id__=path` 的方式，关联在 idSetter 预设的投影定义，参见 [idSetter 预定义](#3.4.4.)。借助 idSetter 动态关联投影定义，markdown 文本就具备完整的编程能力了。
 
+我们常用如下方式随意改造由 markdown 定义的子节点：指定 `props.noShow='1'`，然后在 idSetter 函数中，重新组装 `duals.nodes` ，再调用 `utils.setChildren()` 设置重组过的子节点。比如：
+
+``` js
+  this.defineDual('id__', function(value,oldValue) {
+    if (value <= 2) return;
+    
+    var bMenu = this.duals.nodes.map( function(item){return item[1]} );
+    utils.setChildren(this, [
+      <t.Ul key='menu' >
+        {bMenu}
+      </t.Ul>
+    ]);
+  });
+```
+
 &nbsp;

@@ -5,7 +5,7 @@
 
 #### W 节点与 R 节点
 
-语句 `var W = require('shadow-widget')`  导入构件树（即 W 树）模块，W 树由若干节点分层组装而来，各节点我们称 W 节点，变量 `W` 是 W 树的根节点。W 节点与 react component 节点不一样，为描述方便，我们将 react component 节点称为 R 节点，W 节点与 R 节点虽有一一对应关系，但两者还是独立的，两者主要关联有：
+语句 `W = require('shadow-widget')`  导入构件树（即 W 树）模块，W 树由若干节点分层组装而来，各节点我们称 W 节点，变量 `W` 是 W 树的根节点。W 节点与 react component 节点不一样，为描述方便，我们将 react component 节点称为 R 节点，W 节点与 R 节点虽有一一对应关系，但两者有区别，它们之间的关系是：
 
 1. 每个 W 节点用 `component` 属性记录它所关联的 R 节点
 2. 每个 R 节点用 `widget` 属性记录它所关联的 W 节点
@@ -58,6 +58,8 @@ W 树的上下层关系直接用 key 属性组织，比如某 W 节点（变量 
 从指定 R 节点查找子节点时，路径字串不以 `'.'` 开头，若以 `'.'` 开头表示按绝对路径查找。
 
 附带说明一下，本手册所提 R 节点，实质就是 react component，手册中不说 component，改称 R 节点，通常因为上下文语义要强调该 component 为适应 Shadow Widget 附加了特定规格（比如有 `duals`、`isHooked` 属性，具备事件化驱动能力等）。
+
+我们之所以在确定 R 节点概念后，还要定义 W 节点的概念，因为 W 树由 W 节点串接而成，而不由 R 节点直接串接。在 R 节点要用 `wdgt = comp.widget` 得到相应的 W 节点，然后用 `wdgt.parent` 取父级 W 节点，或用 `wdgt[childKey]` 取子级 W 节点，若想得到子级 R 节点，要用 `wdgt[childKeyName].component`。
 
 #### 登记侦听函数
 

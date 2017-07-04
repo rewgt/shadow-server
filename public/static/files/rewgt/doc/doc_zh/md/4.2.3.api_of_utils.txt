@@ -39,6 +39,7 @@
 > - [`loadElement`](#4.2.3.!load_element)
 > - [`loadElementEx`](#4.2.3.!load_element_ex)
 > - [`setVendorLib`](#4.2.3.!set_vendor_lib)
+> - [`bindMountData`](#4.2.3.!bind_mount_data)
 > - [`fireTrigger`](#4.2.3.!fire_trigger)
 
 &nbsp;
@@ -207,9 +208,11 @@
 
 ##### <a name="each_element"></a>`eachElement(comp,callback)`
 
-> 用于遍历 `comp` 节点下的各成员 Element，对每个子成员调用 `callback(childElement,index)`，这里 `childElement` 就是 `comp.$gui.comps[index]` 的值。
+> 用于遍历 `comp` 节点下的各成员 Element，每个子成员都按 `callback(childElement,index)` 方式回调，这里 `childElement` 就是 `comp.$gui.comps[index]` 的值。
 
-> 说明：`comp.$gui` 是 Shadow Widget 对 React Component 封装后用于集中存放数据，`comp.$gui.comps` 的功能相当于 `comp.props.children`，因 `$gui` 数据格式不对用户开放，所以提供本函数用于子成员遍历。
+> 参数 `callback` 可以缺省，缺省时，调用 `utils.eachElement(comp)` 将返回一个包含所有子成员 Element 的 array 数据。
+
+> 说明：`comp.$gui` 是 Shadow Widget 对 React Component 封装后用于集中存放数据，`comp.$gui.comps` 的功能相当于 `comp.props.children`，因 `$gui` 数据格式未对外开放，请用本函数遍历节点子成员。
 
 ##### <a name="set_element"></a>`setElement(comp,index,childElement)`
 
@@ -217,7 +220,11 @@
 
 ##### <a name="each_component"></a>`eachComponent(comp,callback)`
 
-> 用于遍历 `comp` 节点下的各成员 Component，对每个子成员调用 `callback(childComponent,index)`，这里 `childComponent` 是 `comp.$gui.comps[index]` 的输出实例。
+> 用于遍历 `comp` 节点下的各成员 Component，每个子成员都按 `callback(childComponent,index)` 方式回调，这里 `childComponent` 是 `comp.$gui.comps[index]` 的输出实例。
+
+> 参数 `callback` 可以缺省，缺省时，调用 `utils.eachComponent(comp)` 将返回一个包含所有子成员 Component 的 array 数据。
+
+> 说明：`comp.$gui` 是 Shadow Widget 对 React Component 封装后用于集中存放数据，`comp.$gui.comps` 的功能相当于 `comp.props.children`，因 `$gui` 数据格式未对外开放，请用本函数遍历节点子成员。
 
 ##### <a name="set_children"></a>`setChildren(comp,children,callback)`
 
@@ -242,6 +249,18 @@
 
 > 通常在回调函数中，往 `template` 挂载若干 UI 样板节点，引用样板节点要用绝对路径，如：   
 &nbsp;&nbsp; `<span $='.rewgt.sample.hoverBtn'>Test button</span>`。
+
+##### <a name="bind_mount_data"></a>`bindMountData(data)`
+
+> 为在 `W.$idSetter` 下已定义的 idSetter 的节点，增加动态数据自动捆绑的功能。当 `W.$idSetter[sKey]` 与 `data[sKey]` 同时定义某 `sKey` 项时，由 `data[sKey]` 指示的数据将在 `componentDidMount` 时自动捆绑到指定节点。
+
+> 参数 `data` 可以缺省，缺省时系统自动取 `W.$dataSrc` 的值。`data` 下允许用 `__attr__` 指定各个 `comp.duals.attr = data[attr]` 赋值的顺序，比如：`utils.bind_mount_data({myButton:{__attr__:['attr1','attr2'],attr1:value1,attr2:value2}})`，如果 `__attr__` 没给出，各项 `duals.attr` 赋值顺序可能不是确定的。
+
+> 在 `W.$idSetter` 中定义的 idSetter 函数，正常情况下不需返回数据，也就是说，idSetter 调用后缺省结果值是 `undefined`，如果让它的返回结果为 `true`，在动态捆绑数据的场合（即使用了 `utils.bindMountData(data)`）有特殊含义，表示忽略数据捆绑。
+
+> 调用本函数时，系统将遍历 `W.$idSetter` 下的 idSetter 函数定义，找出所有可捆绑数据的项目，然后重新定义各项 `W.$idSetter[sKey]`。所以，请注意，本函数通常只调用一次，而且要在任何初始化函数（如 `W.$$onLoad` 与 `W.$onLoad`）运行之前调用。
+
+> 调用函数可以方便的为多个节点自动设置若干 `duals.attr` 初值，所以它常用作测试，不过，非调测目的用它也是可以的。
 
 ##### <a name="fire_trigger"></a>`fireTrigger(comp,data)`
 

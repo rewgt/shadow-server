@@ -1,11 +1,11 @@
-3.6.2 扩展 ex 与 utils 模块
--------------------------
+3.6.2 扩展 ex 模块
+----------------------
 
 &nbsp;
 
-#### 扩展 utils 模块
+#### 定制 utils 下特定的 API 函数
 
-模块 utils 提供众多公共处理函数，用户既可以往 utils 自行添加自己的 API，也可以替换已定义的 API，因为 Shadow Widget 尝试提供一个精简的内核，部分 API 因精简而功能不强，比如下面 3 个 API 是假定可被用户替换的。
+模块 utils 提供众多公共处理函数，用户可以替换已定义的 API，因为 Shadow Widget 尝试提供一个精简的内核，可能部分 API 因追求精简导致功能不强，比如下面 3 个 API 是假定可以被用户自行替换。
 
 ```
     utils.shouldUpdate  // 提供 shouldComponentUpdate() 缺省处理

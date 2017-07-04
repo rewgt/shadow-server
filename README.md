@@ -35,7 +35,6 @@ npm start
 [shadow-widget 开源项目](https://github.com/rewgt/shadow-widget)   
 [shadow-book 开源项目](https://github.com/rewgt/shadow-book)   
 [shadow-slide 开源项目](https://github.com/rewgt/shadow-slide)   
-[shadow-gits 开源项目](https://github.com/rewgt/shadow-gits)
 
 [Shadow Widget 产品博客](https://rewgt.github.io/product-blogs/)
 

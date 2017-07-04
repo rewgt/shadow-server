@@ -79,7 +79,7 @@
 [2,"3.5.3.","自动化测试","md/3.5.3.auto_test.txt"],
 [1,"3.6.","定制扩展","md/3.6.extend_shadow_widget.txt"],
 [2,"3.6.1.","安装库化UI","md/3.6.1.install_ui_lib.txt"],
-[2,"3.6.2.","扩展ex与utils模块","md/3.6.2.extend_ex_utils.txt"],
+[2,"3.6.2.","扩展ex模块","md/3.6.2.extend_ex_utils.txt"],
 [2,"3.6.3.","可视化编辑的扩展","md/3.6.3.extend_ui_design.txt"],
 [0,"4.","API手册","md/4.api_manual.txt"],
 [1,"4.1.","main模块","md/4.1.main_module.txt"],

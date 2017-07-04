@@ -45,6 +45,30 @@ W.$main.$onLoad.push(onLoad);
 
 请注意，在 idSetter 函数中调用 `utils.setChildren()` 来更新子成员节点时，须用 `key` 值指明各个子成员，因为 idSetter 函数会被 `render()` 频繁调用，若不指明 `key` 值，系统会创建新节点，而非更新已存在的子节点。
 
+#### 在 idSetter 函数中改变当前节点的 tag 名
+
+在 idSetter 函数中，可以用 `this.state['tagName.'] = sTag` 改变当前节点的标签名。比如：
+
+``` js
+  function id__(value,oldValue) {
+    if (value <= 2) {
+      // ...
+      return;
+    }
+    
+    this.state['tagName.'] = (this.props.bsStyle == 'link'? 'a': 'button');
+    // utils.setChildren(...);
+  }
+```
+
+#### 在 idSetter 函数中编程等效于在 render 函数编程
+
+如前所述，idSetter 函数中可用`utils.setChildren()` 动态安装子节点，用 `this.duals.attr = value` 改变当前节点属性，能用 `this.state['tagName.'] = sTag` 改变标签名，加上 `value` 为 `0, 1, 2` 的几个条件代码段，分别等效于在 `componentWillUnmount, getInitialState, componentDidMount` 中写代码。所以，idSetter 函数的表达能力是完备的。
+
+每次 `render()` 函数调用，都会调起预先定义的 idSetter 函数，从原理上讲，在 idSetter 中组装界面完全等效于在 render 中组装。因此，Shadow Widget 不建议用户定制 render 函数，这并不影响它的编程表现力，把相关代码转到 idSetter 中实现即可。
+
+需注意：如果决定在 idSetter 函数中组装子成员，就不能调用 `this.setChild()` 来添加或删除子节点了，两种方式只能二选一。
+
 #### 在 idSetter 模块预置 setter 函数
 
 除了将 setter 函数传给 `$id__` 属性，Shadow Widget 还支持用一个路径字串指示系统从预定的地方找到 setter 函数。
@@ -93,16 +117,66 @@ W.$main.$onLoad.push(onLoad);
 
 #### 给 `$id__` 传函数还是传路径字串？
 
-在 `duals.id__` 的 setter 函数中，我们既可以接管当前节点如何组织它的子成员，也可以不接管，比如上面例子，在 idSetter 模块预设的 setter 函数中，如果不调用 `utils.setChildren()` 就不接管了。
+在 `duals.id__` 的 setter 函数中，我们既可以接管当前节点如何组织它的子成员，也可以不接管，比如上面例子，在 idSetter 模块预设的 setter 函数中，如果不调用 `utils.setChildren()` 就不接管了。子节点组装到底由 idSetter 接管好，还是不接管，主要考虑如下因素：
 
-采用函数式编程风格，还是指令式风格，对接不接管子成员组装，以及给 `$id__` 传路径字串还是 setter 函数都产生影响。越倾向于函数式编程，就越多接管子成员组装，越多即时传递 `$id__` 的 setter 函数（而少在 idSetter 模块预先定义）。
+其一，与采取函数式风格，还是指令式风格相关。
 
-**凡子节点动态有增删，宜在 `duals.id__` 的 setter 函数中接管子成员组装**，对这两种编程风格均如此。但如果不增删子成员，只动态更改节点属性，这时，接不接管子成员组装是可选的，对于函数式编程，尽可能接管。而用指令式编程时，不必接管，只需考虑如何用双源属性构造单向数据流特性，而且，尽量在 idSetter 模块预定义供 `$id__` 使用的 setter 函数，让 setter 与 JSX（或 json-x）清晰分离，管理与维护会更便利。
+> 越倾向于函数式，越能接管，或是指令式（或声明式）定义用户界面，尽量不由 idSetter 接管子层动态组装。
+
+其二，与子节点在生存期内不变，还是要动态增删有关。
+
+> **如果子节点需动态增删，宜在 `duals.id__` 的 setter 函数中接管子成员组装**。如果不增删子成员，只是改节点属性，则尽量不接管子成员组装。
+
+另外，在 Shadow Widget 的可视编辑器中做设计时，节点的属性值不能是 `function` 函数，所以，传给 `$id__` 的值只能是路径字串，由系统自动到 `W.$idSetter` 下找出相应 idSetter 函数。如果不考虑可视化界面设计，直接传函数给 `$id__` 会更直接。
+
+#### 从 idSetter 函数分离驱动数据
+
+在一个节点捆绑数据，如初始化数据，或测试数据，通常在节点挂载时（即 `componentDidMount()` 回调时）进行，若在 idSetter 函数中实现，编码类似下面样子：
+
+``` js
+  idSetter[sPath] = function(value,oldValue) {
+    if (value <= 2) {
+      if (value == 2) {  // component did mount
+        this.duals.attr1 = value1;
+        this.duals.attr2 = value2;
+      }
+      return;
+    }
+  };
+```
+
+Shadow Widget 提供 `utils.bindMountData(data)` 接口用于节点挂载时自动插入若干 `duals.attr = value` 语句。比如：
+
+``` js
+  idSetter[sPath] = function(value,oldValue) {
+    // ...
+  };
+  
+  utils.bindMountData( {
+    sPath: { __attr__: ['attr1','attr2'],
+      attr1: value1,
+      attr2: value2,
+    },
+  });
+```
+
+调用 `utils.bindMountData(data)` 时，系统会遍历 `W.$idSetter` 下所有已定义的 idSetter 函数，从参数 `data` 找出相同 `key` 的数据项，在这个例子中 `data[sPath]` 对应于 `idSetter[sPath]`，然后自动在 `idSetter[sPath]` 函数未尾链接如下语句：
+
+``` js
+  if (value == 2) {  // component did mount
+    this.duals.attr1 = value1;
+    this.duals.attr2 = value2;
+  }
+```
+
+数据项中 `__attr__` 固定用来表达对 `duals.attr` 赋值的顺序，有关 `utils.bindMountData(data)` 的接口规格，请参考 API 使用手册。
+
+总之，使用 `utils.bindMountData()` 便于将驱动数据游离出来，方便了调测，甚至不只是调测，我们还可以将此机制带到发行版本，把游离的驱动数据保存到独立的配置文件。
 
 #### 避免与指令可计算属性混用
 
-如果您已用编程方式接管子节点的组装过程，就不应再用 `$for, $if, $elif, $else` 这 4 个 “指令可计算属性” 让下级节点有条件的展示。尽管这两种方式都能达到目标，前者动用编程手段，表达能力强些，但是，这两者思维方式差别较大，并用容易产生混乱，得不偿失。
+如果您已用编程方式接管子节点的组装过程，就不应再用 `$for, $if, $elif, $else` 这 4 个 “指令可计算属性” 让下级节点有条件的展示。尽管这两种方式都能达到目标，前者动用编程手段，表达力强些，但两者思维方式差别较大，同时使用容易混乱，得不偿失。
 
-所以我们建议：在前端开发中，要么采用 “指令可计算属性” 组织你的界面，要么采用编程方式动态组装各层节点，两者二选一，尽量避免混用。当然，用 `$for=''` 或 `$$for=''` 开启一层 callspace 是例外，它没有动态组装子节点，只是让下层可计算表达式可用而己。
+所以，我们建议：在前端开发中，要么采用 “指令可计算属性” 组织你的界面，要么采用编程方式动态组装各层节点，两者二选一，避免混用。当然，用 `$for=''` 或 `$$for=''` 开启一个 callspace 是例外，因为并没有动态组装子节点，只是让下层可计算表达式可用。
 
 &nbsp;
