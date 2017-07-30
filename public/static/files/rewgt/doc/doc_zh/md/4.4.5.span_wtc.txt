@@ -16,6 +16,7 @@
 
 > 其它：
 > - [`HiddenSpan`](#4.4.5.!hidden_span)
+> - [`VirtualSpan`](#4.4.5.!virtual_span)
 > - [`Audio/Video`](#4.4.5.!audio)
 > - [`Br/A/Q/Abbr/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/Textarea/Progress/Img/Canvas/Picture/Map/Area/Time/Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/Option/B/I/S/U/Ins/Del/Code/Var/Summary/Em/Strong/Big/Small/Dfn/Samp/Kdb/Cite/Dialog/Meter/Embed/Object/Param/Ruby/Rp/Rt`](#4.4.5.!br)
 
@@ -99,6 +100,13 @@
 > **`getDefaultProps()` 新增属性：** 无。
 
 > **新增 duals 属性：** 无。
+
+##### <a name="virtual_span"></a>`VirtualSpan`
+
+> 本类继承自 [`Span`](#4.4.5.!span)，用来描述 Span 类虚节点（即 'tagName.' 为空的节点）。
+
+> **`getDefaultProps()` 新增属性：**
+> - `'tagName.': ''`
 
 ##### <a name="audio"></a>`Audio/Video`
 

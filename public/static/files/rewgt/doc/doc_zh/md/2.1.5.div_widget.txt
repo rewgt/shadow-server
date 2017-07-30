@@ -36,9 +36,13 @@ Div 的属性包括：`width, height, minWidth, maxWidth, minHeight, maxHeight, 
 1. Div 缺省值定为 `20px` 是一种无害化处理，便于界面可视化编辑时，让 Div 构件占据一定宽高，便于用鼠标选中它，否则零宽高的构件选取不便。
 2. `Article`、`Section`、`Header`、`Footer`、`Aside`、`Nav` 的使用方法与 Div 类似，本手册不赘述。
 
+#### Div2 构件
+
+Div2 继承自 Div，其 width 与 height 属性的缺省值均为 null（含义为 `'auto'`），另外，Div2 属 P 类构件，但在网页上输出 `<div>` 标签，Div2 的下级节点可以是 P 类构件，也可以是 Span 类构件。而 Div 的下级节点要求是 Div 类构件或 P 类构件。
+
 #### <a name="marked_div"></a>MarkedDiv 构件
 
-MarkedDiv 类继承自 Div，支持用 <a target="_blank" href="https://daringfireball.net/projects/markdown/syntax">markdown</a> 文本描述节点内容。它用 `<pre>` 标签定义 markdown 文本，系统自动输出相应的 html 界面。
+MarkedDiv 继承自 Div，支持用 <a target="_blank" href="https://daringfireball.net/projects/markdown/syntax">markdown</a> 文本描述节点内容。它用 `<pre>` 标签定义 markdown 文本，系统自动输出相应的 html 界面。
 
 比如：
 

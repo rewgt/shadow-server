@@ -41,8 +41,6 @@
 取 `null` 值含义为 `auto`。
 > - `minHeight: 0`
 
-> **新增 duals 属性：** 无。
-
 ##### <a name="article"></a>`Article/Section/Header/Footer/Aside/Nav/Main`
 
 > 本类继承自 [`Div`](#4.4.3.!div) 。

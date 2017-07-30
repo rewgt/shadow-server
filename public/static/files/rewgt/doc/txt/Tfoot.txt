@@ -1,2 +1,2 @@
 Tfoot
-4.4.4.!noscript
+4.4.4.!col

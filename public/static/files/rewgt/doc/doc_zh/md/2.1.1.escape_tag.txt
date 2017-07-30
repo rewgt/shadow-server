@@ -86,6 +86,20 @@ duals.style 赋值按覆盖合并的方式进行，即，同名 css 属性被新
 1) 将 style 下某 css 属性赋空字串，表示恢复该属性的缺省值。   
 2) 本节所举例子在 demo2，源码可从安装路径下 `shadow-server/public/static/demo2/` 找到。
 
+#### 转义标签中的属性要显式赋值
+
+HTML 标签中允许类似如下 `disabled` 简写的属性定义：
+
+``` html
+  <button disabled>test</button>
+```
+
+转义标签中要显式给所有属性赋值，省掉等号赋值的属性定义不再支持，比如要写成如下方式：
+
+``` html
+  <span $=Button disabled='1'>test</span>
+```
+
 #### 转义与非转义标签混用
 
 若在转义标签的子节点混入非转义标签，系统将自动把它视作 **“静态节点”**，尝试原样放到指定位置。比如：

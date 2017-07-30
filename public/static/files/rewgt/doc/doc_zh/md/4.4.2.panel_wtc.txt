@@ -29,7 +29,7 @@
 
 > `T.Widget_` 是所有 WTC 的共有基类，它提供通用的属性与类方法。通常要在继承类中使用本类提供的属性与方法，使用时请注意区分行内构件，还是非行内构件，这两者差别较大。
 
-> 本类提供 `_createClass(defs)` 方法用于定制化捆绑，生成 React class，参数 defs 要求为投影类定义，或者为 `null`，或者缺省不传递。缺省时，defs 自动取 `{}` 值，若传入 `null` 则表示按 `WTC._className` 命名，从全局 T 模块中查找相应 WTC，并返回对应的 React class 定义。
+> 本类提供 `_createClass(defs)` 方法用于定制化捆绑，生成 React class，参数 defs 要求为投影类定义，或者为 `null`，或者缺省不传递。缺省时，defs 自动取 `{}` 值，若传入 `null` 则表示按 `WTC._className` 命名，从全局 T 模块中查找相应 WTC，并返回对应的 React class 定义，该返回值还自动被缓存，下次再调用 `WTC._createClass(null)` 将直接返回缓存值。
 
 &nbsp;
 
@@ -49,6 +49,12 @@
 > - `borderWidth: [0,0,0,0]`
 > - `padding: [0,0,0,0]`
 > - `margin: [0,0,0,0]`
+
+&nbsp;
+
+> 说明：当 `left` 或 `top` 取 `null` 值时，可让虚拟 DOM 节点忽略 `style.left` 或 `style.top` 设置，这使得该节点相关的 CSS 定义不被覆盖。类似的，`margin=[null,null,null,null]; padding=[null,null,null,null]; borderWidth=[null,null,null,null];` 也具备忽略相应 CSS 属性的功能。
+
+&nbsp;
 
 > **新增 duals 属性：**
 > - `keyid`   
@@ -89,12 +95,14 @@
 
 > **1) `defineDual(attr,setFn,initValue,base)`**
 
-> 用于定义双源属性，`attr` 为属性名，`setFn` 为 setter 函数，`initValue` 为初始值，`base` 用于取回底层的 setter 函数，其中 `setFn, initValue, base` 参数可以缺省，setFn 缺省时系统自动定义一个 setter 用于给 `this.state.attr` 赋值，`initValue` 缺省时自动取值 `undefined`，表示不设置该双源属性的初始值，`base` 缺省时表示不取回底层的 setter 函数。
+> 用于定义双源属性，`attr` 为 string 类型的属性名，`setFn` 为 setter 函数，`initValue` 为初始值，`base` 用于取回底层的 setter 函数，其中 `setFn, initValue, base` 参数可以缺省，setFn 缺省时系统自动定义一个 setter 用于给 `this.state.attr` 赋值，`initValue` 缺省时自动取值 `undefined`，表示不设置该双源属性的初始值，`base` 缺省时表示不取回底层的 setter 函数。
+
+> 参数 `attr` 还可以是字串列表，用于调用一次注册多个双源属性。比如 `this.defineDual(['attr1','attr2'],setFn)` 等效于连续调用 `this.defineDual('attr1',setFn)` 与 `this.defineDual('attr2',setFn)`。
 
 > 因为本函数返回当前 component 实例（即 `this`），所以可以将多条 `defineDual()` 语句串接起来书写，比如：
 
 ``` js
-      this.defineDual('attr').defineDual('attr2');
+      this.defineDual('attr1').defineDual('attr2');
 ```
 
 > 参数 `base` 有特殊用途，当它取回底层 setter 函数（存为 `base.setter`）后，底层 setter 不再隐式自动调用，改成在当前 setter 函数中用 `base.setter(value,oldValue)` 显式调用。比如：
@@ -123,7 +131,7 @@
 
 > **4) `listen(attr,targComp,sMethod)`**
 
-> 用于侦听双源属性。`attr` 指定被侦听的源属性，`targComp` 指定目标节点，`sMethod` 显式指定 `targComp` 下的类方法或另一个双源属性，此参数可缺省，缺省表示要登记的侦听函数命名将从源属性推导。若不缺省，如果 `targComp[sMethod]` 类方法存在，就登记该侦听函数，否则进一步判断`targComp.duals[sMethod]` 是否存在，如果存在就串接两个侦听源。
+> 用于侦听双源属性。`attr` 指定被侦听的源属性，`targComp` 指定目标节点，`sMethod` 显式指定 `targComp` 下的类方法或另一个双源属性，此参数可缺省，缺省表示要登记的侦听函数命名将从源属性推导。若 `sMethod` 不缺省，如果 `targComp[sMethod]` 类方法存在，就登记该侦听函数，否则进一步判断 `targComp.duals[sMethod]` 是否存在，如果存在就串接两个侦听源。
 
 > 本函数返回 `listen` 函数所在的 component 实例，多条 `listen()` 语句串接起来书写。
 
@@ -145,11 +153,23 @@
 
 > 返回React Component 节点的真实 DOM 节点，等效于 `ReactDOM.findDOMNode(this)`。
 
-> **7) `parentOf()`**
+> **7) `parentOf(noVirtual,sRole)`**
 
 > 获取父节点 Component，如果失败（可能父节点不存在，或已 unmount）则返回 `null`。
 
-> **8) `componentOf(path)`**
+> 参数 `noVirtual` 指示是否忽略虚节点（即 `tagName.` 为空的节点），取真值为忽略。本参数可以缺省（值为 `undefined`），缺省时表示不忽略虚节点。
+
+> 参数 `sRole` 指示目标节点的 `role` 属性还须等于指定值，若不相等则接着向上级查找。本参数也可以缺省，缺省时表示忽略 `role` 属性是否匹配。
+
+> **8) `childOf(sKey,noVirtual)`**
+
+> 获取指定 `sKey` 值的子节点 Component，如果失败（可能父节点不存在，或已 unmount）则返回 `null`。
+
+> 参数 `sKey` 指示待查找子节点的 key 值，只查找一层子节点。
+
+> 参数 `noVirtual` 指示是否忽略虚节点（即 `tagName.` 为空的节点），取真值为忽略。本参数可以缺省，缺省时表示不忽略虚节点。如果忽略虚节点，且 `sKey` 为空时，将从子节点找出首个实节点。如果忽略虚节点且 `sKey` 非空时，表示找到首个实节点后，再从其下找出 key 值为 `sKey` 的子节点。
+
+> **9) `componentOf(path)`**
 
 > 取 `path` 指示的 Componet 节点，如果失败返回 `null`。`path` 既可以是绝对路径，也可以是相对路径，还可以是 `0, -1, -2` 等数值，表示取指定层 callspace 所在的节点，如果当前节点未在 MJI 解释器的上下文执行环境中，将返回 `null`。
 
@@ -164,19 +184,19 @@
     "../seg"         /* 以上一个导航段为基点，向下定位 */
 ```
 
-> **9) `elementOf(path)`**
+> **10) `elementOf(path)`**
 
 > 取 `path` 指示的 Element 节点，`path` 既可以是绝对路径，也可以是相对路径，还可以是 `0, -1, -2` 等数值，其格式与 `componentOf(path)` 中的 `path` 要求相同。
 
-> **10) `prevSibling()`**
+> **11) `prevSibling()`**
 
 > 取前一兄弟节点，如果不存在就返回 `undefined`。
 
-> **11) `nextSibling()`**
+> **12) `nextSibling()`**
 
 > 取后一兄弟节点，如果不存在就返回 `undefined`。
 
-> **12) `fullClone(props)`**
+> **13) `fullClone(props)`**
 
 > 带 `props` 参数克隆当前节点，返回值 Element 的 `props` 由传入参数 `props` 与原有值合并而来，`props` 参数可缺省。
 
@@ -184,7 +204,7 @@
 
 > 上面所提 “特定属性” 就是各节点 `_statedProp` 列出的属性，及所有 `data-*` 与 `aria-*` 属性。
 
-> **13) `setChild(...)`**
+> **14) `setChild(...)`**
 
 > 设置子节点 Element，可以传入单个子节点，也可传多个。变长参数的最后一个若是 function 类型，表示它是回调函数，在本次设置完成后自动回调，回调函数带一个参数 `changed`（取值 `true` 或 `false` 表示是否对子成员产生修改）。
 
@@ -192,11 +212,11 @@
 
 > 在参数传入的子节点，还可是 array 数组类型，表示批量增删，如 `this.setChild('+btn',[ele,ele2])` 表示在键值为 `btn` 的子节点之前插入 `ele` 与 `ele2` 节点。
 
-> **14) `reRender(callback,data)`**
+> **15) `reRender(callback,data)`**
 
 > 用于强制 render 刷新，刷新后 `callback` 回调函数将被调用，参数 `callback` 可以缺省。`data` 是刷新前要更新到节点 state 的数据，如 `comp.reRender(null,{width:0.9999})`，参数 `data` 也可缺省。
 
-> **15) `willResizing(width,height,inPending)`**
+> **16) `willResizing(width,height,inPending)`**
 
 > 供父级是面板的构件专用，当父面板宽高变化时（即触发了 Resizing），调用本函数来决定当前节点是否按缺省方式响应父级宽高变化。`width` 与 `height` 是父构件宽高的像素值，`inPending` 指示当前父构件宽高尚在变化中（比如用鼠标拖拉分割条，拖拉未结束时，面板变宽高还在进行中）。
 

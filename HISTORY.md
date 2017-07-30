@@ -16,6 +16,15 @@ v1.0.0 / 2017-05-31
     - 优化：通过给 `comp.state['tagName.']` 赋值，让 `comp` 节点的 render 输出能改变 tag
     - 改错：用 `comp.setChildren()` 安装子节点时，可能报 `keyid.` 属性不支持的错误
     - 优化：增加 `utils.bindMountData(data)` 函数用于捆绑调测数据
+  * v1.0.4 / 2017-07-31
+    - 优化：增加 `Div2, VirtualDiv, VirtualSpan` 节点 
+    - 优化：增加用 `utils.setChildren()` 设置虚拟节点与插入节点
+    - 优化：增加接口 `childOf(sKey,noVirtual)`，给 `parentOf(noVirtual,sRole)` 增加 2 个参数
+    - 优化：增加接口 `utils.containKlass(), utils.clearKlass(), utils.klassNames()`
+    - 优化：为选项构件统一增加 `disabled` 双源属性
+    - 优化：非行内构件的 `left/top/margin/padding/borderWidth` 支持用 null 表示省略 inline css
+    - 优化：`defineDual(attr)` 的 attr 参数允许传 array，便于一次设置多个双源属性
+    - 改错：原有 `Input/TextArea/Select` 的 value 同步处理不符合 controlled input 要求
 
 v0.1.4 / 2017-04-05
 ============

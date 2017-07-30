@@ -87,9 +87,24 @@ function onLoad() {
 
 #### idSetter 定义的实现原理
 
-给 `duals.id__` 定义 setter 函数有两种方式，其一是用上面介绍的 `props.$id__`，其二是调用 `defineDual('id__',setter)` 定义（所有 WTC 类的根基类就按该方式定义一个），前者 setter 函数要比后者 setter 函数多处理 `value` 为 `0, 1, 2` 的三种情况，即：启用 `$id__` 时，系统将在 `render, componentDidMount, componentWillUnmount` 函数中埋入触发 `"duals.id__ = 0/1/2"` 赋值的钩子。前者 `setter(value,oldValue)` 要处理 `value` 为 `0, 1, 2` 取值，但后者 setter 始终不处理这三种取值。
+给 `duals.id__` 定义 setter 函数有两种方式，其一是用上面介绍的 `props.$id__`，其二是调用 `defineDual('id__',setter)` 定义（所有 WTC 类的根基类就按该方式缺省定义了一个），前者 setter 函数要比后者 setter 函数多处理 `value` 为 `0, 1, 2` 的三种情况，即：启用 `$id__` 时，系统将在 `render, componentDidMount, componentWillUnmount` 函数中埋入触发 `"duals.id__ = 0/1/2"` 赋值的钩子。前者 `setter(value,oldValue)` 要处理 `value` 为 `0, 1, 2` 取值，但后者 setter 始终不处理这三种取值。
 
 通过 `$id__` 传入的 setter 函数，最终通过 `defineDual('id__',props.$id__)` 挂入，不同的仅是，它要额外模拟在 `getInitialState(), componentDidMount(), componentWillUnmount()` 函数中编码的三种处理。
+
+在用 `defineDual('id__',setter)` 登记的 setter 函数中，应在头部加入 `if (value <= 2) return` 语句，因为即便当前类没启用 `props.$id__` 的函数传入，它的继承类或投影类仍可能会启用。另外，在不确定是否会用 `props.$id__` 时，`defineDual('id__',setter)` 的 setter 函数中宜用如下方式书写初始化代码：
+
+``` js
+  this.defineDual('id__', function(value,oldValue) {
+    if (oldValue == 1) {
+      // init process ...
+    }
+    if (value <= 2) return;
+    
+    // other process ...
+  });
+```
+
+语句 `if (oldValue == 1)` 发生在当前节点首次 `render()` 调用时，因为不确定是否使用 `props.id__` 传入 idSetter 函数，所以不能用 `if (value == 1)` 确定初次 `render()` 调用。
 
 #### 用 idSetter 追加双源定义
 
@@ -102,6 +117,13 @@ function onLoad() {
         this.defineDual('test', function(value,oldValue) {
           // ...
         },0);
+        
+        this.setEvent( { $onMouseOver: function(ev) {
+            // ...
+          }, $onMouseOut: function(ev) {
+            // ...
+          }
+        });
       }
       else if (value == 2) {  // mount process
         console.log('componentDidMount() just called');
@@ -125,13 +147,13 @@ function onLoad() {
 
 编程中，常在一个节点集中获得数据，可能通过向服务器发送请求获得返回数据，也可能在该节点对外提供服务，封装其成员让外界不去关心。这时，集成的数据被各级子成员引用，就涉及数据如何在节点之间传递的问题。
 
-由于各节点的创建、挂载、卸载的时间有先后，给数据传递带来麻烦，比如子成员还没就绪时，如何传数据给它，数据传递依赖的某个节点卸载了（但未删除）如何处理。最好的传递方式是借助可计算属性，因为：
+由于各节点的创建、挂载、卸载的时间有先后，给数据传递带来麻烦，比如子成员还没就绪时，如何传数据给它，数据传递依赖的某个节点卸载了（但未删除）如何处理。最好的传递方式是借助可计算属性，比如 `$data='duals(-1).data.member'`，因为：
 
 1. 可计算属性在它所在节点首次 `render()` 时会对可计算表达式求值，这是主动同步。
 2. 节点就绪后，它的可计算表达式由侦听机制自动更新，这是被动同步。
 3. 节点被卸载，或程序中调用 `unlisten` 或 `undefineDual` 时，数据同步关系是自动维护的
 4. 可计算表达式功能强大，数据可被整体引用，也可局部引用，数据还可组装，动态结合各种条件。
 
-如果不借助可计算表达式，自行编写代码组织数据引用，往往把简单事情搞复杂了。
+如果不借助可计算表达式，自行编写代码组织数据引用，容易把简单事情弄复杂了。
 
 &nbsp;

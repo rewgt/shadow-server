@@ -1,0 +1,6 @@
+Div2
+4.4.4.!div2
+[ props ]
+  width: null
+  minWidth: 0
+  minHeight: 0

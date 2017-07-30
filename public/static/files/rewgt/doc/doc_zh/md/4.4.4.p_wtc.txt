@@ -4,11 +4,36 @@
 &nbsp;
 
 > P 类构件：
+> - [`Div2`](#4.4.4.!div2)
+> - [`VirtualDiv`](#4.4.4.!virtual_div)
 > - [`P`](#4.4.4.!p)
 > - [`OptLi`](#4.4.4.!opt_li)
-> - [`Noscript/Fieldset/Details/Ul/Ol/Li/Dl/Dd/Dt/Figure/Figcaption/Menu/Menuitem/Address/Form/Iframe/Blockquote/Table/Caption/Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr/Hgroup/H1/H2/H3/H4/H5/H6/Hr/Pre`](#4.4.4.!noscript)
+> - [`Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr`](#4.4.4.!col)
+> - [`Noscript/Fieldset/Details/Ul/Ol/Li/Dl/Dd/Dt/Figure/Figcaption/Menu/Menuitem/Address/Form/Iframe/Blockquote/Table/Caption/Hgroup/H1/H2/H3/H4/H5/H6/Hr/Pre`](#4.4.4.!noscript)
 
 &nbsp;
+
+##### <a name="div2"></a>`Div2`
+
+> 本类继承自 [`Div`](#4.4.3.!div) 。它输出 `<div>` 标签，但属于 P 类构件，其下可直接装入 Span 类构件。
+
+> **`getDefaultProps()` 新增属性：**
+> - `width: null`   
+取 `null` 值含义为 `auto`。
+> - `minWidth: 0`
+> - `minHeight: 0`
+
+##### <a name="virtual_div"></a>`VirtualDiv`
+
+> 本类继承自 [`Div2`](#4.4.4.!div2) ，用来描述 Div 类虚节点（即 `'tagName.'` 为空的节点）。
+
+> **`getDefaultProps()` 新增属性：**
+> - `left: null`
+> - `top: null`
+> - `margin: [null,null,null,null]`
+> - `padding: [null,null,null,null]`
+> - `borderWidth: [null,null,null,null]`
+> - `'tagName.': ''`
 
 ##### <a name="p"></a>`P`
 
@@ -55,19 +80,29 @@
 
 > 触发选中操作，`callback` 为选中后的回调函数，`newOpt` 是用于弹窗的附加配置项。这两个参数均可缺省，`callback` 缺省时表示不必回调，`newOpt` 缺省表示不附加弹窗配置项。如果当前选项构件不用于弹出弹窗，调用本函数时不应传入 `newOpt` 参数。
 
-##### <a name="noscript"></a>`Noscript/Fieldset/Details/Ul/Ol/Li/Dl/Dd/Dt/Figure/Figcaption/Menu/Menuitem/Address/Form/Iframe/Blockquote/Table/Caption/Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr/Hgroup/H1/H2/H3/H4/H5/H6/Hr/Pre`
+> - [`Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr`](#4.4.4.!col)
 
-> 本类继承自 [`P`](#4.4.4.!p) 。
+##### <a name="col"></a>`Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr`
+
+> 这些 WTC 均继承自 [`VirtualDiv`](#4.4.4.!virtual_div) 。
+
+> **`getDefaultProps()` 新增属性：**无。
+
+> **新增 duals 属性：** 无。
+
+##### <a name="noscript"></a>`Noscript/Fieldset/Details/Ul/Ol/Li/Dl/Dd/Dt/Figure/Figcaption/Menu/Menuitem/Address/Form/Iframe/Blockquote/Table/Caption/Hgroup/H1/H2/H3/H4/H5/H6/Hr/Pre`
+
+> 这些 WTC 均继承自 [`P`](#4.4.4.!p) 。
 
 > **`getDefaultProps()` 新增属性：**
 > - `padding`   
-`Fieldset` 为 `[10,10,10,10]`，`Ul` 与 `Ol` 为 `[0,0,0,20]`，`Blockquote` 为 `[0,30,0,30]`，其余对基类定义未作更改。
+`Fieldset` 为 `[10,10,10,10]`，`Ul` 与 `Ol` 为 `[0,0,0,20]`，`Blockquote` 为 `[0,30,0,30]`，其余未更改基类定义。
 > - `margin`   
-`Iframe` 为 `[0,0,0,0]`，`Tbody, Th, Tr` 也是 `[0,0,0,0]`，其余对基类定义未作更改。
+`Iframe` 为 `[0,0,0,0]`，其余未更改基类定义。
 > - `borderWidth`   
-`Fieldset` 为 `[2,2,2,2]`，`Hr` 为 `[1,1,1,1]`，其余对基类定义未作更改。
+`Fieldset` 为 `[2,2,2,2]`，`Hr` 为 `[1,0,0,0]`，其余未更改基类定义。
 > - `style`   
-`Fieldset` 为 `{borderColor:'#bbb'}`，其余对基类定义未作更改。
+`Fieldset` 为 `{borderColor:'#bbb'}`，其余未更改基类定义。
 
 > **新增 duals 属性：** 无。
 

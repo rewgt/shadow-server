@@ -177,6 +177,15 @@ var creator = null;
 var switchPageList_ = null;
 var getKeyFromNode_ = function(node) { return '' };
 
+function getKeyFromNode2_(node) {
+  var s;
+  if (node && (s=getKeyFromNode_(node))) {
+    var s2 = node.getAttribute('data-rewgt-owner');
+    return s2? s2 + '.' + s: s;
+  }
+  return '';
+}
+
 function segmentOfToolId(sOptid) {
   var b = sOptid.split('/');
   if (b.length <= 2) return null;
@@ -782,7 +791,7 @@ function defaultPluginGetSet(wdgtPath,noExpr) {
       if (succ) {
         if (retNode) {
           if (retNode.classList.contains('rewgt-scene')) {
-            var sName = getKeyFromNode_(retNode);
+            var sName = getKeyFromNode2_(retNode);
             unselectWidget();
             if (sName) {
               setTimeout( function() {
@@ -1377,7 +1386,7 @@ function getWidgetPath(targ,bNodeList) {
       break;
     }
     
-    var sKeyid = getKeyFromNode_(targ);
+    var sKeyid = getKeyFromNode2_(targ);
     if (sKeyid) {
       var b = [], isInline = false;
       if (targ.classList.contains('rewgt-panel'))
@@ -2219,7 +2228,7 @@ function initCreator() {
         var newSelect = '';
         if (retNode) {
           if (retNode.classList.contains('rewgt-scene')) {
-            var sName = getKeyFromNode_(retNode);
+            var sName = getKeyFromNode2_(retNode);
             unselectWidget();
             if (sName) {
               setTimeout( function() {
@@ -3085,7 +3094,7 @@ function initCreator() {
             rootNode.updateWdgtProp(schemaId,dProp, function(succ,newNode) {
               if (succ) {
                 if (newNode && newNode.classList.contains('rewgt-scene')) {
-                  var sName = getKeyFromNode_(newNode);
+                  var sName = getKeyFromNode2_(newNode);
                   unselectWidget();
                   if (sName) {
                     setTimeout( function() {
@@ -3826,7 +3835,7 @@ function initCreator() {
           targ = tmpNode;
         }
         if (wdgtNode)  // add or remove widget in scene
-          sKey = getKeyFromNode_(wdgtNode)
+          sKey = getKeyFromNode2_(wdgtNode)
       }
       if (sKey) { // find widget in current ScenePage, wdgtNode != null
         var multiChanged = false;
@@ -4627,7 +4636,7 @@ setTimeout( function() {
       if (!bdNode) return;
       for (var i=0,node; node=bdNode.children[i]; i++) {
         if (node.classList.contains('rewgt-scene')) { // try show first ScenePage
-          var sName = getKeyFromNode_(node);
+          var sName = getKeyFromNode2_(node);
           if (sName) {
             setTimeout( function() {
               nextStep(sName);

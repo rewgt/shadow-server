@@ -40,8 +40,8 @@ Span 类构件：
 4. 场景页构件：   
 `ScenePage`
 
-5. 空构件（不显示到界面）：   
-`HiddenDiv  HiddenSpan`
+5. 其它构件：   
+`Div2  VirtualDiv  VirtualSpan  HiddenDiv  HiddenSpan`
 
 面板构件在前者章节已介绍，后面章节我们还将陆续介绍可选导航、模板引用，及场景页构件。
 
@@ -56,10 +56,10 @@ Span 类构件：
 `HiddenDiv  SplitDiv  MarkedDiv  MarkedTable  NavDiv  GroundDiv  OptDiv  TempDiv  RefDiv`
 
 3. P 类构件：   
-`OptLi  TableRow`
+`Div2  VirtualDiv  OptLi  TableRow`
 
 4. Span 类构件：   
-`HiddenSpan OptSpan  OptA  OptImg  OptButton  OptInput  OptOption  TempSpan  RefSpan`
+`HiddenSpan VirtualSpan  OptSpan  OptA  OptImg  OptButton  OptInput  OptOption  TempSpan  RefSpan`
 
 说明：
 1. 划分 4 类构件是为了辅助界面设计，参见后文 [“绝对定位与界面布局”](#2.6.1.) 。

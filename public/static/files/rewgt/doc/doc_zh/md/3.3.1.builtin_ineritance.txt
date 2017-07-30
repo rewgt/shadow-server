@@ -22,6 +22,9 @@ Shadow Widget 内置构件分为 Panel 类、Div 类、P 类、Span 类共 4 种
     |   +-- ScenePage
     +-- Unit
     |   +-- Div
+    |   |   +-- Div2
+    |   |   |   +-- VirtualDiv
+    |   |   |   |   +-- Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr
     |   |   +-- HiddenDiv
     |   |   +-- Article/Section/Header/Footer/Aside/Nav/Main
     |   |   +-- MarkedDiv
@@ -35,11 +38,11 @@ Shadow Widget 内置构件分为 Panel 类、Div 类、P 类、Span 类共 4 种
     |   +-- P
     |   |   +-- Noscript/Fieldset/Details/Ul/Ol/Li/Dl/Dd/Dt/Figure/Figcaption/
     |   |       Menu/Menuitem/Address/Form/Iframe/Blockquote/Table/Caption/
-    |   |       Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr/Hgroup/
-    |   |       H1/H2/H3/H4/H5/H6/Hr/Pre
+    |   |       Hgroup/H1/H2/H3/H4/H5/H6/Hr/Pre
     |   |   +-- OptLi
     +-- Span
     |   +-- HiddenSpan
+    |   +-- VirtualSpan
     |   +-- Br/A/Q/Abbr/Audio/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/
     |       Textarea/Progress/Img/Video/Canvas/Picture/Map/Area/Time/
     |       Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/

@@ -11,6 +11,9 @@ if (!createClass_) console.log('fatal error: invalid React.createClass'); // bef
 var W = require('shadow-widget');
 var main = W.$main, utils = W.$utils, T = W.$templates, creator = W.$creator;
 
+var RefDiv__  = T.Div._createClass(null);
+var RefSpan__ = T.Span._createClass(null);
+
 var namedColor_ = { aliceblue:'#f0f8ff',antiquewhite:'#faebd7',aqua:'#00ffff',aquamarine:'#7fffd4',
   azure:'#f0ffff',beige:'#f5f5dc',bisque:'#ffe4c4',black:'#000000',
   blanchedalmond:'#ffebcd',blue:'#0000ff',blueviolet:'#8a2be2',
@@ -548,7 +551,7 @@ main.$$onLoad.push( function(callback) {
   containNode_.topmostNode = function() {  // return node of '.body'
     var comp = topmostWidget_ && topmostWidget_.component;
     if (comp)
-      return ReactDOM.findDOMNode(comp);
+      return comp.getHtmlNode();
     else return null;
   };
   
@@ -584,7 +587,7 @@ main.$$onLoad.push( function(callback) {
       var ret = null;
       if (targObj) {
         retIsRef = !!targObj.props['isReference.'];
-        ret = ReactDOM.findDOMNode(targObj);
+        ret = targObj.getHtmlNode();
       }
       doCallback(ret);
     });
@@ -656,11 +659,11 @@ main.$$onLoad.push( function(callback) {
     
     var targ = topmostWidget_, targObj = targ && targ.component;
     if (targObj) {
-      var selectChild = targ[sName];
+      var selectChild = targ.W(sName); // sName maybe 'virtual.sub'
       selectChild = selectChild && selectChild.component;
       if (!selectChild) return doCallback();
       
-      var selectNode = ReactDOM.findDOMNode(selectChild);
+      var selectNode = selectChild.getHtmlNode();
       if (selectNode) {
         if (selectNode.classList.contains('rewgt-panel'))
           sNodeType = 'Panel';
@@ -726,7 +729,7 @@ main.$$onLoad.push( function(callback) {
       }
     }
     else if (Array.isArray(pathInfo) && pathInfo.length >= 2) {
-      var scene = topmostWidget_ && topmostWidget_[pathInfo[0]];
+      var scene = topmostWidget_ && topmostWidget_.W(pathInfo[0]);
       var sceneObj = scene && scene.component;
       if (sceneObj && sceneObj.props['isScenePage.']) {
         var bArgs = [];
@@ -744,7 +747,7 @@ main.$$onLoad.push( function(callback) {
   };
   
   containNode_.listPageChild = function(sKey) {
-    var bRet = [], targ = topmostWidget_ && topmostWidget_[sKey];
+    var bRet = [], targ = topmostWidget_ && topmostWidget_.W(sKey);
     var targObj = targ && targ.component;
     if (targObj && targObj.props['isScenePage.']) {
       var bComp = targObj.$gui.comps || [];
@@ -756,7 +759,7 @@ main.$$onLoad.push( function(callback) {
           var childObj = targ[sKey];
           childObj = childObj && childObj.component;
           if (childObj) {
-            var node = ReactDOM.findDOMNode(childObj);
+            var node = childObj.getHtmlNode();
             if (node) bRet.push([sKey,node]);
           }
         }
@@ -791,7 +794,7 @@ main.$$onLoad.push( function(callback) {
             }
             
             if (childObj.props['isScenePage.'])
-              bExt.push([sKey,ReactDOM.findDOMNode(childObj)]);
+              bExt.push([sKey,childObj.getHtmlNode()]);
             
             var dStyle = childObj.state.style || {};
             if (dStyle.position == 'absolute' && dStyle.display != 'none') {
@@ -816,7 +819,7 @@ main.$$onLoad.push( function(callback) {
     var node, bRet = [], targ = W.W(sPath), changed = false;
     var targObj = targ && targ.component;
     
-    if (targObj && (node = ReactDOM.findDOMNode(targObj))) {
+    if (targObj && (node = targObj.getHtmlNode())) {
       if (utils.hasClass(targObj,['rewgt-panel','rewgt-unit'])) {
         var r = node.getBoundingClientRect();
         var iOldX = targObj.state.width, iOldY = targObj.state.height;
@@ -871,8 +874,7 @@ main.$$onLoad.push( function(callback) {
       }
       
       if (changed) {
-        var ownerObj = targ.parent;
-        ownerObj = ownerObj && ownerObj.component;
+        var ownerObj = targObj.parentOf(true);
         if (ownerObj) {
           creator.renewWidgetSpared(ownerObj,true, function() {
             targObj.reRender( function() {
@@ -895,7 +897,7 @@ main.$$onLoad.push( function(callback) {
   containNode_.setSceneCurrent = function(bChanging) {
     if (!topmostWidget_) return;
     bChanging.forEach( function(item) {
-      var sSceneId = item[0], sKey = item[1], targObj = topmostWidget_[sSceneId];
+      var sSceneId = item[0], sKey = item[1], targObj = topmostWidget_.W(sSceneId);
       targObj = targObj && targObj.component;
       if (targObj && targObj.props['isScenePage.'])
         targObj.setSelected(sKey);   // sKey maybe '' (for unselect)
@@ -1027,7 +1029,7 @@ main.$$onLoad.push( function(callback) {
     var ownerObj = owner && owner.component;
     if (!ownerObj) return doCallback(); // unknown error
     
-    if (isUnderLinker(ReactDOM.findDOMNode(ownerObj))) {
+    if (isUnderLinker(ownerObj.getHtmlNode())) {
       utils.instantShow('error: binding path disallowed under a linker.');
       return doCallback();
     }
@@ -1044,7 +1046,7 @@ main.$$onLoad.push( function(callback) {
     if (isOrgLink)
       newEle = React.cloneElement(orgEle,dProp);
     else {
-      var refCls = linkType == 2? creator.RefSpan__: creator.RefDiv__;
+      var refCls = linkType == 2? RefSpan__: RefDiv__;
       newEle = React.createElement(refCls,Object.assign(srcNodeObj.props['link.props'] || {},dProp));
     }
     
@@ -1104,7 +1106,7 @@ main.$$onLoad.push( function(callback) {
               var wdgt = tarOwnerObj2.widget, targ = wdgt && wdgt[item];
               var targObj = targ && targ.component;
               if (targObj)
-                returnNode = ReactDOM.findDOMNode(targObj);
+                returnNode = targObj.getHtmlNode();
               break;
             }
           }
@@ -1133,7 +1135,7 @@ main.$$onLoad.push( function(callback) {
     }
     
     // step 2: check editable
-    var targNd = ReactDOM.findDOMNode(tarNodeObj);
+    var targNd = tarNodeObj.getHtmlNode();
     if (targNd && getEditableFlag(targNd,isChild?0:1) != 'all') {
       utils.instantShow('error: insert target is disallowed.');
       return doCallback();
@@ -1144,7 +1146,7 @@ main.$$onLoad.push( function(callback) {
       var dProp = bTree[1], bHtml = dProp && dProp.html;
       if (Array.isArray(bHtml)) {
         var targObj2 = isChild? tarNodeObj: tarOwnerObj;
-        returnNode = ReactDOM.findDOMNode(targObj2);
+        returnNode = targObj2.getHtmlNode();
         if (returnNode && isUnderLinker(returnNode)) {
           utils.instantShow('error: can not add widget to a linker.');
           return doCallback();
@@ -1285,7 +1287,7 @@ main.$$onLoad.push( function(callback) {
     
     function insertNewComp() {
       tarOwnerObj2 = isChild? tarNodeObj: tarOwnerObj;
-      if (isUnderLinker(ReactDOM.findDOMNode(tarOwnerObj2))) {
+      if (isUnderLinker(tarOwnerObj2.getHtmlNode())) {
         utils.instantShow('error: can not add widget to a linker.');
         return doCallback();
       }
@@ -1382,13 +1384,13 @@ main.$$onLoad.push( function(callback) {
     
     // step 2: check editable
     if (rmvSrc) {
-      var sourNd = ReactDOM.findDOMNode(srcNodeObj);
+      var sourNd = srcNodeObj.getHtmlNode();
       if (sourNd && getEditableFlag(sourNd,1) != 'all') {
         utils.instantShow('error: move source widget is disallowed.');
         return doCallback();
       }
     }
-    var targNd = ReactDOM.findDOMNode(tarNodeObj);
+    var targNd = tarNodeObj.getHtmlNode();
     if (targNd && getEditableFlag(targNd,isChild?0:1) != 'all') {
       utils.instantShow('error: insert target is disallowed.');
       return doCallback();
@@ -1482,7 +1484,7 @@ main.$$onLoad.push( function(callback) {
       if (!srcEle) return doCallback();  // unknown error
       
       tarOwnerObj2 = isChild? tarNodeObj: tarOwnerObj;
-      if (isUnderLinker(ReactDOM.findDOMNode(tarOwnerObj2))) {
+      if (isUnderLinker(tarOwnerObj2.getHtmlNode())) {
         utils.instantShow('error: can not add target widget under a linker.');
         return doCallback();
       }
@@ -1533,7 +1535,7 @@ main.$$onLoad.push( function(callback) {
             var wdgt = tarOwnerObj2.widget, targ = wdgt && wdgt[sSrcKey];
             var targObj = targ && targ.component;
             if (targObj)
-              retNode = ReactDOM.findDOMNode(targObj);
+              retNode = targObj.getHtmlNode();
             if (callback) callback(copied,retNode);
           });
         });
@@ -1573,7 +1575,7 @@ main.$$onLoad.push( function(callback) {
           rmvSrc = false; // for named widget, old same-keyid-widget will auto-removed
       }
       
-      if (rmvSrc && isUnderLinker(ReactDOM.findDOMNode(srcOwnerObj))) {
+      if (rmvSrc && isUnderLinker(srcOwnerObj.getHtmlNode())) {
         utils.instantShow('error: can not remove source widget under a link.');
         return doCallback();
       }
@@ -1593,7 +1595,7 @@ main.$$onLoad.push( function(callback) {
             var wdgt = tarOwnerObj2.widget, targ = wdgt && wdgt[item];
             var targObj = targ && targ.component;
             if (targObj)
-              retNode = ReactDOM.findDOMNode(targObj);
+              retNode = targObj.getHtmlNode();
             break;
           }
         }
@@ -1622,7 +1624,7 @@ main.$$onLoad.push( function(callback) {
     ownerObj = ownerObj && ownerObj.component;
     if (!compObj || !ownerObj) return doCallback();
     
-    if (isUnderLinker(ReactDOM.findDOMNode(ownerObj))) {
+    if (isUnderLinker(ownerObj.getHtmlNode())) {
       utils.instantShow('error: can not change z-index under a link.');
       return doCallback();
     }
@@ -1660,7 +1662,7 @@ main.$$onLoad.push( function(callback) {
     }
     // else, adjustIt, for builtin prop-editor (right panel)
     
-    var currNode = ReactDOM.findDOMNode(comp), sEditable = 'all';
+    var currNode = comp.getHtmlNode(), sEditable = 'all';
     if (currNode) sEditable = getEditableFlag(currNode,1);
     if (sEditable == 'none') return [0];   // failed, clear prop-editor
     
@@ -1716,7 +1718,7 @@ main.$$onLoad.push( function(callback) {
     }
     if (typeof dProp != 'object') return doCallback();  // fatal error
     
-    var currNode = ReactDOM.findDOMNode(compObj);
+    var currNode = compObj.getHtmlNode();
     var ownerNode = currNode && currNode.parentNode;
     if (ownerNode && isUnderLinker(ownerNode)) { // currNode can be a linker
       utils.instantShow('error: can not modify widget that under linker.');
@@ -1848,7 +1850,7 @@ main.$$onLoad.push( function(callback) {
     if (!ele) return doCallback();
     
     if (option.linkPath) {
-      var reactCls = option.flag == 2? creator.RefDiv__: creator.RefSpan__;
+      var reactCls = option.flag == 2? RefDiv__: RefSpan__;
       dProp['$'] = option.linkPath;
       
       var newLnkId;
@@ -1911,7 +1913,7 @@ main.$$onLoad.push( function(callback) {
           var newChild = owner[newNodeKey];
           newChild = newChild && newChild.component;
           if (newChild) {
-            retNode = ReactDOM.findDOMNode(newChild);
+            retNode = newChild.getHtmlNode();
             if (backupComp)
               lastSchemaComp_ = newChild;  // not change session of GUI property editing
           }
@@ -1974,7 +1976,7 @@ main.$$onLoad.push( function(callback) {
     if (!srcEle || !option.linkPath)
       return doCallback();
     
-    var ownerNode = ReactDOM.findDOMNode(ownerObj);
+    var ownerNode = ownerObj.getHtmlNode();
     if (ownerNode && isUnderLinker(ownerNode)) {
       utils.instantShow('error: can not modify widget under a linker.');
       return doCallback();
@@ -1999,7 +2001,7 @@ main.$$onLoad.push( function(callback) {
       dProp.styles = dStyles;
     else delete dProp.styles;
     
-    srcEle = React.createElement(option.flag == 2?creator.RefDiv__:creator.RefSpan__,dProp);
+    srcEle = React.createElement(option.flag == 2?RefDiv__:RefSpan__,dProp);
     ownerObj.setChild('-'+keyid,'-'+oldLnkId, function(changed) {
       succ = true;
       if (nextKey)
@@ -2013,7 +2015,7 @@ main.$$onLoad.push( function(callback) {
           var newChild = owner[keyid];  // keyid not changed
           newChild = newChild && newChild.component;
           if (newChild)
-            retNode = ReactDOM.findDOMNode(newChild);
+            retNode = newChild.getHtmlNode();
           callback(succ,retNode);
         },300); // wait Refxx ready
       }
@@ -2052,7 +2054,7 @@ main.$$onLoad.push( function(callback) {
     if (!srcEle)
       return doCallback();
     
-    var currNode = ReactDOM.findDOMNode(comp);  // comp is not linked linker
+    var currNode = comp.getHtmlNode();  // comp is not linked linker
     var ownerNode = currNode && currNode.parentNode;
     if (ownerNode && isUnderLinker(ownerNode)) {
       utils.instantShow('error: can not save widget content under a linker.');
@@ -2062,10 +2064,10 @@ main.$$onLoad.push( function(callback) {
     if (currNode && currNode.children.length == 0) {
       var dProp = comp.props['link.props'];
       if (dProp) { // is linker
-        var lnkCls = creator.RefDiv__, lnkPath = comp.props['data-unit.path'];
+        var lnkCls = RefDiv__, lnkPath = comp.props['data-unit.path'];
         if (!lnkPath) {
           lnkPath = comp.props['data-span.path'];
-          lnkCls = creator.RefSpan__;
+          lnkCls = RefSpan__;
         }
         if (!lnkPath) return doCallback(); // system error
         
@@ -2120,7 +2122,7 @@ main.$$onLoad.push( function(callback) {
         var newChild = owner[keyid];  // keyid not changed
         newChild = newChild && newChild.component;
         if (newChild)
-          retNode = ReactDOM.findDOMNode(newChild);
+          retNode = newChild.getHtmlNode();
         callback(succ,retNode);
       }
     }
@@ -2144,7 +2146,7 @@ main.$$onLoad.push( function(callback) {
   };
   
   containNode_.selectMultWdgt = function(keyid,x1,y1,x2,y2) {
-    var bRet = [], wdgt = topmostWidget_ && topmostWidget_[keyid], pageObj = wdgt && wdgt.component;
+    var bRet = [], wdgt = topmostWidget_ && topmostWidget_.W(keyid), pageObj = wdgt && wdgt.component;
     if (pageObj && pageObj.props['isScenePage.']) {
       var fromRightBtm = y1 >= y2 && x1 >= x2;  // select from right-bottom
       var x1_ = Math.min(x1,x2), y1_ = Math.min(y1,y2), x2_ = Math.max(x1,x2), y2_ = Math.max(y1,y2);
@@ -2153,7 +2155,7 @@ main.$$onLoad.push( function(callback) {
         var subKey = utils.keyOfElement(child), childObj = subKey && subKey[0] != '$' && wdgt[subKey];
         childObj = childObj && childObj.component;
         if (childObj) {
-          var node = ReactDOM.findDOMNode(childObj);
+          var node = childObj.getHtmlNode();
           if (node) {
             var r = node.getBoundingClientRect();
             if (r.width == 0 && r.height == 0) return;  // ignore none-area widget
@@ -2200,7 +2202,7 @@ main.$$onLoad.push( function(callback) {
       }
     }
     else if (Array.isArray(pathInfo) && pathInfo.length >= 2) {
-      var keyid = pathInfo[0], wdgt = topmostWidget_ && topmostWidget_[keyid];
+      var keyid = pathInfo[0], wdgt = topmostWidget_ && topmostWidget_.W(keyid);
       var pageObj = wdgt && wdgt.component;
       if (pageObj && pageObj.props['isScenePage.']) {
         pathInfo.slice(1).forEach( function(sKey) {
@@ -2229,7 +2231,7 @@ main.$$onLoad.push( function(callback) {
     try {
       var bRet = null, sTag = ',0,';  // 0 for normal widget, 1 for ScenePage's widget
       if (Array.isArray(wdgtPath)) {
-        var sceneId = wdgtPath[0], wdgt = topmostWidget_ && topmostWidget_[sceneId];
+        var sceneId = wdgtPath[0], wdgt = topmostWidget_ && topmostWidget_.W(sceneId);
         var wdgtObj = wdgt && wdgt.component;
         if (wdgtObj && wdgtObj.props['isScenePage.']) {
           sTag = ',1,'; bRet = [];
@@ -2281,7 +2283,7 @@ main.$$onLoad.push( function(callback) {
           }
           else if (Array.isArray(rmvPath)) {
             var pgKey = rmvPath[0], pages = rmvPath.slice(1);
-            var scenePg = topmostWidget_ && topmostWidget_[pgKey];
+            var scenePg = topmostWidget_ && topmostWidget_.W(pgKey);
             var scenePgObj = scenePg && scenePg.component;
             if (scenePgObj) {
               var bArgs = pages.map( function(item) { return '-'+item; } );
@@ -2359,7 +2361,7 @@ main.$$onLoad.push( function(callback) {
     // step 3: add widgets
     var tarType = 0, tarIsRow = false;
     if (!inScene) {
-      if (isUnderLinker(ReactDOM.findDOMNode(ownerObj))) {
+      if (isUnderLinker(ownerObj.getHtmlNode())) {
         utils.instantShow('error: can not paste widget to a linker.');
         return doCallback();
       }
@@ -2474,7 +2476,7 @@ main.$$onLoad.push( function(callback) {
         if (sKey) {
           if (onlyNormal && sKey[0] == '$') continue;
           var subWdgt = wdgt[sKey], subObj = subWdgt && subWdgt.component;
-          if (subObj) return ReactDOM.findDOMNode(subObj);
+          if (subObj) return subObj.getHtmlNode();
         }
       }
     }

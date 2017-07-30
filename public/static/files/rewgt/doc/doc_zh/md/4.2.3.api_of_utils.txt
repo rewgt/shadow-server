@@ -26,6 +26,9 @@
 > - [`removeClass`](#4.2.3.!remove_class)
 > - [`setClass`](#4.2.3.!set_class)
 > - [`mergeClass`](#4.2.3.!merge_class)
+> - [`klassNames`](#4.2.3.!klass_names)
+> - [`clearKlass`](#4.2.3.!clear_klass)
+> - [`containKlass`](#4.2.3.!contain_klass)
 
 > Element 与 Component 组装
 > - [`getWTC`](#4.2.3.!get_wtc)
@@ -41,6 +44,7 @@
 > - [`setVendorLib`](#4.2.3.!set_vendor_lib)
 > - [`bindMountData`](#4.2.3.!bind_mount_data)
 > - [`fireTrigger`](#4.2.3.!fire_trigger)
+> - [`isUnderBody`](#4.2.3.!is_under_body)
 
 &nbsp;
 
@@ -179,6 +183,49 @@
 
 > 判断两个 class 是否为同族，依据两点，其一，命名若用 `'-'` 连接，依次将首段转移到末段判断两者是否同名，其二，作为系统内置的特例，`S1, S2, S3, S4, S5, S6` 这 6 项视作同族。
 
+##### <a name="klass_names"></a>`klassNames(s1,s2, ...)`
+
+> 将参数列出的各个 klass 名称串接起来，各参数项允许使用如下类型：string、array、object，比如 `utils.klassNames('A','B')` 返回 `"A B"`。串接过程会忽略空项（非真项），比如 `utils.klassNames('A',undefined,['','B'],{C:false,D:true})`，将返回 `"A B D"`。
+
+> 本 API 常用来组装 `duals.klass` 的值。
+
+> 例如：
+
+``` js
+  var sClsList = utils.klassNames('cls_a')
+  var sClsList = utils.klassNames(['cls_b','cls_c'])
+  var sClsList = utils.klassNames({cls_d:true,cls_e:false})
+  var sClsList = utils.klassNames('cls_f',['cls_g','cls_h'],{cls_i:true})
+```
+
+##### <a name="clear_klass"></a>`clearKlass(sKlass,dAll)`
+
+> 从 `sKlass` 字串删除 `dAll` 中列出的项目。本 API 常用来调整 `duals.klass` 的值。
+
+> 例如：
+
+``` js
+  var dAll = {disabled:true, active:true, 'btn-large':true};
+  var sCls = utils.klassNames(
+    utils.clearKlass(this.state.klass,dAll),
+    this.state.disabled && 'disabled',
+    this.state.active && 'active' );
+  this.duals.klass = sCls;
+```
+
+##### <a name="contain_klass"></a>`containKlass(sKlass,cls)`
+
+> 判断 `cls` 所列的项目是否在 `sKass` 中存在，若存在返回 `true`，否则返回 `false`。
+
+> 参数 `cls` 可以是字串，指示单项 class 名，也可以是 class 名的 array 列表，只要列表中有任一项存在于 `sKlass` 中，就返回 `true`。
+
+> 例如：
+
+``` js
+  var isDisabled = utils.containKlass(comp.duals.klass,'disabled');
+  var isActive = utils.containKlass(comp.duals.klass,['btn-active','link-active']);
+```
+
 ##### <a name="get_wtc"></a>`getWTC(cls)`
 
 > 取得指定 `cls` 的 WTC 缺省 React Class 集合。`cls` 允许用如下格式：
@@ -235,6 +282,10 @@
 > 2. 用 JSX 描述的节点，如：`<MyClass>{desc}</MyClass>`
 > 3. 字符串，系统将自动解析为 `P` 或 `Span` 节点（视 `comp` 是否为 `Panel` 类节点而定）
 
+> 本 API 还支持 `setChildren(comp,children,insertEle,callback)` 调用方式，`insertEle` 指示一个即将插到本节点下的新节点，而本节点的 `props.children` 将自动改挂到 `insertEle` 新节点之下。`insertEle` 要求是原生 React 节点（即，未经 Shadow Widget 的 WTC 包装）。如果 `insertEle` 取值为 `null`，表示不使用插入节点。
+
+> 当我们想修改 `insertEle` 配置，而不改变子成员定义时，可传 `null` 值给 `children` 参数。 
+
 ##### <a name="load_element"></a>`loadElement(jsonX, ...)`
 
 > 读入以 json-x 格式描述的界面，转化成 React Element 返回，既可以用参数只传递一个 json-x 数据，也可以依次传多个，当只传一个 json-x 参数时，返回值是单个 Element，如果传多个 json-x 时，将返回一个数组，数组内依次存放转化结果。
@@ -269,6 +320,10 @@
 > 参数 `data` 可以是以下几种类型的数据，也可以是这些类型数据组成的 array 数组，一是用 string 类型的路径（相对路径或绝对路径）指定目标选项构件，其预定动作是让目标构件选中。二是用 `{$trigger:sPath}` 指明定义弹窗配置的选项构件，预定动作是弹出弹窗。三是用 `[sPath,modifier,attr]` 更新 `sPath` 所指示节点（不限定为选项构件）的 `duals[attr]` 属性值，这里的 `attr` 可缺省，缺省时自动取 `'data'` 值。
 
 > 由于节点的 `$trigger` 及 `fireType` 属性与 `duals.trigger` 紧密相关，当 `comp` 节点的 `props.fireType` 为 `'onsite'` 时，调用本函数时会先计算 `$trigger`，结果值更新到 `duals.trigger` ，然后触发动作。如果 `props.fireType` 取其它值，`$trigger` 不对本函数调用产生影响。
+
+##### <a name="is_under_body"></a>`isUnderBody(comp)`
+
+> 判断 `comp` 节点是否位于根节点（即 `".body"` 节点）之下，若是返回 `true`，否则返回 `false`。如果 `comp` 与根节点之间存在虚节点，分析时忽略，即：被虚节点包裹的 `comp` 若挂在根节点，调用 `utils.isUnderBody(comp)` 也返回 `true`。
 
 <pre $=".rewgt.book_top"></pre>
 

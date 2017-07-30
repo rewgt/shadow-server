@@ -61,6 +61,40 @@ W.$main.$onLoad.push(onLoad);
   }
 ```
 
+#### 定义虚节点
+
+节点标签名可被修改，甚至赋值为空字串，空字串标签表示当前 Widget 节点用作虚节点，它不在网页输出内容，但它定义的事件函数，如 `$onClick`，可以透传并附加在它的子节点上，另外，在虚节点调用 `this.getHtmlNode()` 将得到其下实节点的 `DOM Node`。
+
+虚节点下应有子节点，且只能有一个子节点，当然虚节点可嵌套定义虚节点，在嵌套定义的各个虚节点上能各自定义同名事件函数，这些函数将自动串接附加到其下实节点上。
+
+举个例子：
+
+``` js
+class VirtualNode extends T.Div_ {
+  constructor(name,desc) {
+    super(name || 'VirtualNode',desc);
+  }
+  
+  getDefaultProps() {
+    var props = super.getDefaultProps();
+    props['tagName.'] = '';
+    return props;
+  }
+
+  $onMouseOver(event) {
+    var childComp = this.childOf('',true);
+    if (childComp) childComp.duals.style = {opacity:'0.5'};
+  }
+  
+  $onMouseOut(event) {
+    var childComp = this.childOf('',true);
+    if (childComp) childComp.duals.style = {opacity:'1'};
+  }
+}
+```
+
+Shadow Widget 提供了两个内置虚节点类：`VirtualDiv` 与 `VirtualSpan`，可以分别用来给非行内构件与行内构件加套一层事件处理机制。
+
 #### 在 idSetter 函数中编程等效于在 render 函数编程
 
 如前所述，idSetter 函数中可用`utils.setChildren()` 动态安装子节点，用 `this.duals.attr = value` 改变当前节点属性，能用 `this.state['tagName.'] = sTag` 改变标签名，加上 `value` 为 `0, 1, 2` 的几个条件代码段，分别等效于在 `componentWillUnmount, getInitialState, componentDidMount` 中写代码。所以，idSetter 函数的表达能力是完备的。
@@ -160,7 +194,7 @@ Shadow Widget 提供 `utils.bindMountData(data)` 接口用于节点挂载时自�
   });
 ```
 
-调用 `utils.bindMountData(data)` 时，系统会遍历 `W.$idSetter` 下所有已定义的 idSetter 函数，从参数 `data` 找出相同 `key` 的数据项，在这个例子中 `data[sPath]` 对应于 `idSetter[sPath]`，然后自动在 `idSetter[sPath]` 函数未尾链接如下语句：
+调用 `utils.bindMountData(data)` 时，系统会遍历 `W.$idSetter` 下所有已定义的 idSetter 函数，从参数 `data` 找出相同 `key` 的数据项，在这个例子中 `data[sPath]` 对应于 `idSetter[sPath]`，系统会在 `idSetter[sPath]` 函数捆绑特定处理，即，相当于在 `idSetter[sPath]` 函数被调后叠加如下语句：
 
 ``` js
   if (value == 2) {  // component did mount
@@ -169,7 +203,7 @@ Shadow Widget 提供 `utils.bindMountData(data)` 接口用于节点挂载时自�
   }
 ```
 
-数据项中 `__attr__` 固定用来表达对 `duals.attr` 赋值的顺序，有关 `utils.bindMountData(data)` 的接口规格，请参考 API 使用手册。
+`data[sPath]` 数据项中 `__attr__` 固定用来表达对各个 `duals.attr` 赋值的顺序，有关 `utils.bindMountData(data)` 的接口规格，请参考 API 使用手册。
 
 总之，使用 `utils.bindMountData()` 便于将驱动数据游离出来，方便了调测，甚至不只是调测，我们还可以将此机制带到发行版本，把游离的驱动数据保存到独立的配置文件。
 
