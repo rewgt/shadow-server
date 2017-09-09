@@ -9,7 +9,7 @@
 
 库化 UI 以厂商分类，比如厂商 rewgt 共享的节点注册在 `".rewgt"` 路径下。安装库化 UI 的第一步是设置指定厂商的根节点，根节点是 `TempPanel` 面板，通过调用 `utils.setVendorLib(sName,callback)` 来设置。
 
-我们用例子来说明，参见 demo42，假定我们要设计一种按钮，移鼠标在其上时按钮高亮显示，移走鼠标变恢复正常。
+我们用例子来说明，参见 demo42，假定我们要设计一种按钮，移鼠标在其上时按钮高亮显示，移走鼠标恢复正常。
 
 ``` js
 var sampleEle = null;
@@ -36,11 +36,11 @@ function registMyLib(callback) {
 }
 ```
 
-函数 `utils.setVendorLib(sName,callback)` 中的 `sName` 指定厂商名（camelCased 风格），这里我们用 `"ui"`，`callback` 回调带一个 `template` 参数，`template` 是厂商库的根节点，也就是 TempPanel 根模板节点，接下来用 `template.setChild(libEle,callback)` 在该根模板节点下，登记一个 key 为 `"sample"` 的段落 P 节点，段落中定义 `hoverBtn` 样板按钮。
+函数 `utils.setVendorLib(sName,callback)` 中的 `sName` 指定厂商名（camelCased 风格），这里我们用 `"ui"`，`callback` 回调带一个 `template` 参数，`template` 是厂商库的根节点，也就是 TempPanel 根模板节点，接下来用 `template.setChild(libEle,callback)` 在根模板节点下，登记一个 key 为 `"sample"` 的段落 P 节点，段落中再定义 `hoverBtn` 样板按钮。
 
-上面用 json-x 描述被安装的 P 节点，用户可根据需要改用 JSX 描述。
+上面用 json-x 描述被安装的 P 节点，用户可根据实际情况改用 JSX 描述。
 
-然后，将安装处理挂入：
+然后，挂入上面 `registMyLib` 函数：
 
 ``` js
 main.$$onLoad.push( function(callback) {
@@ -48,14 +48,14 @@ main.$$onLoad.push( function(callback) {
 });
 ```
 
-初始化函数被 push 到 `main.$$onLoad` 函数列表中，注意，`main.$$onLoad` 列表与 `main.$onLoad` 列表用法有差别：
+初始化函数被 `push` 到 `main.$$onLoad` 函数列表中，注意，`main.$$onLoad` 列表与 `main.$onLoad` 列表用法有差别：
 
 1. 前者（`$$onLoad`）各函数依次先被执行，执行完毕后才执行后者（`$onLoad`）中各个初始化函数。
 
 2. 存放在 `$$onLoad` 中的各个函数，都要求用参数 `callback` 传递回调函数，而后者的初始化函数不要求带 `callback` 参数。   
-说明：系统借助 `$$onLoad` 中各函数的 callback 参数，强制各函数以串行方式运行，所以，压入 `main.$$onLoad` 的初始化函数，必须调用传入的 callback 参数，否则，其后的初始化调用将意外终结。
+说明：系统借助 `$$onLoad` 中各函数的 `callback` 参数，强制各函数以串行方式运行，所以，压入 `main.$$onLoad` 的初始化函数，必须调用传入的 `callback` 参数，否则，其后的初始化调用将意外终止。
 
-3. 即使在设计态下（`W.__design__` 为真），前者各初始化函数也依次被执行，但后者在设计态下自动忽略。
+3. 即使在设计态下（`W.__design__` 为真），前者各初始化函数也依次被执行，但后者 `$onLoad` 在设计态下却自动忽略。
 
 最后，在界面以绝对路径方式引用库构件：
 
@@ -65,9 +65,9 @@ main.$$onLoad.push( function(callback) {
 
 #### 在库化 UI 导入后在转义标签引用它
 
-如前面例子，在转义标签中以 `$` 引用模板库，系统在导入界面定义后，先依次运行在 `main.$$onLoad` 列出的初始化函数，然后依次关联转义标签中的 `$` 引用，最后才执行在 `main.$onLoad` 定义的初始化函数。
+如前面例子，在转义标签中以 `$` 引用模板库，系统在导入界面定义后，先依次运行在 `main.$$onLoad` 列出的初始化函数，然后依次关联初始界面在转义标签中的 `$` 节点引用，最后才执行在 `main.$onLoad` 定义的初始化函数。
 
-因为这个执行顺序，只要库化 UI 正常被安装，转义标签中即可任意以 `"$=path"` 方式引用。第 3 方软件通常按如下方式开放界面库供他人使用：
+因为这个执行顺序，只要库化 UI 正常被安装，转义标签即可任意以 `"$=path"` 方式引用。第 3 方软件通常按此方式开放界面库供他人使用，步骤如下：
 
 1. 在一个 javascript 库文件定义库化 UI，使用时要求用户在网页文件中用 `<script>` 标签把该 JS 库包含进来。
 

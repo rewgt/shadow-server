@@ -61,9 +61,6 @@ Span 类构件：
 4. Span 类构件：   
 `HiddenSpan VirtualSpan  OptSpan  OptA  OptImg  OptButton  OptInput  OptOption  TempSpan  RefSpan`
 
-说明：
-1. 划分 4 类构件是为了辅助界面设计，参见后文 [“绝对定位与界面布局”](#2.6.1.) 。
-2. 识别 Panel 类与 Div 类构件只需看尾部命名是否为 Panel 或 Div，仅 ScenePage 例外，因为它是绝对定位的，并不像 Panel 那样使用。
-3. 识别 P 类与 Span 类构件也看尾部命名与原生构件命名的关联关系，比如 `OptButton` 与 原生构件 `Button` 有关联，Button 是 Span 类构件，所以 OptButton 也是 Span 类构件。
+划分 4 类构件是为了辅助界面设计，参见后文 [“绝对定位与界面布局”](#2.6.1.) 。
 
 &nbsp;

@@ -19,13 +19,13 @@
   <div $=Panel key='top' height='{null}'>
     <div $=TempDiv key='tmp'>
       <div $=TempDiv key='tmp'>
-        <div $=P key='hello' width='{0.9999}' html.='template in template'></div>
+        <div $=P key='hello' width='{0.9999}'>template in template</div>
       </div>
     </div>
     <div $='//tmp.tmp.hello' sty__='color:blue'></div>
     
     <div $=TempDiv key='tmp2'>
-      <div $=P key='normal' width='{0.9999}' html.='It is an example.'></div>
+      <div $=P key='normal' width='{0.9999}'>It is an example.</div>
       <div $='//normal' key='hint' sty__='color:gray'></div>
       <div $='//normal' key='warning' sty__='color:red'></div>
       <div $='//warning' key='error' sty__='font-weight:600'></div>

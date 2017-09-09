@@ -2986,6 +2986,9 @@ function initCreator() {
     }
   }
   
+  if (bPage.length >= 20)  // too many pages, enlarge list area
+    rightPageList.style.height = '96px';
+  
   var appBasePath = location__('./').pathname;
   if (appBasePath[0] != '/') appBasePath = '/' + appBasePath; // avoid bug of IE10
   var listResUrl = creator.appBase()+'/list_resource.html?base=' + encodeURIComponent(appBasePath);

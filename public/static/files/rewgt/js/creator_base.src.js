@@ -11,8 +11,8 @@ if (!createClass_) console.log('fatal error: invalid React.createClass'); // bef
 var W = require('shadow-widget');
 var main = W.$main, utils = W.$utils, T = W.$templates, creator = W.$creator;
 
-var RefDiv__  = T.Div._createClass(null);
-var RefSpan__ = T.Span._createClass(null);
+var RefDiv__  = T.RefDiv._createClass(null);
+var RefSpan__ = T.RefSpan._createClass(null);
 
 var namedColor_ = { aliceblue:'#f0f8ff',antiquewhite:'#faebd7',aqua:'#00ffff',aquamarine:'#7fffd4',
   azure:'#f0ffff',beige:'#f5f5dc',bisque:'#ffe4c4',black:'#000000',
@@ -82,8 +82,18 @@ function getLinkFullPath_(entry,sPath_) {
   if (isSibling) {  // iLevel = 0 or iLevel = -1
     targ = targ.parent;
     if (iLevel < 0) targ = targ && targ.parent;  // start with '//', maybe sPath=''
-    if (targ)
+    if (targ) {
+      var sHead = sPath.slice(0,2);
+      while (sHead == '//') {
+        targ = targ.parent;
+        if (!targ) return ''; // error
+        
+        sPath = sPath.slice(2);
+        sHead = sPath.slice(0,2);
+      }
+      
       targ = sPath? targ.W(sPath): targ;
+    }
     return targ? targ.getPath(): '';
   }
   else if (iLevel == -1) {
@@ -129,8 +139,18 @@ function getCompByPath2_(entry,sPath_,callback) { // entry is component object, 
     if (entry) {
       var targ = entry.widget, owner = targ; // default according to entry
       if (iLevel < 0) owner = owner && owner.parent; // start with '//', maybe sPath=''
-      if (owner)
+      if (owner) {
+        var sHead = sPath.slice(0,2);
+        while (sHead == '//') {
+          owner = owner.parent;
+          if (!owner) return doCallback(null); // error
+          
+          sPath = sPath.slice(2);
+          sHead = sPath.slice(0,2);
+        }
+        
         return getLevelByLevel(owner,sPath);
+      }
     }
   }
   else if (iLevel == -1) {
@@ -363,6 +383,7 @@ function getCompSchema_(comp,dTypeInfo,noExpr) {
   
   delete props.children;
   delete props['hasStatic.'];
+  delete props['data-rewgt-owner'];
   props.key = sKeyid_;
   
   // step 4: prepare prop.* (data-*/aria-* renewed)

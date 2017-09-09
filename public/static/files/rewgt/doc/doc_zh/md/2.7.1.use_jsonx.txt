@@ -204,7 +204,7 @@ main['.body.top.p'] = {
 
 `utils.loadElementEx(sPrefix,jsonX,...)` 与 `utils.loadElement(jsonX,...)` 用法很接近，前者要额外用一个 sPrefix 参数（首参数位置）来帮助定位 main 模块下的投影类定义，两者的其它参数及返回值格式是相同的，即：如果传入一个 json-x 数据，返回一个 Element，如果传入多个 json-x，则返回一个容纳了多个 Element 的数组。
 
-上面例子中，路径前缀 sPrefix 为 `'.body.top.p'`，叠加上导入按钮的 `'.btn'` 尾路径，就是全路路 `'.body.top.p.btn'`，系统自动到 `main['.body.top.p.btn']` 取得投影定义，并将它绑定到按钮构件。
+上面例子中，路径前缀 sPrefix 为 `'.body.top.p'`，叠加上导入按钮的 `'btn'` 尾路径，全路径就是 `'.body.top.p.btn'`，系统自动到 `main['.body.top.p.btn']` 取得投影定义，并将它绑定到按钮构件。
 
 #### 在 json-x 中传递事件函数
 

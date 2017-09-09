@@ -118,7 +118,7 @@
 
 ##### <a name="br"></a>`Br/A/Q/Abbr/Source/Track/Bdi/Bdo/Data/Mark/Wbr/Button/Textarea/Progress/Img/Canvas/Picture/Map/Area/Time/Output/Input/Keygen/Label/Legend/Sub/Sup/Select/Datalist/Optgroup/Option/B/I/S/U/Ins/Del/Code/Var/Summary/Em/Strong/Big/Small/Dfn/Samp/Kdb/Cite/Dialog/Meter/Embed/Object/Param/Ruby/Rp/Rt`
 
-> 本类继承自 [`Span`](#4.4.5.!span)。因为 React 为 `input, textarea, select` 标签增加了 `defaultValue` 属性，并且要求用户通过 `onChange` 事件同步 `state.value` 与 `event.target.value`，`Input` 与 `Textarea` 对 `defaultValue` 及 `onChange` 同步做了封装。React 为 `input` 增加 `defaultChecked` 属性及 `state.checked` 同步的要求，我们同样在 `Input` 构件做了封装。所以，编程中请注意不必重复处理，相关的 `duals.value` 与 `duals.checked` 能自动与界面操作保持数据同步。使用 `Input, Textarea` 构件时请注意传递 `props.defaultValue`，而不要传递 `props.value`，否则输入文本过程中会因 `duals.value` 变化导致界面刷新，使得编辑光标经常跳到尾部。
+> 本类继承自 [`Span`](#4.4.5.!span)。其中 `Input, Textarea, Select` 是 Controlled Component，已对 `onChange` 事件做封装，相关的 `state.value, state.checked` 能自动与界面输入同步，对相关 `duals.value, duals.checked` 赋值也能自动同步到 DOM 节点。
 
 > **`getDefaultProps()` 新增属性：** 无。
 

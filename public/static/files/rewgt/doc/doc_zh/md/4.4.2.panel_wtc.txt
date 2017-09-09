@@ -97,22 +97,22 @@
 
 > 用于定义双源属性，`attr` 为 string 类型的属性名，`setFn` 为 setter 函数，`initValue` 为初始值，`base` 用于取回底层的 setter 函数，其中 `setFn, initValue, base` 参数可以缺省，setFn 缺省时系统自动定义一个 setter 用于给 `this.state.attr` 赋值，`initValue` 缺省时自动取值 `undefined`，表示不设置该双源属性的初始值，`base` 缺省时表示不取回底层的 setter 函数。
 
-> 参数 `attr` 还可以是字串列表，用于调用一次注册多个双源属性。比如 `this.defineDual(['attr1','attr2'],setFn)` 等效于连续调用 `this.defineDual('attr1',setFn)` 与 `this.defineDual('attr2',setFn)`。
+> 参数 `attr` 还可以是字串列表，用于调用一次注册多个双源属性。比如 `this.defineDual(['attr1','attr2'],setFn)` 等效于连续调用 `this.defineDual('attr1',setFn)` 与 `this.defineDual('attr2',setFn)`。回调函数 `setFn` 格式为 `setFn(value,oldValue,attr)`，最后一个参数 `attr` 用来指出哪个 `duals.attr` 被赋值。
 
 > 因为本函数返回当前 component 实例（即 `this`），所以可以将多条 `defineDual()` 语句串接起来书写，比如：
 
 ``` js
-      this.defineDual('attr1').defineDual('attr2');
+    this.defineDual('attr1').defineDual('attr2');
 ```
 
 > 参数 `base` 有特殊用途，当它取回底层 setter 函数（存为 `base.setter`）后，底层 setter 不再隐式自动调用，改成在当前 setter 函数中用 `base.setter(value,oldValue)` 显式调用。比如：
 
 ``` js
-      var base = {};
-      this.defineDual('test', function(value,oldValue) {
-        var newValue = this.state.test = parseInt(value);
-        base.setter(newValue,oldValue);
-      },undefined,base);
+    var base = {};
+    this.defineDual('test', function(value,oldValue) {
+      var newValue = this.state.test = parseInt(value);
+      base.setter(newValue,oldValue);
+    },undefined,base);
 ``` 
 
 > 在未使用 `base` 参数情况下，同一双源属性的多层 setter 函数，从底层向高层依次被调。使用 `base.setter` 可以改变这个顺序，如上面代码，底层 setter 是后调用的。
@@ -151,15 +151,17 @@
 
 > **6) `getHtmlNode()`**
 
-> 返回React Component 节点的真实 DOM 节点，等效于 `ReactDOM.findDOMNode(this)`。
+> 返回React Component 节点的真实 DOM 节点，等效于 `ReactDOM.findDOMNode(this)`。对于虚节点，系统尝试取其下实节点的 DOM 节点。
 
-> **7) `parentOf(noVirtual,sRole)`**
+> **7) `parentOf(noVirtual,sRole,scanMax)`**
 
 > 获取父节点 Component，如果失败（可能父节点不存在，或已 unmount）则返回 `null`。
 
 > 参数 `noVirtual` 指示是否忽略虚节点（即 `tagName.` 为空的节点），取真值为忽略。本参数可以缺省（值为 `undefined`），缺省时表示不忽略虚节点。
 
 > 参数 `sRole` 指示目标节点的 `role` 属性还须等于指定值，若不相等则接着向上级查找。本参数也可以缺省，缺省时表示忽略 `role` 属性是否匹配。
+
+> 参数 `scanMax` 指示最多查找多少个父节点，限定查找次数可提高运行效率。如果本参数缺省，系统会一直向上遍历，直至找到匹配的节点，或直至 W 树的根节点（这时因为没找到匹配的，函数返回 `null`）。
 
 > **8) `childOf(sKey,noVirtual)`**
 
@@ -276,7 +278,7 @@ MarkedDiv 的 `duals.nodes` 值可以直接赋给本属性，因为格式是兼�
 
 > **新增 duals 属性：**
 > - `cellSpacing`   
-> 指定各列之间间隙的像素值，缺省为 0 像素。GridPanel 下各个子面板因 margin 取值缺省为0，子面板之间的间隙为 0，当用户修改子面板的 margin 值时，应同时调整本属性的值，以便让 GridPanel 仍能正确计算其下子面板处于哪行哪列。
+> 指定各列之间间隙的像素值，缺省为 0 像素。GridPanel 下各个子面板之间的空隙缺省按不占位来计算，如果真实情况空隙非 0，宜用本属性指示具体像素数，以便让 GridPanel 能正确计算其下子面板处于哪行哪列。
 > - `sizes`   
 > 指定各列占宽，各项取值大于 0 且小于 1 时表示百分比，大于等于 1 时为像素值，负值表示剩余宽的百分比。
 

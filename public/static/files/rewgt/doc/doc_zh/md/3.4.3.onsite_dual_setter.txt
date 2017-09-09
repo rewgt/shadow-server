@@ -48,6 +48,10 @@ function onLoad() {
 
 ``` js
   function id__(value,oldValue) {
+    if (oldValue == 1) {  // init process
+      console.log('in first render()');
+    }
+    
     if (value <= 2) {    // no need prepare render content
       if (value == 1) {  // init process
         // ...
@@ -60,51 +64,27 @@ function onLoad() {
       }
       return;
     }
-
-    if (oldValue == 1) {  // init process
-      console.log('in first render()');
-    }
-    else {
-      console.log('in other render()');
-    }
+    
+    console.log('in other render()');
   }
 ```
 
 当 `valule <= 2` 时，`id__` 的 setter 函数并不用来组织 render 内容（**所以上面代码用 `return` 返回**），具体来说，在上述 `value == 1` 条件段编写代码，等效于在 `getInitialState()` 函数末尾写代码，`value == 2` 条件段等效于在 `componentDidMount()` 中编码，`value == 0` 条件段等效于在 `componentWillUnmount()` 中编码。当 `value` 值大于 2 时，等效于在 `render()` 中编码。
 
-不难发现，传给 `$id__` 的是一个超级函数，它的功能等效于一个投影定义，在 `getInitialState, componentDidMount, componentWillUnmount, render` 中编码都能等价实现。为方便叙述，后文将这种超级 setter 函数称为 **idSetter 函数**，该函数所提供的等效于投影定义的功能，称作 **idSetter 定义**。现在，我有 3 种对等的定义体了：WTC 定义、投影定义、idSetter 定义。
+不难发现，传给 `$id__` 的是一个超强函数，它的功能等效于一个投影定义，在 `getInitialState, componentDidMount, componentWillUnmount, render` 中编码都能等价实现。为方便叙述，后文将这种 setter 函数称为 **idSetter 函数**，该函数所提供的等效于投影定义的功能，称作 **idSetter 定义**。现在，我有 3 种对等的定义体了：WTC 定义、投影定义、idSetter 定义。
 
 注意：
 
-1. **只有给 `$id__` 属性传递 setter 函数（包括从 `idSetter[path]` 找出的函数，见下一节），才有 `value == 1`，`value == 2` 与 `value == 0` 的赋值更新**。即：如果不使用 `props.$id__`，首次 `render()` 时并不执行 `duals.id__ = 1` 语句，在 `componentDidMount()` 中不执行 `duals.id__ = 2`， 在 `componentWillUnmount()` 中也不执行 `duals.id__ = 0`。
-
-2. 节点的 `render` 函数首次被调时，部分 `props.attr` 传入属性自动注册为双源属性   
+1. 节点的 `render` 函数首次被调时，部分 `props.attr` 传入属性自动注册为双源属性   
 包括：标签的标准属性，`data-*, aria-*, duals-*`，可计算属性等，参见 [“定义双源属性”](#2.2.2.)。
 
-3. 本例中 `value == 1` 与 `oldValue == 1` 两个条件段内的代码用法有差异。   
+2. 本例中 `value == 1` 与 `oldValue == 1` 两个条件段内的代码用法有差异。   
 前者被执行的时机是：`getInitialState()` 调用刚结束，自动注册的双源属性尚未定义，`props.attr` 尚未赋给同名双源属性，该段代码近似于在 `getInitialState()` 中编程，参见 [“重要设计原则”](#2.7.5.!import_rule)。后者则在：本节点所有双源属性已定义（包括调用 `defineDual()` 注册的与系统自动注册的），而且传入的 `props.attr` 均已赋值给同名双源属性，比如 `props.width` 已赋给 `duals.width`。   
 这两个条件段均可用来编写初始化代码，主要差别是：**前者通常只用来注册回调函数（如追加双源属性定义、调用 `setEvent()` 等），后者则是所有双源属性就绪后的初始化**。前者由 `duals.id__ = 1` 语句触发，后者由 `duals.id__ = N` 触发，在这个 `id__` 的 setter 函数中，当前次赋值 `value=1`，紧接着下次赋值，`value` 转为 `oldValue`，`oldValue == 1` 表明这两次调用之间没插入其它 “对 `duals.id__` 赋值” 的动作，也就是说，两者之间没有其它 `render()` 插入。
 
-#### idSetter 定义的实现原理
+给 `duals.id__` 定义 setter 函数有两种方式，其一是用上面介绍的 `props.$id__`，其二是调用 `defineDual('id__',setter)` 定义（所有 WTC 类的根基类就按该方式缺省定义了一个），这两种方式是等效的。
 
-给 `duals.id__` 定义 setter 函数有两种方式，其一是用上面介绍的 `props.$id__`，其二是调用 `defineDual('id__',setter)` 定义（所有 WTC 类的根基类就按该方式缺省定义了一个），前者 setter 函数要比后者 setter 函数多处理 `value` 为 `0, 1, 2` 的三种情况，即：启用 `$id__` 时，系统将在 `render, componentDidMount, componentWillUnmount` 函数中埋入触发 `"duals.id__ = 0/1/2"` 赋值的钩子。前者 `setter(value,oldValue)` 要处理 `value` 为 `0, 1, 2` 取值，但后者 setter 始终不处理这三种取值。
-
-通过 `$id__` 传入的 setter 函数，最终通过 `defineDual('id__',props.$id__)` 挂入，不同的仅是，它要额外模拟在 `getInitialState(), componentDidMount(), componentWillUnmount()` 函数中编码的三种处理。
-
-在用 `defineDual('id__',setter)` 登记的 setter 函数中，应在头部加入 `if (value <= 2) return` 语句，因为即便当前类没启用 `props.$id__` 的函数传入，它的继承类或投影类仍可能会启用。另外，在不确定是否会用 `props.$id__` 时，`defineDual('id__',setter)` 的 setter 函数中宜用如下方式书写初始化代码：
-
-``` js
-  this.defineDual('id__', function(value,oldValue) {
-    if (oldValue == 1) {
-      // init process ...
-    }
-    if (value <= 2) return;
-    
-    // other process ...
-  });
-```
-
-语句 `if (oldValue == 1)` 发生在当前节点首次 `render()` 调用时，因为不确定是否使用 `props.id__` 传入 idSetter 函数，所以不能用 `if (value == 1)` 确定初次 `render()` 调用。
+请注意，idSetter 函数在 `value <= 2` 时，并不由 `render()` 调用发起，也即：当前不在渲染中。
 
 #### 用 idSetter 追加双源定义
 
@@ -112,6 +92,11 @@ function onLoad() {
 
 ``` js
   function id__(value,oldValue) {
+    if (oldValue == 1) {  // init process
+      console.log('value of duals.test',this.duals.test);
+      // ...
+    }
+    
     if (value <= 2) {    // no need prepare render content
       if (value == 1) {  // init process
         this.defineDual('test', function(value,oldValue) {
@@ -132,11 +117,6 @@ function onLoad() {
         console.log('componentWillUnmount() just called');
       }
       return;
-    }
-    
-    if (oldValue == 1) {  // init process
-      console.log('value of duals.test',this.duals.test);
-      // ...
     }
   }
 ```

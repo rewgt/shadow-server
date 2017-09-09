@@ -5,25 +5,25 @@
 
 #### 定制 utils 下特定的 API 函数
 
-模块 utils 提供众多公共处理函数，用户可以替换已定义的 API，因为 Shadow Widget 尝试提供一个精简的内核，可能部分 API 因追求精简导致功能不强，比如下面 3 个 API 是假定可以被用户自行替换。
+模块 utils 提供众多公共处理函数，用户可以替换已定义的 API，因为 Shadow Widget 尝试提供一个精简的内核，可能部分 API 功能不够强大，用户不妨自行定义一个替换原先的，比如下面 3 个 API：
 
 ```
-    utils.shouldUpdate  // 提供 shouldComponentUpdate() 缺省处理
-    utils.marked        // 将 markdown 文本转换成 html 代码
-    utils.pageCtrl      // 场景页控制器
+  utils.shouldUpdate()  // 提供 shouldComponentUpdate() 缺省处理
+  utils.marked()        // 将 markdown 文本转换成 html 代码
+  utils.pageCtrl()      // 场景页控制器
 ```
 
-utils 下的变量或函数可直接用赋值语句替换，如：`utils.someAPI = function() {}`，同名函数替换后，接口参数应兼容旧有定义，详情请参考：[API 手册](#4.)。
+替换同名函数，须保证接口参数能兼容旧有定义，详情请参考：[API 手册](#4.)。
 
 #### 扩展 ex 模块
 
 ex 模块专为 MJI 脚本运算提供 API 支持，在可计算表达式中，内置变量或函数只有少数几项（参见 [MJI 解释器](#2.5.3.)），我们可借助 ex 扩展可计算表达式的运算能力。
 
-只有函数定义才允许注册到 ex 模块下，注册过程很简单，比如：
+只有函数实体才允许注册到 ex 模块下，注册过程很简单，比如：
 
 ``` js
   ex.regist('debugLog', function() {
-    var iNum = arguments, s = 'DB>';
+    var iNum = arguments.length, s = 'DB>';
     for (var i=0; i < iNum; i++) s += ' ' + arguments[i];
     console.log(s);
   });

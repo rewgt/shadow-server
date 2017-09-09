@@ -69,7 +69,7 @@ Shadow Widget 建议使用 react Add-Ons 的 update API，使用方法参见 <a 
 
 #### `id__` 属性
 
-Shadow Widget 为每个构件都定义了 `duals.id__` 属性，当构件创建后，`id__` 值固定取值 1，接下来每次 `render()` 调用，`id__` 值都发生变化，首次 `render()` 调用必将 `id__` 从旧值 1 改为其它值。
+Shadow Widget 为每个构件都定义了 `duals.id__` 属性，构件首次 `render()` 调用时，`id__` 值固定取值 `1`，接下来每次 `render()` 调用，`id__` 值都发生变化，首次 `render()` 调用必将 `id__` 从旧值 `1` 改为其它值。
 
 利用这个特点，**在 setter 函数用 `oldValue == 1` 识别出首次 `render()` 调用，然后执行特定的初始化处理**，比如：
 

@@ -16,6 +16,19 @@ code {
   font-size: 0.875em;   /* 14px, em, not rem */
 }
 
+.hljs-hint {
+  background-color: #faebcc;
+}
+.hljs-ln-num {
+  border: 0px solid #ddd;
+  border-width: 0 1px 0 0;
+  padding: 0 6px 0 4px;
+  margin: 0 8px 0 0;
+}
+.hljs-ln-num:after {
+  content: attr(data);
+}
+
 h1, h2 {
   margin: 0.625rem 0;   /* 10px */
   padding: 0;
@@ -45,6 +58,8 @@ ul {
   border: 1px solid #f0f0f0;
   background-color: #f8f8f8;
   line-height: 1;
+  border-radius: 3px;
+  overflow: auto;
 }
 .rewgt-static blockquote {
   padding-left: 1.25em;
@@ -59,6 +74,13 @@ ul {
   color: #800;
 }
 
+.select-txt {
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  -o-user-select: text;
+  user-select: text;
+}
 .noselect-txt {
   -moz-user-select: none;
   -webkit-user-select: none;

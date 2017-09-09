@@ -25,7 +25,7 @@
 用 `$` 引用时，通过重新定义 dual-data 数据来定制被引用界面的表现特征。比如下面定义两个节点，分别用来展示只读的与拖拉右下角变宽高的 Textarea 构件：
 
 ``` html
-  <div $='//tmp_log.p' dual-data='{{"width":300,"height":200,"resize":"none","readOnly":"readonly"}}'></div>
+  <div $='//tmp_log.p' dual-data='{{"width":300,"height":200,"resize":"none","readOnly":"1"}}'></div>
   <div $='//tmp_log.p' dual-data='{{"width":300,"height":200,"resize":"both","readOnly":""}}'></div>
 ```
 
@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    <div $='//tmp_log2.p' $trigger='["",{$merge:{readOnly:"readonly"}}]'></div>
+    <div $='//tmp_log2.p' $trigger='["",{$merge:{readOnly:"1"}}]'></div>
     <div $='//tmp_log2.p' $trigger='["",{$merge:{resize:"both"}}]'></div>
   </div>
 ```

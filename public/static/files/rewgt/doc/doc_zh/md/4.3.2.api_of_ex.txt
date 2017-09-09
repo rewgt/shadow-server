@@ -9,6 +9,7 @@
 > - [`ajax`](#4.3.2.!ajax)
 > - [`jsonp`](#4.3.2.!jsonp)
 > - [`setChecked`](#4.3.2.!set_checked)
+> - [`elementOf`](#4.3.2.!element_of)
 
 > 从 javascript 函数封装而来的 API
 > - [`log`](#4.3.2.!log)
@@ -60,6 +61,10 @@
 
 > 调用 `ex.setChecked()` 等效于在界面对选项构件做 “点击选中” 操作，目标构件如果不是选项构件，“点击选中” 操作将被忽略。 
 
+##### <a name="element_of"></a>`elementOf(sPath)`
+
+> 获取 Element 节点定义，参数 `sPath` 用来定位目标节点，可以用绝对路径，也可用相对路径（以当前可计算表达式所在的节点为参考点）。如果找不到节点，返回 `null` 值。
+
 ##### <a name="log"></a>`log(arg, ...)`
 
 > 用于打印输出，相当于对 `console.log` 做封装，使之适合在可计算表达式中使用。可带一个参数 `arg`，也可带多个，各个参数将依次被打印。
@@ -110,7 +115,7 @@
 
 > 在 `expr` 表达式中，有 3 个变量 `$item, $index, $count` 是内置可用的，它们分别表示：遍历 `data` 时的当前数组成员、当前成员在 `data` 中的序号（首成员序号为 0）、数组 `data` 的长度。
 
-> 脚本表达式 `expr` 由 MJI 解释器解析执行，其规格须合乎 MJI 语法要求。本函数既能在可计算属性中使用，也能在其它任意场合独立使用，对于前者，`expr` 将在当前 `callspace` 环境中运行，所以，除了 `$item, $index, $index` 变量可用外，还能使用诸如 `duals.attr, props.attr, state.attr` 等变量。
+> 脚本表达式 `expr` 由 MJI 解释器解析执行，其规格须合乎 MJI 语法要求。本函数既能在可计算属性中使用，也能在其它任意场合独立使用，对于前者，`expr` 将在当前 `callspace` 环境中运行，所以，除了 `$item, $index, $count` 变量可用外，还能使用诸如 `duals.attr, props.attr, state.attr` 等变量。
 
 ##### <a name="filter"></a>`filter(data, expr)`
 

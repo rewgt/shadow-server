@@ -103,11 +103,9 @@ Shadow Widget 支持在任意节点定义 `$trigger` 属性，`$trigger` 如何�
 
 2. 取值为 `'auto'`，在上述 `'none'` 处理方式的基础上，如果 `$trigger` 计算结果给 `duals.trigger` 值带来变化了，系统将接着自动触发 trigger 动作。
 
-3. 取值为 `'onsite'`，表示 `$trigger` 表达式只在主动触发（选项构件被选中，或程序中调用 `utils.fireTrigger()`）时，才重新计算，计算结果赋给 `duals.trigger`，然后触发 trigger 动作。对于 “非主动触发”，`$trigger` 表达式保持静默，不被计算。本选项可简单理解为：在主动触发 trigger 动作前先用 `$trigger` 更新动作列表。
+3. 取值为 `'onsite'`，表示 `$trigger` 表达式只在主动触发（选项构件被选中，或程序中调用 `utils.fireTrigger()`）时，才重新计算，计算结果赋给 `duals.trigger`，有更改时（指 `duals.trigger` 有变化）就触发 trigger 动作。而对于 “非主动触发”，`$trigger` 表达式保持静默，并不自动计算。而对于 “非主动触发”，`$trigger` 表达式保持静默，并不自动计算。
 
-当一个节点的 `props.fireType` 未定义时，`$trigger` 自动按 `'auto'` 的方式处理。
-
-一个构件定义 `trigger` 或 `$trigger`，这两个属性只能二选一，`fireType` 属性只与 `$trigger` 配合起作用。
+说明：`props.fireType` 不是双源属性，它可以缺省，缺省时视作取 `'auto'` 值。另外，`fireType` 只与 `$trigger` 配合使用，如果未定义 `$trigger`，`props.fireType` 将被忽略。
 
 #### 借助 `$trigger` 逆向同步数据
 

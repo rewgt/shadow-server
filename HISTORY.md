@@ -25,6 +25,17 @@ v1.0.0 / 2017-05-31
     - 优化：非行内构件的 `left/top/margin/padding/borderWidth` 支持用 null 表示省略 inline css
     - 优化：`defineDual(attr)` 的 attr 参数允许传 array，便于一次设置多个双源属性
     - 改错：原有 `Input/TextArea/Select` 的 value 同步处理不符合 controlled input 要求
+  * v1.0.5 / 2017-09-09
+    - 改错：构件 `Select` 在 multiple 为 '1' 时，`duals.value` 改用 React 要求的 array 格式
+    - 优化：增加接口 `utils.setupKlass()`
+    - 优化：markdown 中的源码块增加首部行号与指定高亮行的功能
+    - 改错：特定情况下 Select 下 Option 的 `selected` 未被正确同步
+    - 优化：增加对虚节点的 `duals.style = value` 赋值，将转接至其下实节点
+    - 优化：增加用多个 `"//"` 表达连续多次取父节点
+    - 改错：在面板下计算剩余像素数未排除 margin
+    - 优化：选项构件用于切换导航面板时 isolated 缺省视作 false，其它情况缺省视作 true 
+    - 优化：增加接口 `ex.elementOf()`
+    - 改错：在可视设计器选中引用 `P` 的节点改属性，存盘后节点却变为 `Div`
 
 v0.1.4 / 2017-04-05
 ============

@@ -42,22 +42,14 @@ Shadow Widget 对布局有若干限定，包括：
 
 此外，用 TablePanel 与 TableRow 组织的表格布局中，用作表元格的各个成员，可以是 Panel 类、P 类、Div 类构件，不能直接用 Span 类构件。
 
-#### 面板下构件的 margin 值会影响布局
-
-面板构件对它内容按 flex 方式布局，比如一块横向布局的面板（用 `row-reverse` 或 `reverse-row`），其子构件的宽度可以是像素值，也可以是负百分比，当所有子构件的左、右 margin 取 0 值时，负百分比可以准确算得具体像素值，但如果各子构件之间 margin 非零，会导致负百分比算不准，最后一个子构件因超出宽度而出乎预料的排到下一行。
-
-Shadow Widget 对所有 Panel 类、Div 类及 P 类构件的 `margin-left` 与 `margin-right` 缺省均取 0 值，这降低了出现上述预料之外情况的机率。当面板需要为它的内容留出左侧或右侧空白时，宜设置面板的 padding 解决。但 P 类构件的 `margin-top` 与 `margin-bottom` 缺省值通常不为 0，所以，使用纵向布局的面板（用 `col-reverse` 或 `reverse-col`），以负百比指定的子构件高度时，须小心忘了考虑子构件间有 margin 空隙的因素。
-
-总之，**在 flex 布局的场合，宜用 padding 控制间隙，避免用 margin 来控制**。
-
 #### 创建绝对定位的构件
 
-创建绝对定位的构件比较简单，指定 `style.display` 为 `absolute` 即可。
+创建绝对定位的构件比较简单，指定 `style.position` 为 `absolute` 即可。
 
 比如在根节点下定义如下构件（见样例 demo35）：
 
 ``` html
-  <div $=Panel sty__='display:absolute' left='{100}' top='{100}' width='{0.5}' height='{200}'>
+  <div $=Panel sty__='position:absolute' left='{100}' top='{100}' width='{0.5}' height='{200}'>
     <div $=P>Hello, world!</div>
   </div>
 ```

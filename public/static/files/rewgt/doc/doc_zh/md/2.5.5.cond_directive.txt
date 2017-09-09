@@ -16,7 +16,7 @@
       <div $=P $if='duals.data.hasLogin' $html='duals.data.name + " has login!"'></div>
       <div $=P $else=''>
         <span $=Span $html='"login for " + duals.data.name'></span><span $=Br></span>
-        <span $=Input placeholder='Input account'></span><span>&nbsp;&nbsp;</span>
+        <span $=Input placeholder='Input account'></span><span $=Span> </span>
         <span $=Input placeholder='Input password'></span>
       </div>
     </div>

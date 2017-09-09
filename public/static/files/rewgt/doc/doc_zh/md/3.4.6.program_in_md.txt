@@ -37,7 +37,7 @@ still in row1-col2
 </pre>
 ```
 
-MarkedTable 中用 MarkedDiv 或 MarkedTable 表达一个单元格时，单元节点还可附加定义 `col-span, row-span, td-style` 标签，这三项分别对应于 `<td>` 的 `rowspan, colspan, style` 属性。举例如下：
+MarkedTable 中用 MarkedDiv 或 MarkedTable 表达一个单元格时，单元节点还可附加定义 `col-span, row-span, td-style` 属性，这三项分别对应于 `<td>` 的 `rowspan, colspan, style` 属性。举例如下：
 
 ``` html
 <pre $=MarkedTable>
