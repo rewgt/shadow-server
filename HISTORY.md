@@ -1,3 +1,12 @@
+v1.1.0 / 2017-09-11
+============
+
+从本版本起不再支持 react v15.4.x 以前旧版本，Shadow Widget v1.1 以后版本只与 react v15.5+ 配套使用。
+
+  * v1.1.0 / 2017-09-09
+    - 优化：React.createClass 在 react v15.5 以后版本改用 create-react-class，本系统随之升级
+    - 优化：重构用户手册，Shadow Widget 原理介绍与 UI 构件介绍分开到两本手册
+
 v1.0.0 / 2017-05-31
 ============
 

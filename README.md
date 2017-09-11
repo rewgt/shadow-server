@@ -1,4 +1,4 @@
-shadow-server：Shadow Widget 的本地 WebService 系统
+shadow-server：Shadow Widget 的本地 Web Service 系统
 ------------------------------
 
 &nbsp;
@@ -35,6 +35,7 @@ npm start
 [shadow-widget 开源项目](https://github.com/rewgt/shadow-widget)   
 [shadow-book 开源项目](https://github.com/rewgt/shadow-book)   
 [shadow-slide 开源项目](https://github.com/rewgt/shadow-slide)   
+[shadow-bootstrap 开源项目](https://github.com/rewgt/shadow-bootstrap)
 
 [Shadow Widget 产品博客](https://rewgt.github.io/product-blogs/)
 
