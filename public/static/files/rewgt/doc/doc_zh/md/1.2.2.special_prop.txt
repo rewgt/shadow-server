@@ -1,0 +1,50 @@
+1.2.2 几个特殊属性
+-----------------------
+
+&nbsp;
+
+#### key 属性
+
+所有 Shadow Widget 控件都支持 key 属性，它实际就是 React Component 的 key 属性，用来在本层唯一标识本节点。如果构件的 key 值未显式给出，系统将自动为它分配 0、1、2 等整数值作为它在本层的唯一 ID 号，如果指定 key 属性，应指定一个字串，该字串可使用的合法字符如下：
+
+```
+  _    a~z    A~Z    0~9
+```
+
+将本节点的 key 及其所有上层各节点的 key 用点号（即 "."）串接起来，就是本节点的绝对路径，例如：`".body.top.test"`，路径字串在查找构件、引用构件、拷贝构件等场合使用。为编程方便，我们经常要在转义标签中指定 key 属性值。
+
+#### klass 属性
+
+React 用 `className` 属性表示 DOM 节点的 `class` 字串，这个属性非常重要，以致于离开它就玩不转前端开发了。Shadow Widget 将该属性按两种功能去理解，其一是标识控件的固有特征，其二是标识控件的运行状态，前者在控件的生存期内保持不变，后者则动态可变，比如控件选中了，增加 `selected`  类定义，定义相应的 css 让控件呈现选中的样式，取消选中则删除这个 `selected` 类。
+
+方便了管理，Shadow Widget 区分这两种不变与可变的 `class` 类。其中，前者不可变 `class` 仍用 React 的 `className` 表达，而后者可变 `class` 则用 `klass` 属性表达。
+
+多数情况下，用户不必关心控件的 `className` 属性，既然表达不可变类名，一般在创建控件时已缺省指定，用户需要关心的是如何传入 `klass` 属性，及运行中如何修改 `klass`，比如：
+
+<div $='.rewgt.ui_demo' src='md/code/1_2_2_a.txt' input-height='{50}'></div>
+
+这时描述的 P 节点，`className` 属性值为 `"rewgt-unit"`，`klass` 属性值为 `"default-large-small auto-hidden-visible"`，最后输出到界面的 `class` 值为两者合并值，是 `''rewgt-unit default-large-small auto-hidden-visible"`。
+
+试验一下，把本例 `klass` 值改为 `large-small-default`（或 `small-default-large`），是否发现当前节点的字体变大（或变小）了。
+
+Shadow Widget 推荐采用 **以 "-" 字母分割各个状态** 的命名方式，如 "default-large-small" 表达 3 种状态，并且，其中第一个状态（本例是 `default`）指示当前状态，将 `klass` 改为 "large-small-default" 则表示切换到 `large` 状态。如果采用这种命名，可视化设计界面已提供辅助手段，让你点一下按钮就能快速切换 `klass` 状态。
+
+#### style 属性
+
+对于 `*.html` 网页文件，某些浏览器会检验并自动调整 `style` 属性值，比如 IE11 认为 `style='{{"dispaly":"none"}}'` 不合法，自动将它改为 `style=''`，Firefox 会删除 `style` 中它不支持的属性。为避免浏览器干扰 `style` 转义表达，我们改用 `sty__` 表示 `style`。
+
+说明：我们仅在转义标签中用 `sty__` 代替 `style`，其它地方，如 `duals.style` 仍用 `style`。
+
+因为 `style` 极为常用，Shadow Widget 特别增强了它的功能，其一，在转义标签中，既可以将 `style` 写成字串格式，也可写成 React 要求的 Object 格式，比如，下面两种 P 节点定义都是正确的。
+
+<div $='.rewgt.ui_demo' src='md/code/1_2_2_b.txt' input-height='{50}'></div>
+
+其二，`style` 自动被定义成双源属性，运行中可以用 javascript 语句这么赋值：   
+&nbsp;&nbsp;&nbsp; `component.duals.style = {backgroundColor:'red', display:'none'};`   
+对 `duals.style` 赋值按覆盖合并的方式进行，即，同名 css 属性被新值覆盖，未被覆盖的维持原值。比如在上面语句运行后，再运行：   
+&nbsp;&nbsp;&nbsp; `component.duals.style = {display:''};`    
+就只替换 `style.display` 值，原 `style.backgroundColor` 值不变。
+
+说明：若将 `style` 下某 css 属性赋空字串，表示恢复该属性的缺省值。
+
+&nbsp;

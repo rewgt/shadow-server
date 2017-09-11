@@ -1,0 +1,13 @@
+<div $=Panel key='top'>
+  <div $=Div key='msg' padding='{[0,6]}' sty__='display:none'>
+    <div $=P>Hello, world!</div>
+  </div>
+
+  <div $=P key='opt'>
+    <span $=OptButton key='btn' 
+      pop-option='{{"path":"////msg","width":0.7,"height":200,"bodyStyle":{"display":"block"}}}'>
+      Show hello</span>
+    <span $=OptButton key='btn2' fire-type='onsite' 
+      $$for='' $trigger='{$trigger:"//btn",width:0.5}'>Show hello2</span>
+  </div>
+</div>

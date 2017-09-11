@@ -16,13 +16,14 @@ WTC 实例名的首字符要求大写，因为 React 对自定义 tag 都要求�
 如果您开发的项目仅供自己使用，而且项目规模也不大时，自定义 WTC 类及其实例直接往 T 模块下挂，不要不覆盖原有定义即可。如果项目规模较大，自定义 WTC 较多时，不妨分层登记组织 WTC。比如：
 
 ``` js
-  var T = W.$templates;
-  T.usr = {
-    Login: UsrLogin,
-    Login_: UsrLogin_,
-    Submit: UsrSubmit,
-    Submit_: UsrSubmit_,
-  };
+var T = W.$templates;
+
+T.usr = {
+  Login: UsrLogin,
+  Login_: UsrLogin_,
+  Submit: UsrSubmit,
+  Submit_: UsrSubmit_,
+};
 ```
 
 这里 `usr` 是功能模块名，把与用户管理相关的 WTC 符号都挂到 `T.usr` 下。然后在转义标签中这么引用 `<span $=usr.Submit>Save</span>`。
@@ -41,9 +42,9 @@ WTC 实例名的首字符要求大写，因为 React 对自定义 tag 都要求�
 
 #### <a name="idsetter"></a>idSetter 保留路径
 
-`W.$idSetter` 提供 `id__` 函数的预注册功能，`id__` 函数的功能与投影定义类似，参见后文 [“附加定义双源 setter”](#3.4.3.) 与 [“idSetter 预定义”](#3.4.4.)。
+`W.$idSetter` 提供 `$id__` 函数的预注册功能，`$id__` 函数的功能与投影定义类似，[参见后文](#3.4.2.)。
 
-idSetter 以路径名为索引，路径名如 `".body.top.toolbar"`，其中，以厂商名（camelCased 风格）为前缀（如 `".rewgt."`）的路径同样为各厂商保留，比如 `".rewgt.share_bar"`。
+idSetter 可以用路径名（如 `".body.top.toolbar"`）为索引，也可以自行规划其它形式。但须避开厂商前缀（如 `".rewgt."`），以厂商名（camelCased 风格）作前缀的命名（比如 `".rewgt.share_bar"`）为各厂商保留，此举可避免不同厂商提供的中间件潜藏命名冲突。
 
 #### localStorage 键值命名
 

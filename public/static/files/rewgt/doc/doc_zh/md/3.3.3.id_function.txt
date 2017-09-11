@@ -1,0 +1,94 @@
+3.3.3 id__ 属性
+-------------
+
+&nbsp;
+
+在 Shadow Widget 中，既然各种处理过程，都可转化为针对某 `duals.attr` 赋值，而触发的自动回调。那么，`render()` 调用是否也能视作某 `duals.attr` 变更的回调形式呢？答案是肯定的，这个 `attr` 就是 `"id__"`。
+
+#### 特殊的双源属性 `duals.id__`
+
+`render` 是 React 的内置方法，其调用由内置机制触发，尽管如此，每次 `render()` 调用我们都让 `duals.id__` 取不同值，再让 `duals.id__` 赋新值时自动触发 `render()` 调用，这样，我们就可以将 `render()` 调用视作 `duals.id__` 资源化驱动的产物了。
+
+系统为每个构件都自动定义 `duals.id__`，构件刚创建时，`duals.id__` 固定取值 `0`，之后每次 `render()` 调用，`duals.id__` 值都在变化。利用这个特性，我们可以构造一种数据驱动的处理机制，比如：
+
+``` js
+01 main['.body.top.panel'] = {
+02   getInitialState: function() {
+03     var state = this._getInitialState(this);
+04     
+~~     this.defineDual('id__', function(value,oldValue) {
+~~       if (oldValue == 1) {  // init process
+07         console.log('in first render() call:', this.widget.getPath());
+08         // do something ...
+09       }
+10     });
+11     
+12     return state;
+13   },
+14 };
+```
+
+本例 **用 `oldValue == 1` 识别首次 `render()` 调用，然后执行特定的初始化处理**。
+
+#### `id__` 的特殊取值
+
+`duals.id__` 是特殊双源属性，对它赋值会触发构件刷新，如果由 React 内置机制（包括通过调用 `setState({attr:value})`）触发 render 刷新，系统有机制保证 `duals.id__` 取值是变更过的，即，与上次 `render()` 时取值不一样。如果主动对 `duals.id__` 赋值，我们要求用 `utils.identicalId()` 取一个唯一值赋给它。构件的 `comp.reRender()` 方法，就是通过类似如下语句实现强制刷新的：
+
+``` js
+this.duals.id__ = utils.identicalId();
+```
+
+调用 `utils.identicalId()` 将返回大于 `2` 的整数值，每次调用所得的值都会累加 1，此机制保证了所得整数相比旧值是变更过的。小于等于 `2` 的值被 `duals.id__` 保留，有如下特殊含义：
+
+1. `id__` 从 `0` 切换到 `1`，表示当前节点正在初始化（在首次 `render()` 前触发）   
+节点刚创建时的取值 `0`（也就在 `getInitialState()` 调用结束时），表示 “未定义态”，然后在首次 `render()` 之前将值从 `0` 改到 `1`，值 `1` 表示 “初始态”。
+2. `id__` 从 `1` 切换到其它值，表示首次刷新（在首次 `render()` 时触发）
+3. `id__` 从其它值切换到 `2`，表示节点刚挂载（在 `componentDidMount()` 中触发）   
+值 2 表示 “挂载态”，一个节点的 `id__` 不会从 `1` 直接切换到 `2`，而是从 `1` 切到其它值，再从其它值切到 `2`，因为首次 `render()` 调用发生在 `componentDidMount()` 之前。
+4. `id__` 从任意值切换到 `0`，表示节点将要卸载（在 `componentWillUnmount()` 中触发）   
+理解为回到 “刚创建” 的 “未定义态”。
+
+所以，`duals.id__` 的 setter 回函数常这么定义：
+
+``` js
+01 function id__(value,oldValue) {
+~~   if (oldValue == 1) {  // init process
+03     console.log('in first render()');
+04   }
+05   
+06   if (value <= 2) {    // no need prepare render content
+~~     if (value == 1) {  // init process
+08       // ...
+09     }
+~~     else if (value == 2) {  // mount process
+11       // ...
+12     }
+~~     else if (value == 0) {  // unmount process
+14       // ...
+15     }
+16     return;
+17   }
+18   
+19   console.log('in normal render()');
+20 }
+21 
+22 this.defineDual('id__', id__);
+```
+
+当 `valule <= 2` 时，`id__` 的 setter 函数并不用来组织 render 内容（**所以上面代码用 `return` 返回**），具体来说，在上述 `value == 1` 条件段编写代码，等效于在 `getInitialState()` 函数末尾写代码，`value == 2` 条件段等效于在 `componentDidMount()` 中编码，`value == 0` 条件段等效于在 `componentWillUnmount()` 中编码。当 `value` 值大于 2 时，等效于在 `render()` 中编码。
+
+说明：在上面 `02` 行与 `07` 行的条件段，都能编写初始化代码，但这两者有差别。后者（`value == 1` 条件段）先执行，相当于在 `getInitialState()` 函数的末尾编码，而 `oldValue == 1` 条件发生于首次 `render()` 调用时，这时，本节点所有双源属性已定义（包括调用 `defineDual()` 注册的，以及系统自动注册的），而且传入的 `props.attr` 均已赋值给同名双源属性，比如 `props.width` 已赋给 `duals.width`。换一句话，`value == 1` 条件段通常只用来注册回调函数（如追加 duals 属性定义、调用 `setEvent()` 等），**`oldValue == 1` 条件段是所有 duals 属性已预备之后的初始化**。
+
+正因为 `oldValue == 1` 条件段得到执行时，duals 属性刚准备好，这儿也是最早可以侦听自身 duals 属性的位置，所以该段常用来编写 `this.listen(sAttr,func)` 语句，[一次性安装子节点](#3.4.3.!once_child) 也在此处。
+
+#### idSetter 函数
+
+不难发现，上述传给 `duals.id__` 的 setter 函数是一个超强函数，它可实现的功能几乎等效于一个投影定义，因为对于 `getInitialState, componentDidMount, componentWillUnmount, render` 这几项 React 内置方法都有等价的实现方式。为方便叙述，后文将这种 setter 函数称为 **idSetter 函数**，它所提供的，等效于投影定义的函数体，称为 **idSetter 定义**。
+
+请注意，idSetter 函数在 `value <= 2` 时，并不由 `render()` 调用发起，也即：当前不在渲染中。
+
+把 `duals.attr` 视作资源，由 `duals.attr` 变更，也就是资源变更，来领引、推进程序功能展示，这是 Shadow Widget 技术体系的重要特征。除了 `duals.id__`，本系统还用 `duals.childNumId` 表达子节点的 “增、删、改” 变化，不过 `childNumId` 用法被系统保留，大家不必学习。
+
+前面手册已介绍 WTC 定义与投影定义，再加上这里的 idSetter 定义，现在，我们有 3 种对等的，用于定义构件行为的开发方式了。由于 idSetter 是函数方式，而非类定义，用它描述构件行为，更具灵活性，下一章我们再详细介绍。
+
+&nbsp;

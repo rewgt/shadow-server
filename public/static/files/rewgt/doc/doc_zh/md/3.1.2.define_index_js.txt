@@ -33,7 +33,9 @@ var exportModules = {
 };
 ```
 
-这样，上层模块（也常通称为 main 模块）编写投影类定义时，经 `require('my_module')` 后就可以使用这个用户自定义的模块了。由于上层编码假定在 ES5 环境中进行，所以开放给上层的模块宜优先用 ES5 风格编写。
+这样，上层模块（也常通称为 “MAIN 模块”）编写投影类定义时，经 `require('my_module')` 后就可以分享该自定义模块了。
+
+不过，多数情况下我们无需借助 `require` 分享底层模块，因为新定义 WTC 类常登记到 `W.$templates`，新增初始化处理也通常登记到 `main.$$onLoad` 与 `main.$onLoad`，如果没有其它东西要从底层分享到上层的，就不必在 `exportModules` 添加底层模块。Shadow Widget 鼓励底层模块只定义 WTC（并登记到 `W.$templates`）与初始化函数（并登记到 `main.$$onLoad` 与 `main.$onLoad`），这样，底层模块想转成 CDN 版本，用作第 3 方 lib 库时，只需直白的包装成 “MAIN 模块” （[参考前文](#2.7.2.!js_module)）即可。
 
 #### 一个例子
 
@@ -70,16 +72,20 @@ T.HighlightBtn_ = THighlightBtn_;
 T.HighlightBtn = new THighlightBtn_();
 ```
 
-上面源码见样例 `sample_dev1`。转义标签描述的构件要从 W.$template 模块（即上面的 `T`）查找，最后一条语句 `T.HighlightBtn = new THighlightBtn_()` 用于注册该 WTC 对象，语句 `T.HighlightBtn_ = THighlightBtn_` 则登记该 WTC，以便设计新的 WTC 时可以继承它。当然，如果某 WTC 没有被继承的价值，就不必登记到 `T` 模块中了。
+上面源码见样例 demo19，使用前请记得先用 `npm install` 安装，并用 `npm start` 启动 babel 翻译。
 
-现在运行 `sample_dev1` 工程，看看它的界面效果。在命令行终端，进入该工程目录，运行 `npm install` 安装本工程的依赖库（安装只做一次），然后运行 `npm start` 命令，watchify 随即启动修改侦测并转译 ES5 代码。当工程目录下 bundle.js 文件更新后，在浏览器中打开 `http://localhost:3000/sample_dev1/`，可检验一下界面运行效果。
+转义标签描述的构件要从 W.$template 模块（即上面的 `T`）查找，最后一条语句 `T.HighlightBtn = new THighlightBtn_()` 用于注册该 WTC 对象，语句 `T.HighlightBtn_ = THighlightBtn_` 则登记该 WTC，以便设计新的 WTC 时可以继承它。当然，如果某 WTC 没有被继承的价值，就不必登记到 `T` 模块中了。
 
-#### 下层 WTC 与上层投影类的关系
+因为已注册 `T.HighlightBtn`，转义标签可以直接引用它了，如下：
+ 
+``` html
+01 <div $=Panel key='top' height='{null}'>
+02   <div $=P key='p'>
+~~     <span $=HighlightBtn>Click me</span>
+04   </div>
+05 </div>
+```
 
-本质上，投影类定义是对 WTC 的一种继承，近似于类继承。如果 WTC 定义完备了，上层无需对它再定制时，可以直接用它描述界面，而不必非得借助投影类定义。比如上例的 `HighlightBtn`，转义标签中直接使用 WTC 实例名。当然，如果上层想对它做定制，再定义投影类也无妨，针对同一 WTC 实例可定义任意个投影类，但在投影类之上，就不再有类继承关系了。
-
-但 WTC 并不只为上层投影类及转义标签服务，后文 [“函数式开发”](#3.4.) 还会介绍让 WTC 实例结合 json-x 描述，以一种纯正函数式风格做开发，该方式不涉及投影类与转义标签。
-
-澄清一下 WTC 的概念：WTC 是一种 class 类定义（形式为 `class OneWidget extends BaseWidget {}` ），可以继承它再定义新的 WTC，如 `class NewWidget extends OneWidget {}`，但，投影类继承基于 WTC 实例，WTC 实例化后才供上层投影类定制。所以，转义标签 `$=Widget` 指向的是 `T` 模块下的 WTC 类实例，而非 WTC 类自身。
+现在运行 `demo19` 工程，在浏览器中打开 `http://localhost:3000/demo19/`，检验一下界面运行效果。
 
 &nbsp;

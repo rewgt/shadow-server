@@ -16,87 +16,40 @@
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
 <div $=BodyPanel key='body'>
-  <div $=Panel key='top'>
-    <div $=P key='p' width='{0.9999}'>
-      <span $=Textarea key='input' placeholder='Input markdown' sty__='width:300px; height:100px'></span>
+  <div $=ScenePage name='first_pg'>
+    <div $=Div left='{0}' top='{0}'>Hello, world!</div>
+    <div $=Panel left='{-100}' top='{-50}' width='{200}' height='{100}'>
+      <div $=Panel width='{0.2}' sty__='background-color:#eee'></div>
+      <div $=SplitDiv></div>
+      <div $=Panel width='{-1}' sty__='background-color:#eee'></div>
     </div>
-    <pre $=MarkedDiv klass='auto-hidden-visible' key='markdown' width='{0.9999}' height='{200}'></pre>
+  </div>
+  
+  <div $=ScenePage name='second_pg'>
+    <div $=Panel left='{-0.5}' top='{-0.5}' width='{0.9999}' height='{0.9999}' klass='auto-hidden-visible'>
+      <div $=Div>Hello, world!</div>
+    </div>
+  </div>
+  
+  <div $=ScenePage name='third_pg'>
+    <div $=Div left='{-0.5}' top='{-0.5}'>
+      <div $=Div>It is third page.</div>
+      <div $=P>&nbsp;</div>
+      <div $='.body.temp.msg'></div>
+    </div>
+  </div>
+  
+  <div $=ScenePage key='temp' no-show='1'>
+    <div $=Div key='msg' left='{-0.5}' top='{-0.5}'>It is defined in template ScenePage (.body.temp)</div>
   </div>
 </div>
 </div>
 <!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 
-<script>
-if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
-
-var React = require('react');
-var ReactDOM = require('react-dom');
-
-var W = require('shadow-widget');
-var main = W.$main, utils = W.$utils, ex = W.$ex;
-
-main['.body.top.p.input'] = {
-  getInitialState: function() {
-    var state = this._getInitialState(this);
-    this.defineDual('textValue');
-    return state;
-  },
-  
-  $onChange: function(event) {
-    this.duals.textValue = event.target.value;
-  },
-};
-
-main['.body.top.markdown'] = {
-  componentDidMount: function() {
-    this._componentDidMount(this);
-    
-    var inputMark = W.W('.body.top.p.input').component, self = this;
-    inputMark.listen('textValue', function(value,oldValue) {
-      if (!self.isHooked) return;
-      self.duals['html.'] = value;
-    });
-  },
-};
-
-/*
-main['.body.top.markdown'] = {
-  onTextValue: function(value,oldValue) {
-    // no need check this.isHooked
-    this.duals['html.'] = value;
-  },
-  
-  componentDidMount: function() {
-    this._componentDidMount(this);
-    
-    var inputMark = W.W('.body.top.p.input').component;
-    inputMark.listen('textValue',this);
-  },
-};
-
-main['.body.top.markdown'] = {
-  getInitialState: function() {
-    var state = this._getInitialState(this);
-    this.defineDual('markOrg', function(value,oldValue) {
-      this.duals['html.'] = value;
-    });
-    return state;
-  },
-  
-  componentDidMount: function() {
-    this._componentDidMount(this);
-    
-    var inputMark = W.W('.body.top.p.input').component;
-    inputMark.listen('textValue',this,'markOrg');
-  },
-}; */
-
-});
-</script>
-
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

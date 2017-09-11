@@ -1,0 +1,152 @@
+1.7.5 循环指令
+-------------
+
+&nbsp;
+
+#### 用 "$for" 动态组装子节点
+
+`$for` 指令用于循环生成多个子节点，它的表达式格式是 `'item in some_data'`，其中 `item` 与 `in` 是固定使用的单词，先看一个例子。
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_a.txt' input-height='{110}'></div>
+
+`item in expr` 是 `in` 运算，表示对 array 类型的 `expr` 做遍历，每次遍历成员的值赋给 `item` 变量。在 `for..in` 句式下，有三个预置变量可用：`item, index, count`，其中 `index` 是遍历序号，如上例，被遍历 array 的长度是 3，遍历时各 index 依次取值 0、1、2，`count` 变量指示 array 的长度，这里它的值是 3。
+
+前面已介绍用 `$for=''` 开启一个 callspace，这里 `$for='item in expr'` 也开启一个 callspace，我们不妨将前者 `$for` 取空串，视为后者 `item in expr` 表达式省略后的特殊形态（即：不必动态生成子节点，只保留创建 callspace 的功能）。
+
+描述动态生成的子节点，须用 `$key` 表达式明确定义各子节点的 key 值如何生成。因为 React 要求同级 key 值不能重复，宜结合预置的 `index` 变量来定义 key，比方这里用：`"a" + index` 。
+
+#### 改用 "$$for" 更简洁的表达
+
+上面例子为了计算 `item in duals.data`，要在它的上层另开一层 callspace，因为本节点表达式中的 `duals.data` 向上找 0 层 callspace，所以 `duals.data` 要在上层出现。现在，我们希望把事情简化，让 `$for='item in duals.attr'` 中的 `duals.attr` 定向到在本节点。
+
+可以把代码改成如下形式：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_b.txt' input-height='{80}'></div>
+
+指令 `$$for` 的功能近似于 `$for`，仅多做一件事：在当前位置多插一层重复的 callspace。这样，虽然 `$$for='item in duals.data'` 中的 `duals.data` 会从上层 callspace 查找，但上层 callspace 仍捆绑当前 `$$for` 所在的节点，所以，目标 `duals.data` 相当于定向到本节点了。
+
+### 引用各层 callspace 的数据
+
+看这个例子：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_c.txt' input-height='{130}'></div>
+
+在 callspace 的 `0` 层与 `-1` 层都定义了 `duals.test`，在最里层的表达式中，我们分别用 `duals.test` 与 `duals(-1).test` 取这两个属性。
+
+#### 一次循环生成多个节点
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_c2.txt' input-height='{130}'></div>
+
+循环指令 `$for` 之下的子节点，要用 `$key` 表达式指示如何取 key 值，我们一般结合 `index` 变量让 N 次循环中，各次算得的 key 值各不相同。如果一次循环生成多个节点，不妨像本例那样，用 `"a" + index, "b" + index, "c" + index` 加以区分。
+
+#### 使用 `ex.map()`
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_c3.txt' input-height='{140}'></div>
+
+函数 `ex.map(data,expr)` 的作用类似于 `Array.map()`，遍历并重组一个列表。传入参数 `data` 要求是 array 数组，`expr` 是脚本表达式，指示遍历每项时如何组装各项，脚本表达式中可以使用 `$item, $index, $count` 三个变量，分别表示当前遍历到的 array 子成员、遍历序号、array 长度。更详细介绍请参考 [“API 手册”](#4.3.2.!map)。
+
+#### 过滤循环列表
+
+循环表达式用如下句式支持过滤：
+
+``` js
+  item in expr, filter_expr
+```
+
+计算 `item in expr` 得到一个 array 数据后，用 `filter_expr` 表达式对数组内容进行过滤，`filter_expr` 是条件表达式，对数组成员（以临时变量 `$item` 表示）是否满足某条件作出判断，如果条件成立表示，表示该成员要保留，否则将它过滤掉。
+
+条件表达式 `filter_expr` 还可以直接用常量 `true`，表示所有成员都有效。
+
+假设，`duals.data` 这么取值：
+
+``` js
+  [{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]
+```
+
+如果循环表达式是：
+
+``` js
+  item in duals.data, $item.age > 32 && $index < 2
+```
+
+过滤后得到集合将是：
+
+``` js
+  [{"name":"george","age":40}]
+```
+
+说明：过滤表达式 `filter_expr` 中允许使用 3 种临时变量：`$item, $index, $count`，在遍历数组成员时，分别表示当前数组成员、当前序号（从 0 开始）、数组长度。
+
+请自行试验：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_d.txt' input-height='{130}'></div>
+
+#### 给循环列表排序
+
+在 `$for` 表达式中给循环列表排序要用如下格式：
+
+``` js
+  item in expr, attrName1, attrName2, ...  iOrder
+```
+
+想依据哪个属性做排序，在 `item in expr` 之后列出即可，比如：
+
+``` js
+  item in duals.data, "age"
+```
+
+请自行试验：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_e.txt' input-height='{130}'></div>
+
+表示按 `$item.age` 的值排序，还可指定多个排序属性名，比如：
+
+``` js
+  item in duals.data, "age", "name"
+```
+
+表示以 `$item.age` 为主排序，但 age 值一样时，再用 `$item.name` 排序。
+
+请自行试验：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_f.txt' input-height='{130}'></div>
+
+缺省的排序方式是正序，即：从小值到大值，如果想用倒序，最后一个参数 iOrder 用 -1 即可，比如：
+
+``` js
+  item in duals.data, "age", -1
+```
+
+当 iOrder 取值大于等于 0 时，表示正序，否则逆序。
+
+请自行试验：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_g.txt' input-height='{130}'></div>
+
+#### 同时使用过滤与排序
+
+过滤与排序可以并用，如：
+
+``` js
+  item in duals.data, $item.age > 32, "age", -1
+```
+
+两者并用时，过滤表达式要先写，排序后写。过滤表达式只能写一个，可以用与（`&&`）、或（`||`）描述复杂的运算逻辑。
+
+请自行试验：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_h.txt' input-height='{130}'></div>
+
+#### `$children` 表达式
+
+在 `$for` 循环动态生成的子节点中，我们可以用 `$children` 表达式指示它的子节点 Element，比如：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_5_i.txt' input-height='{200}'></div>
+
+`$children` 表达式只在 `$for` 循环指令的子节点使用，其它地方无效。表达式 `$children` 的计算结果允许用 Element 或 Element 的 array 数组表达一个或多个子节点，如果没有子节点要用 `null` 表示。
+
+说明：
+1. 本例中 `ex.elementOf(sPath)` 用于动态获取指定位置的 React Element。
+2. `VirtualDiv` 是系统内置的一种虚节点 WTC，其下可挂非行内构件，若挂行内构件，应选 `VirtualSpan` 虚节点。
+
+&nbsp;

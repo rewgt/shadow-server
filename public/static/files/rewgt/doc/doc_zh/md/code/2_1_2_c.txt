@@ -1,0 +1,9 @@
+<div $=Panel key='panel' klass='visible-auto-hidden'>
+  <div $=Div2 key='div' klass='auto-hidden-visible' height='{80}'>
+    <div $=P>Hello, world!</div>
+    <div $=P>Hello, world!</div>
+    <div $=P>Hello, world!</div>
+    <div $=P>Hello, world!</div>
+    <div $=P>Hello, world!</div>
+  </div>
+</div>

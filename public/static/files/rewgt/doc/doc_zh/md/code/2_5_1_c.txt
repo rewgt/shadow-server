@@ -1,0 +1,11 @@
+<div $=Panel key='top'>
+  <div $=Div key='msg' padding='{[0,6]}' sty__='display:none'>
+    <div $=P>Hello, world!</div>
+  </div>
+
+  <div $=P key='opt'>
+    <span $=OptButton key='btn' 
+      pop-option='{{"path":"////msg","width":0.7,"height":200,"bodyStyle":{"display":"block"}}}'>
+      Show hello</span>
+  </div>
+</div>

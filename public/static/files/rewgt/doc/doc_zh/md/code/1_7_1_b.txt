@@ -1,0 +1,4 @@
+<div $=P key='p' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
+  <span $=Input key='desc' $value='duals.data.name + " " + duals.data.lastName'></span>
+  <span $=Span key='trig' $trigger='["//",{$set:{name:"George",lastName:"lee"}}]'></span>
+</div>

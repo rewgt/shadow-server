@@ -16,9 +16,14 @@
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
 <div $=BodyPanel key='body'>
-  <div $=Panel key='top' height='{100}'>
-    <div $=P key='p' width='{0.9999}' dual-test='{[1,2]}'>Pass by props['dual-test']</div>
-    <div $=P key='p2' width='{0.9999}'>Call defineDual()</div>
+  <div $=Panel key='top' klass='auto-hidden-visible'>
+    <div $=P key='test' width='{0.9999}'>
+      <div $=TempSpan key='temp'>
+        <span $=Button key='btn'>test</span>
+      </div>
+      <span $='//temp.btn' key='test1'>test 1</span>
+      <span $='//temp.btn' key='test2'>test 2</span>
+    </div>
   </div>
 </div>
 </div>
@@ -31,24 +36,11 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var W = require('shadow-widget');
-var main = W.$main, utils = W.$utils, ex = W.$ex;
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
 
-main['.body.top.p'] = {
+main['.body.top.test.temp.btn'] = {
   $onClick: function(event) {
-    console.log('duals.test =',this.duals.test);
-  },
-};
-
-main['.body.top.p2'] = {
-  getInitialState: function() {
-    var state = this._getInitialState(this);
-    this.defineDual('data');
-    return state;
-  },
-  
-  $onClick: function(event) {
-    console.log('clicked:',this.duals.data);
-    this.duals.data = (this.duals.data || 0) + 1;
+    alert('key = ' + this.duals.keyid);
   },
 };
 
@@ -58,6 +50,7 @@ main['.body.top.p2'] = {
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

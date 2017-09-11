@@ -1,0 +1,58 @@
+1.6.1 SCU 与不可变数据
+------------------
+
+&nbsp;
+
+#### SCU 机制
+
+React 的 SCU 机制是指在 Component 的 [`shouldComponentUpdate(nextProps, nextState)`](https://facebook.github.io/react/docs/react-component.html#shouldcomponentupdate) 方法中，判断当前刷新请求是要执行，拿下一状态的 `nextProps` 及 `nextState` 与当前 `props` 及 `state` 作比较，如果数据没更新，让 `shouldComponentUpdate` 返回 `false`，节点的渲染刷新便不会发生，此机制避免了大量不必要的 DOM 节点更新，从而保障了 React 程序的运行效率。
+
+Shadow Widget 已内置支持 SCU，分析是否该刷新的规则如下：
+
+1. 在 `shouldComponentUpdate(nextProps,nextState)` 函数中，逐一用恒等比较（`===`）各项 `props.attr` 与 `nextProps.attr`，若有变化，本函数结果为 `true`。
+2. 再逐一用恒等比较各项 `state.attr` 与 `nextState.attr`，若有变化，本函数结果为 `true`。
+3. 如果 `children` 属性有变化，附加一项处理：扫描 `children` 各成员，将不符合构件接口的 Element 调整到合规。
+
+#### 不可变数据的策略
+
+由于 Shadow Widget 的 SCU 机制特点，它仅判断各属性的新旧值是否恒等，而不进一步分析其组成子项是否有变化，所以，我们的更新 props 与 state 数据时要适应这一特点。
+
+比方如下是常见的 **误用** 情形，尽管属性变化了，但并不触发更新。
+
+``` js
+// comp.duals.aDict = {};
+comp.duals.aDict.attr = someValue;  // warning: not trigger render()
+  
+// comp.duals.aList = [];
+comp.duals.aList.push(someValue);   // warning: not trigger render()
+```
+
+正确的做法应该是：
+
+``` js
+comp.duals.aDict = Object.assign({}, comp.duals.aDict, {attr:someValue});  // new created
+
+var b = comp.duals.aList = comp.duals.aList.slice(0);  // copy array
+b.push(someValue); 
+```
+
+作为一种规范的更新 Component 属性值的方法，我们重用 React 在 [immutability-helper 模块](https://facebook.github.io/react/docs/update.html) 提供的 `update()` 接口，每次要更新属性时，都调用这个 `update` 函数获得新值。比如：
+
+``` js
+// var ex = W.$ex;
+
+comp.duals.aDict = ex.update(comp.duals.aDict,{$merge: {attr:someValue}}); // merge
+comp.duals.aDict = ex.update(comp.duals.aDict,{$set: {attr:someValue}});   // replace
+
+comp.duals.aList = ex.update(comp.duals.aList,{$push: [value1,value2]});
+comp.duals.aList = ex.update(comp.duals.aList,{$unshift: [value1,value2]});
+comp.duals.aList = ex.update(comp.duals.aList,{$splice: [[1,1,newItem]]}); // splice(1,1,newItem)
+```
+
+当然，不通过 `ex.update()` 构造数据，但保证新值是重新创建的也行。像前面举例的，使用 `Object.assign({})` 与 `aList.slice(0)`，或者，用类似 `{attr:value}` 或 `[value]` 重建 object 或 array，都是可以的。
+
+说明：
+1. 若按严格的 “不可变数据”（Immutable data）去组装，所有子项也需与原值不恒等，但这么做付出成本很高。所以，我们采用上述折中方式，实际应用也算便利。
+2. 为方便编程，我们已将 `update` 函数内置安装在 `W.$ex` 子模块下。
+
+&nbsp;

@@ -1,0 +1,14 @@
+<pre $=MarkedTable key='marked'>
+row1-col1
+
+<pre $=MarkedDiv td-style='{{"color":"red"}}'>row1-col2
+
+still in row1-col2
+</pre>
+
+---
+
+row2-col1
+
+row2-col2
+</pre>

@@ -1,0 +1,9 @@
+<div $=NavPanel key='nav' height='{100}' $for='' dual-data='{["A","B","C"]}'>
+  <div $=P key='p' width='{0.9999}' $for='item in duals.data'>
+    <span $=OptButton $key='"a" + index' $html='"page " + item'></span>
+  </div>
+  
+  <div $=NavDiv key='nav2' $for='item in duals.data'>
+    <div $=GroundDiv $key='"a" + index' $html='"It is page " + item'></div>
+  </div>
+</div>

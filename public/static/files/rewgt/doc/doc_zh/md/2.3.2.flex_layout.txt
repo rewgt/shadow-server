@@ -1,0 +1,78 @@
+2.3.2 flex 布局
+-------------
+
+&nbsp;
+
+#### 横向与纵向 flex 布局
+
+以下是横向布局，`klass` 要用 `row-reverse` 或 `reverse-row`。
+
+<div $='.rewgt.ui_demo' src='md/code/2_3_2_a.txt' input-height='{140}'></div>
+
+若改用 `reverse-row`，如下。
+
+<div $='.rewgt.ui_demo' src='md/code/2_3_2_b.txt' input-height='{140}'></div>
+
+下面是纵向布局，`klass` 用 `col-reverse` 或 `reverse-col`。
+
+<div $='.rewgt.ui_demo' src='md/code/2_3_2_c.txt' input-height='{300}'></div>
+
+说明：`row-reverse, reverse-row, col-reverse, reverse-col` 所对应 CSS 配置项 `flex-direction` 的值分别为：`row, row-reverse, column, column-reverse`。当未指定这 4 者之一时，缺省为 `row-reverse`。
+
+#### 单行还是多行
+
+面板内容以单行还是多行显示，用 `default-wrap_reverse-nowrap` 来控制，以横向布局为例，指定 `nowrap-default-wrap_reverse` 表示单行。
+
+<div $='.rewgt.ui_demo' src='md/code/2_3_2_d.txt' input-height='{140}'></div>
+
+面板对越界内容缺省按 `overflow:hidden` 处理，若添加 `visible-auto-hidden` 项则改用 `visible`，越界内容变为可见。
+
+如果用 `wrap_reverse-nowrap-default` 表示多行，但摆放顺序反过来，如下：
+
+<div $='.rewgt.ui_demo' src='md/code/2_3_2_e.txt' input-height='{140}'></div>
+
+对纵向布局采取单行或多行的配置，可从上面举例类推。面板布局不选单行，就是自动换行（成为多行），**当某构件用到负值宽高，父面板需固定采用单行（`nowrap-default-wrap_reverse`）**，否则，如果一行摆不下，系统会自动把靠后构件挪到下一行，而下一行可能在父面板可见范围外，用户容易误以为界面丢了。而且，表面上看刚好一行能摆下，但有时浏览器并不这么认为，可能设置了阴影，浏览器就认为超一行了，还可能纯粹受浮点精度影响，它也自动换行。
+
+刚才举例的配置与 CSS 对应如下：   
+A) `default-wrap_reverse-nowrap` 对应于 `"flex-wrap: wrap"`   
+B) `wrap_reverse-nowrap-default` 对应于 `"flex-wrap: wrap-reverse"`   
+C) `nowrap-default-wrap_reverse` 对应于 `"flex-wrap: nowrap"`
+
+#### 其它 flex 布局配置
+
+除上面介绍的 `klass` 配置，还有如下项目：
+
+> - `default-justify_center-end`，用于切换 justify-content 取值
+> - `default-content_center-end-stretch`，用于切换 align-content 取值
+> - `default-items_center-end-stretch`，用于切换 align-items 取值
+> - `default-self_center-start-end-stretch`，供被布局子成员用来覆盖父节点 `align-items` 配置
+
+它们与 CSS 属性取值的对应关系如下：
+
+1. 在主轴上的对齐方式   
+A) `default-justify_center-end` 对应于 `"justify-content: flex-start"`   
+B) `justify_center-end-default` 对应于 `"justify-content: center"`   
+C) `end-default-justify_center` 对应于 `"justify-content: flex-end"` 
+
+2. 在多根轴线的对齐方式（换行且存在多根轴线时才有效）   
+A) `default-content_center-end-stretch` 对应于 `"align-content: flex-start"`   
+B) `content_center-end-stretch-default` 对应于 `"align-content: center"`   
+C) `end-stretch-default-content_center` 对应于 `"align-content: flex-end"`   
+D) `stretch-default-content_center-end` 对应于 `"align-content: stretch"`
+
+3. 在交叉轴上的对齐方式   
+A) `default-items_center-end-stretch` 对应于 `"align-items: flex-start"`   
+B) `items_center-end-stretch-default` 对应于 `"align-items: center"`   
+C) `end-stretch-default-items_center` 对应于 `"align-items: flex-end"`   
+D) `stretch-default-items_center-end` 对应于 `"align-items: stretch"`
+
+4. 当前构件在它所在交叉轴上的对齐方式（覆盖上面 `align-items` 选项）   
+A) `default-self_center-start-end-stretch` 对应于 `"align-self: auto"`   
+B) `self_center-start-end-stretch-default` 对应于 `"align-self: center"`   
+C) `start-end-stretch-default-self_center` 对应于 `"align-self: flex-start"`   
+D) `end-stretch-default-self_center-start` 对应于 `"align-self: flex-end"`   
+E) `stretch-default-self_center-start-end` 对应于 `"align-self: stretch"`
+
+请大家自行查阅 CSS 参考手册，了解各选项的具体含义。
+
+&nbsp;

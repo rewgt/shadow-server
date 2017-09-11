@@ -1,0 +1,2 @@
+<div $=P sty__='background-color:#ddd'>example</div>
+<div $=P sty__='{{"backgroundColor":"#ddd"}}'>example2</div>

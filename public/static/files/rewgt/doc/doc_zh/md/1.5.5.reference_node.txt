@@ -1,0 +1,81 @@
+1.5.5 节点引用
+------------
+
+&nbsp;
+
+#### 对相似节点的引用
+
+界面开发中，经常遇到若干相似节点连续出现的情况，如果用转义标签逐个描述每个节点，显得很笨拙，也容易出错。Shadow Widget 采用 “节点引用” 的方式解决这个问题，简单而言，**节点引用就是修改特定属性的节点克隆**。
+
+比如下面界面定义了 3 段文本：
+
+``` html
+  <div $=Panel key='top' height='{null}'>
+    <div $=P key='hello' width='{0.9999}'>Hello, world!</div>
+    <div $=P sty__='color:red' width='{0.9999}'>Hello, world!</div>
+    <div $=P width='{0.9999}'>How are you?</div>
+  </div>
+```
+
+如果改成节点引用的方式，如下：
+
+``` html
+  <div $=Panel key='top' height='{null}'>
+    <div $=P key='hello' width='{0.9999}'>Hello, world!</div>
+    <div $='//hello' sty__='color:red'></div>
+    <div $='//hello'>How are you?</div>
+  </div>
+```
+
+这里 `$` 属性有两种应用，一是指示 WTC 类，如 `$=P`，二是指示引用路径，如 `$='//hello'`。区分这两者的规则是：**如果首字母是 `'.'` 或 `'/'`，表示 `$` 属性用来指示引用路径，否则被视作指示 WTC 类**。
+
+后 2 段文本只需克隆第 1 段，并分别修改字体颜色与文本内容。`$='//hello'` 指明引用路径，以当前节点为参考基点。在 `$` 属性之后，我们接着定义要替换的属性即可，如上，首个节点引用替换文本颜色，第二个节点引用替换文本内容。
+
+如果引用非 inline 节点，要用 `<div $='path'>`，如果引用 inline 节点，要用 `<span $='path'>`，inline 节点引用比如：
+
+``` html
+  <div $=P key='test' width='{0.9999}'>
+    <span $=Button key='btn'>test 1</span>
+    <span $='//btn'>test 2</span>
+  </div>
+```
+
+说明：转义标签 `<span $=path>` 被系统自动转为 WTC 类 `RefSpan`，`<div $=path>` 被系统自动转为 `RefDiv`。
+
+#### 引用会继承源节点属性定义
+
+节点被引用后，常规属性原样被继承，而新定义的属性将替代原属性（如果旧属性存在的话）。
+
+除了属性继承，源头的投影类定义也原样继承。比如：
+
+``` js
+01 main['.body.top2.test.btn'] = {
+~~   $onClick: function(event) {
+03     alert(this.duals.keyid);
+04   },
+05 };
+```
+
+我们定义被引用的源节点，鼠标点击时弹出显示 key 值的信息窗口。现在用 `$` 引用该节点克隆一个新节点，`$onClick` 也被继承，点击新节点同样会弹出 alert 窗口。
+
+本节以上举例，源码在样例 demo9。
+
+#### 将克隆源节点用作样板
+
+上面例子中，被克隆的节点被使用（在界面显示），如果隐藏它只需指定 `sty__='display:none'`，然后在 `$` 引用时让克隆后节点显示，对行内构件用 `sty__='display:inline'`，非行内构件用 `sty__='display:block'` 。
+
+#### 支持多级引用
+
+节点引用可以多次叠加，比如，A 节点引用自 B 节点，而 B 节点又引用自 C 节点，这时，在各节点定义的属性也是逐次叠加的。
+
+#### 以编程方式实现引用
+
+节点引用的本质是克隆一个节点并挂入 W 树。上面介绍的是以转义标签格式描述节点引用，如果用 JS 编程，节点引用会更自由。
+
+操作分三步，第一步获取一个 React Element，第二步调用 `React.cloneElement(element)` 克隆节点，第三步调用  `comp.setChild(...)` 或 `utils.setChildren(comp,...)` 安装节点。
+
+从 W 树获取 Element 主要用 `comp.elementOf(sPath)` 调用，另外，调用 `utils.eachElement(comp,callback)` 可遍历 `comp` 子成员的 Element，遍历时可调用 `utils.keyOfElement(element)` 提取 key 值。
+
+关于上述诸多 API，请查阅 [“API 手册”](#4.) 了解详情。
+
+&nbsp;

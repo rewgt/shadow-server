@@ -1,0 +1,108 @@
+2.4.3 场景页
+------------
+
+&nbsp;
+
+场景页（ScenePage）是绝对定位构件，它用来容纳若干绝对定位的子构件，ScenePage 只允许挂在 body 节点下使用。
+
+#### 场景页的特点
+
+ScenePage 用来描述场景化的状态页面，它具有如下特点：
+
+1. 可以定义多个场景页，但运行中同一时间只显示一个。   
+场景可以切换，通过切换展示特定场景，但不会同时展示多个场景。
+
+2. 在场景页中定义的构件，自动按绝对定位方式显示，而且以屏幕中心为原点。   
+当前屏幕中心的座标记为 `(0,0)`，左上角的 x 与 y 均为负值，右下角 x、y 均为正值。
+
+场景页的适用场合包括：HTML5 游戏中的场景，单页应用（Single Page Application，SPA）中的浮层界面，类 PPT 的胶片页等。
+
+#### 各子节点的层叠顺序
+
+场景页中的构件，`style.zIndex` 取值范围为 `-999 ~ 999`，如果取值 `-999` 或 `-998`，表示它被当前 ScenePage 用作底层背景。另外，在可视设计器中，`zIndex` 为 `-999` 的节点禁止纳入多选，作为最底层的背景构件，不能与其它同层节点一起被实施批量操作（如拷贝、粘贴、批删等）。
+
+#### 创建 ScenePage 及其下子构件
+
+一个简单的例子：
+
+``` html
+  <div $=ScenePage>
+    <div $=Div left='{0}' top='{0}'>Hello, world!</div>
+  </div>
+```
+
+ScenePage 总按屏幕中心进行对齐的，其下子节点用 `left` 与 `top` 指定它的左上角座标，`(0,0)` 是屏幕中心，`(-0.2,-100)` 表示 x 为 `-20%`，y 为 `-100` 像素，`(-0.5, -0.5)` 是屏幕左上角位置，`(0.5, 0.5)` 则是屏幕右下角。
+
+本例 `"Hello, world!"` 的左上角位于屏幕中心。
+
+ScenePage 下的成员虽用 absolute 定位，但各成员的内容仍按原规则布局。比如，ScenePage 下放置一个 Panel，该  Panel 的内容仍是 flex 布局。见下面例子（参见样例 demo13）。
+
+``` html
+  <div $=ScenePage>
+    <div $=Panel left='{-100}' top='{-50}' width='{200}' height='{100}'>
+      <div $=Panel width='{0.2}' sty__='background-color:#eee'></div>
+      <div $=SplitDiv></div>
+      <div $=Panel width='{-1}' sty__='background-color:#eee'></div>
+    </div>
+  </div>
+```
+
+借助 ScenePage 动态切入显示的特性，我们可以将单页应用切割成若干无关联的场景页，用到了就切换进来。使用多个 ScenePage 页，在各 ScenePage 下放置各式面板，此类面板的界面设计与在根节点下放置 flex 布局的面板是等效的。
+
+#### <a name="hash_jmp"></a>切换场景页
+
+Shadow Widget 常用 URL 参数控制页切换，比如下面两行分别用来显示第一个与第二个场景页。
+
+``` js
+  http://localhost:3000/demo13/#0
+  http://localhost:3000/demo13/#1
+```
+
+所有场景页都被系统按定义先后顺序，排列成一个数组，在 URL 中用参数 `#0, #1, ...` 依次指示各页。编程中，若想动态切换到某指定页，可用如下语句：
+
+``` js
+window.location.hash = '#1';
+```
+
+因为产品设计中场景页经常要增删，各页序号随之变化，为避免页面切换受干扰，我们可用 `name` 属性标识场景页。比如，第一个与第二个场景分别设置 `name` 为 `"first_pg", "second_pg"`，跳转到这两页可改用 `"#first_pg"` 与 `"#second_pg"` 表达。
+
+#### 使用 `utils.pageCtrl` 接口
+
+如果使用了 ScenePage 构件，网页初始化时系统会自动在界面左边与右边各加一个边栏，点击边栏可以向前或向后翻页，同时，系统还自动注册一个 `utils.pageCtrl` 接口，用于编程时切换场景页，并提供左右边栏的样式定制。
+
+pageCtrl 主要接口如下：
+
+1. `keys`，array 类型数据，罗列各 ScenePage 的 key 值字串   
+前面举例的 `#0, #1` 所用索引值就对应于这个 array 中各成员的序号。该 array 数据由系统自动生成，开发者应按只读方式使用本属性。
+
+2. `gotoPage(page, callback)`，跳转到指定的场景页   
+传入首参数为序号或场景页名称，次参数是跳转后供回调的函数，可缺省，callback 格式为 `callback(sRetHash)`，成功跳转时 `sRetHash` 为跳转路径，否则为空字串。
+
+3. `setDisplay(config)`，用于设置左右边栏的显示样式   
+比如：`utils.pageCtrl.setDisplay({leftCtrlWidth:0,rightCtrlWidth:0})` 将隐藏左右边栏。
+
+有关 pageCtrl 更详细规格请参考 [“API 手册” 中相关章节](#4.2.2.)。
+
+#### 把 ScenePage 用作模板
+
+由于 ScenePage 很适应可视化界面开发，拖入一个样板来创建构件，然后选中它并修改某些属性，操作起来很方便，所以，实践中我们常将 ScenePage 用作模板。
+
+给某个 ScenePage 的 `props.noShow` 设为 `'1'`，该 ScenePage 就改用作模板了，其下各构件便可按 [“节点引用”](#2.2.2.) 方式重用了，请参考样例 demo13。
+
+``` html
+01 <div $=ScenePage name='third_pg'>
+02   <div $=Div left='{-0.5}' top='{-0.5}'>
+03     <div $=Div>It is third page.</div>
+04     <div $=P>&nbsp;</div>
+~~     <div $='.body.temp.msg'></div>
+06   </div>
+07 </div>
+08 
+~~ <div $=ScenePage key='temp' no-show='1'>
+~~   <div $=Div key='msg' left='{-0.5}' top='{-0.5}'>It is defined in template ScenePage (.body.temp)</div>
+~~ </div>
+```
+
+当然，设置 `props.noShow='1'` 后的场景页不再显示到界面（但在可视设计器中还显示），它还不会被 `utils.pageCtrl.keys` 记录，所以不能跳转到已用作模板的 ScenePage。
+
+&nbsp;

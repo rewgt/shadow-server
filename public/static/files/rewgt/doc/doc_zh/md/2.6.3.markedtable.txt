@@ -1,0 +1,28 @@
+2.6.3 MarkedTable
+---------------
+
+&nbsp;
+
+#### 用 MarkedTable 描述表格
+
+`MarkedTable` 从 `MarkedDiv` 继承而来，它适合用来描述一张表格。比如：
+
+<div $='.rewgt.ui_demo' src='md/code/2_6_3_a.txt' input-height='{230}'></div>
+
+这个例子定义一个 `2 * 2` 的表格，Markdown 文本定义出的每个 `block` 段，自动逐一纳入各个单元格，表格换行用 `"---"` 所描述的 `<hr>` 作标记，比如上面表格，有一次换行，共定义了两行表格内容。
+
+说明：如果想把多行文本纳入同一个单元格，不妨使用 “软换行”，Markdown 格式规定：一行若以两个以上空格结尾，表示本行与下一行将串接（使用 `<br>` 换行，而不是 `block` 块换段）。如果想把多个 `block` 段纳入到同一单元格中，可以嵌套使用 `MarkedDiv`，比如：
+
+<div $='.rewgt.ui_demo' src='md/code/2_6_3_b.txt' input-height='{270}'></div>
+
+#### 指定单元格属性
+
+`MarkedTable` 中若用 `MarkedDiv` 或 `MarkedTable` 表达一个单元格时，单元节点还可附加定义 `col-span, row-span, td-style` 属性，这三项分别对应于 `<td>` 的 `rowspan, colspan, style` 属性。
+
+举例如下：
+
+<div $='.rewgt.ui_demo' src='md/code/2_6_3_c.txt' input-height='{280}'></div>
+
+如果想让当前单元格向右跨越一个单元格（即横向合并两个单元格），在转义标签中用 `col-span='2'` 指明即可。
+
+&nbsp;

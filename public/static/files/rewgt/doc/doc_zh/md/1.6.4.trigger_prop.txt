@@ -1,0 +1,56 @@
+1.6.4 trigger 触发器
+---------------
+
+&nbsp;
+
+#### `trigger` 方式发起数据驱动
+
+在圈层化的单向数据流中，我们常用两种方式在源头发起数据驱动，其一是用 `comp.duals.attr = value` 赋值语句，其二是 `trigger` 方式。
+
+我们常用 `utils.fireTrigger()` 触发特定动作，比如，先定义如下界面，在 `'.body.top.p'` 节点设有 `duals.data` 属性。
+
+``` html
+  <div $=Panel key='top'>
+    <div $=P key='p' dual-data='{[]}'>
+      <span $=Button key='btn'>Test</span>
+    </div>
+  </div>
+```
+
+然后用如下代码驱动数据变更：
+
+``` js
+01 var btnComp = W.W('.body.top.p.btn').component;
+02 utils.fireTrigger(btnComp,['//',{$push:['title 1']}]);
+```
+
+第 2 行语句的含义为，在 `btnComp` 节点发起一项动作，动作定义为 `['//',{$push:['title 1']}]`。
+
+**动作定义的格式是 `[sPath,modifier,attr]`**，其中，`sPath` 以绝对路径或相对路径指定目标节点，`modifier` 是 `ex.update(data,modifier)` 中的 `modifier` 参数，`attr` 指出对目标节点的哪个双源属性作更改，当 `attr` 缺省未指定时，它自动用 `"data"` 属性。
+
+上面第 2 行分两步执行：
+1. 由 `btnComp` 按 `'//'` 相对路径找到目标节点，即 `'.body.top.p'` 节点
+2. 对目标节点（`targComp`）的 `duals[attr]` 发起 `ex.update()` 调用，`attr` 缺省取 `'data'` 值，等效于执行：   
+`targComp.duals.data = ex.update(targComp.duals.data,{$push:['title 1']});`
+
+#### 一次触发多个动作
+
+调用  `utils.fireTrigger()` 时，即可传入单项动作定义，也可传入动作的 array 列表，表示一次发起多个动作。比如：
+
+``` js
+01 utils.fireTrigger( btnComp, [
+~~   ['//',{$push:['title 1','title 2']}],
+~~   ['',{$set:'demo'},'html.']
+04 ]);
+```
+
+动作定义的 `sPath` 若是空串，表示目标节点为当前节点自身，所以，第 2 个动作的含义是：   
+&nbsp;&nbsp; `btnComp.duals['html.'] = ex.update(btnComp.duals['html.'],{$set:'demo'});`
+
+#### trigger 触发器
+
+上面演示涉及 “动作定义” 与 “发起动作”，将两者结合起来，就是 “trigger 触发器” 的概念。
+
+trigger 触发器功能很强，上面介绍的是基础功能。事实上，关于 “动作定义”，除了上述 `update` 更新，还能弹出浮窗、选中构件；关于 “发起动作”，除了用 `utils.fireTrigger()` 触发，还有其它几种发起方式，后续章节将逐步介绍。
+
+&nbsp;

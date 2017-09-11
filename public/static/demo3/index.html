@@ -16,37 +16,61 @@
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
 <div $=BodyPanel key='body'>
-  <div $=Panel width='{0.9999}' height='{0.9999}'>
-    <div $=Panel klass='col-reverse' sty__='background-color:#eee' width='{120}' height='{0.9999}'>
-      <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>A</div></div>
-      <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>B</div></div>
-      <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>C</div></div>
-    </div>
-    <div $=Panel klass='row-reverse' sty__='background-color:#e4e4e4' width='{-1}' height='{0.9999}'>
-      <div $=Panel klass='row-reverse' sty__='border:1px solid #888' height='{120}' border-width='{[1,2,1,2]}'>
-        <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>1</div></div>
-        <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>2</div></div>
-        <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>3</div></div>
-      </div>
-      <div $=Panel klass='reverse-row' sty__='border:1px solid #888' height='{120}' border-width='{[1,2,1,2]}'>
-        <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>1</div></div>
-        <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>2</div></div>
-        <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>3</div></div>
-      </div>
-      <div $=Panel klass='row-reverse nowrap-default-wrap_reverse' sty__='border:1px solid #888' height='{120}' border-width='{[1,2,1,2]}'>
-        <div $=Panel width='{100}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>1</div></div>
-        <div $=Panel width='{-0.5}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>2</div></div>
-        <div $=Panel width='{-0.5}' height='{100}' sty__='border:1px solid red' border-width='{1}'><div $=P>3</div></div>
-      </div>
-    </div>
-  </div>  
+  <div $=Panel key='top' klass='auto-hidden-visible'>
+    <div $=P key='p'><span $=Button key='btn'>Click me</span></div>
+  </div>
 </div>
 </div>
 <!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
+
+var btnComp = null;
+var btnNode = null;
+
+main['.body.top.p.btn'] = {
+  getDefaultProps: function() {
+    var props = T.Button.getDefaultProps();
+    props.title = 'just for test';
+    return props;
+  },
+  
+  getInitialState: function() {
+    var state = this._getInitialState(this);
+    btnComp = this;
+    return state;
+  },
+  
+  componentDidMount: function() {
+    this._componentDidMount(this);
+    btnNode = this.getHtmlNode(); // same to ReactDOM.findDOMNode(this)
+  },
+  
+  componentWillUnmount: function() {
+    btnNode = null;
+    btnComp = null;
+    this._componentWillUnmount(this);
+  },
+  
+  $onClick: function(event) {
+    alert(btnNode.nodeName + ': ' + this.widget.getPath());
+  },
+};
+
+});
+</script>
+
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

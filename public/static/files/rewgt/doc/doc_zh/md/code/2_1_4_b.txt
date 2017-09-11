@@ -1,0 +1,4 @@
+<div $=P key='p' $for=''>
+  <span $=Textarea key='input' value='demo' sty__='width:240px; height:80px'></span>
+  <span $=Span $html='" Input length: " + duals("input").value.length'></span>
+</div>

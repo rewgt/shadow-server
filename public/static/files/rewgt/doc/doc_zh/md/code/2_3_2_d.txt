@@ -1,0 +1,6 @@
+<div $=Panel key='row' width='{500}' klass='row-reverse nowrap-default-wrap_reverse'
+     $for='item in ["#eee","#ddd","#ccc","#bbb","#aaa","#999"]' sty__='outline:1px dotted red'>
+  <div $=Panel $key='"a" + index' width='{100}' height='{40}' 
+     margin='{4}' $style='{backgroundColor:item}'>
+  </div>
+</div>

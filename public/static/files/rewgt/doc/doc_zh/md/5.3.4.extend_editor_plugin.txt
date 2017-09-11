@@ -48,7 +48,7 @@
 任务序号用于校验，用来确保上下文相关的修改操作才能生效。
 3. 系统根据 `toolConfig` 中的配置，如 `"halfScreen, noMove, left, top, width, height"` 等弹出弹窗，等待弹窗打开 `toolConfig.url` 指定的网页。
 4. 弹窗中的网页读入后，弹窗向父窗发送这个请求 `{method:'onDialogLoad',param:[]}`
-5. 父窗收到请求后，查询当前被编辑网页用到哪些共享的 css 文件（即找出 `<linker shared="true">` 节点，参见 [“用户自定义 CSS 文件”](#2.7.6.!user_link)），得到变量 `cssList`
+5. 父窗收到请求后，查询当前被编辑网页用到哪些共享的 css 文件（即找出 `<linker shared="true">` 节点，参见 [“用户扩展 CSS 文件”](#2.7.2.!user_link)），得到变量 `cssList`
 6. 父窗向弹窗发送命令 `{method:'init',param:[taskId,inValue,cssList]}`
 7. 弹窗收到命令后，把待编辑项目（数据在 `inValue` 中）展示出来，必要时需把记录在 `cssList` 中的 CSS 文件通过添加 `<link>` 节点逐一导入进来，因为展示被编辑的内容可能需要相关 CSS 定义
 

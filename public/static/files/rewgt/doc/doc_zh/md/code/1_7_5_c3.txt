@@ -1,0 +1,5 @@
+<div $=Div key='div' $for='' dual-data='{[{"name":"wayne","age":32},{"name":"george","age":40},{"name":"peter","age":35}]}'>
+  <div $=Ul key='list' $for='item in ex.map(duals.data,"$item.name")'>
+    <div $=Li $key='"a"+index' $html='"name: " + item'></div>
+  </div>
+</div>

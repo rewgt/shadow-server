@@ -1,139 +1,192 @@
-3.4.3 附加定义双源 setter
+3.4.3 动态安装子节点
 ------------------
 
 &nbsp;
 
-#### 传递双源属性 `id__` 的 setter 函数
+由于 Shadow Widget 的 `render()` 函数封装了不少复杂过程，包括双源属性数据驱动、`$for, $if, $else` 等解析、原生 React 节点插入（下文即将介绍）等。`render` 函数不再适合开放给用户定制，本节将介绍原先在 `render` 中组装子节点的替代方法。
 
-除了事件函数可在 JSX 表达式中传递外，Shadow Widget 还支持将一个 setter 函数传递给 `$id__` 属性，系统将自动调用 `defineDual('id__',setter)` 注册该 setter 函数。
+#### 用 idSetter 函数组装子成员节点
+
+假设我们要开发这么一种界面：分析当前用户有没登陆，若已登陆显示一条欢迎信息，若未登陆，则提供账号与密码输入框界面，以便用户输入信息后，击回车开始登陆。
+
+已定义如下空面板 `login_panel`，它的内容通过编程动态安装。
+
+``` html
+<div $=Panel key='top'>
+  <div $=Panel key='login_panel' height='{null}' $id__='loginPanel'></div>
+</div>
+```
+
+编程如下：
+
+``` bash
+01 var idSetter = W.$idSetter, t = utils.getWTC('*');
+02 
+03 idSetter.loginPanel = function(value,oldValue) {
+04   if (value <= 2) {
+05     if (value == 1) {  // init process
+06       this.defineDual('hasLogin',null,'');  // default value is ''
+07     }
+08     return;
+09   }
+10   
+11   if (this.state.hasLogin)
+~~     utils.setChildren(this, [ <t.P key='p'>Welcome, you have logined</t.P> ]);
+13   else
+~~     utils.setChildren(this, [ <t.P key='p'><t.Input key='name' type='text' placeholder='Account'/><t.Input key='psw' type='password'/></t.P> ]);
+15 };
+16 
+17 main.push( function() {
+18   var loginComp = W.W('.body.top.login_panel').component;
+19   setTimeout( function() {
+20     loginComp.duals.hasLogin = '1';
+21   },8000);
+22 });
+```
+
+函数 `utils.setChildren(comp,children,callback)` 用于给指定节点 `comp` 安装由 `children` 参数指明的子节点，`callback` 用于安装后的回调，该回调函数不带参数。参数 `children` 要求用 array 数组表达各子成员 Element，各 Element 支持如下几种形式：
+
+1. 用 JSX 描述的节点，如：`<MyClass>{desc}</MyClass>`
+2. 用 json-x 描述的节点，如：`['P',{'html.':'test'}]`
+3. React Element，如：`utils.loadElement(['P',{'html.':'test'}])`
+4. 字串，系统自动解析为 `P` 或 `Span` 节点
+
+在 idSetter 函数中调用 `utils.setChildren()` 动态安装子节点，是 Shadow Widget 的惯常用法。如 [上一节](#3.4.2.!render) 介绍，idSetter 函数中除 `value <= 2` 条件段之外的代码，与 `render()` 函数中代码等效。由于 idSetter 不通过返回值指示界面如何渲染，我们常用如下方式影响 UI 表现：
+
+1. 通过修改 `this.state.attr` 的值，影响本节点的属性输出，包括借助对 `this.duals.attr` 赋值导致 `this.state.attr` 值更改。
+2. 通过 `utils.setChildren()` 动态安装子节点，单层或多层子节点均可。
+
+需注意，**动态安装的各层子节点，如果直属于某 WTC 构件，必须指定 key 值**。否则，各次 render 刷新时，系统无法确定该在哪个节点让更改生效。
+
+#### 动态变换标签名
+
+在 idSetter 函数中，可以根据条件动态指定 `'tagName.'` 取值，来改换渲染输出的 HTML 标签。比如：
+
+``` js
+function id__(value,oldValue) {
+  // ...
+  this.state['tagName.'] = this.isOrderList? 'ol': 'ul';
+  // ...
+}
+```
+
+#### 动态插入原生 React 节点
+
+Shadow Widget 还支持如下规格的 `setChildren` 调用：
+
+``` js
+utils.setChildren(comp,children,insertEle,callback)
+```
+
+其中，`insertEle` 是待插入节点的 Element 定义，既可以是单节点，也可以是用 array 数组表达的多个 Element 节点，单节点或多节点将直接挂到 `comp` 构件下。待插入节点可以是单层，也可以多层，各层中如果某节点 `key` 为 `'foo'`，表明它在当前选择路径上，经此 key 值逐层指示，系统找到最深那层的 “选中节点”，之后，`comp` 原定义的各子节点，都自动改挂到最深选中的节点。也就是说，参数 `insertEle` 指明若干 “待插入节点”，`comp` 原定的子节点将改挂到 “待插入节点” 中某个 “末梢节点”，而 “末梢节点” 经由各层的 `key='foo'` 指示查得。如果某层没有 `key='foo'` 节点，系统自动取该层最后一个节点。
+
+注意：**由 `insertEle` 指示的 “待插入节点” 要求是原生 React 节点**，不能是 Shadow Widget 构件，因为这些节点插入后，并不挂入 W 树。尽管 `comp` 原定的子节点位置改挂了，在 W 树中之些子节点的父构件仍是 `comp`，即，从 W 树上看，各插入节点 `insertEle` 被略过。
+
+举个例子：
+
+``` bash
+01 function id__(value,oldValue) {
+02   if (value <= 2) {
+03     // ...
+04     return;
+05   }
+06   
+07   var bChild = [ ];   // such as [ <t.P key='a0'>demo</t.P> , ... ] 
+08   // setup children ...
+09   
+10   var insertEle = null;
+11   if (this.byList) {
+12     var sCls = utils.klassNames('by-list', this.state.active && 'active');
+~~     insertEle = [ <div key='foo' klass={sCls}/> , <hr/> ];
+14   }
+~~   utils.setChildren(this,bChild,insertEle);
+16 }
+```
+
+说明：
+1. 如果 `utils.setChildren(comp,children,insertEle,callback)` 传入的 `insertEle` 为 `null`，表示不再插入原生 React 节点。
+2. 要求 `insertEle` 是 React Element，如果想传 json-x 描述的界面，须用 `utils.loadElement(jsonX)` 转化成 Element。
+
+#### <a name="once_child"></a>一次性组装子节点
+
+因为 Shadow Widget 在 `duals.attr` 提供控制与数据驱动，相比原生 React 编程，控制粒度更细，所以，它不太依赖在 `render()` 中用一段代码动态组装子节点。许多时候只需提供几个 `duals.attr` 供外部读写就够了，动态组装子节点只在构件初始化时做一次。
 
 比如：
 
 ``` js
-var t = utils.getWTC('*');
-
-function onLoad() {  
-  function id__(value,oldValue) {
-    console.log('in setter:', value, oldValue, this.duals.keyid);
-  },
-  
-  var body = W.W('.body').component;
-  body.setChild(
-    <t.Panel key='top' height={null}>
-      <t.P>
-        <t.Button key='btn' $id__={id__}>test</t.Button>
-      </t.P>
-    </t.Panel>
-  );
-}
+01 function id__(value,oldValue) {
+02   if (oldValue == 1) {
+03     var bChild = [ ];   // such as [ <t.P key='a0'>demo</t.P> , ... ] 
+04     // setup children ...
+05     
+~~     utils.setChildren(this,bChild);
+07   }
+08   
+09   if (value <= 2) {
+10     // ...
+11     return;
+12   }
+13 }
 ```
 
-同样，这个传入的 setter 函数自动捆绑目标节点，在 setter 函数中 `this` 指示 `id__` 属性所在的目标节点。
+在一个构件的生存周期中，idSetter 的 `oldValue == 1` 初始化段代码只执行一次，所以，上面安装子节点只做一次，不像前面例子，每次 render 渲染都重组子节点。
 
-#### `id__` 的特殊值
+选择一次性组装子节点，还是每次 render 都组装，要视实际需要而定。不过，在同一 idSetter 中这两项不宜同时采用。
 
-`duals.id__` 是特殊的双源属性，对它赋值可以触发构件刷新，即再次 `render()` 调用，但赋给它的值宜用 `utils.identicalId()` 取得，因为每次都这么取值才保证 ID 值是唯一的。
+#### 两种动态组装的选择
 
-调用 `utils.identicalId()` 返回大于 2 的整数值，每次调用所得的值都会累加 1。 小于等于 2 的值被 `duals.id__` 保留，有特殊含义：
+上面介绍的动态组装都是通过编程实现的，属于函数式风格，而前文 [“MJI 解释器”](#1.7.) 介绍的用 `$for, $if, $elif, $else` 指令实现组装，属于指令式风格，这两者不宜在相邻节点混杂共用。尽管这两种风格的设计都能达到目标，前者动用编程手段，表达力强些，后者偏向静态，受规格约束更明确些。但这两者思维方式差别较大，并存容易混乱，费力不讨好。
 
-1. `id__` 从 0 切换到 1，表示当前节点正在初始化（在首次 `render()` 之前触发）   
-节点 “刚创建” 时的取值 0，也就是 `getInitialState()` 调用结束时，值 1 表示 “初始态”。
-2. `id__` 从 1 切换到其它值，表示首次刷新（在首次 `render()` 中触发）
-3. `id__` 从其它值切换到 2，表示节点刚挂载（在 `componentDidMount()` 中触发）   
-值 2 表示 “挂载态”，一个节点的 `id__` 不会从 1 直接切换到 2，而是从 1 切到其它值，再从其它值切到 2，因为首次 `render()` 调用发生在 `componentDidMount()` 之前。
-4. `id__` 从任意值切换到 0，表示节点将要卸载（在 `componentWillUnmount()` 中触发）   
-理解为回到 “刚创建” 时的状态，这也是 “未挂载” 的状态。
+所以，**针对小块界面动态组装，应从函数式与指令式两种风格中选其一，不要混用**。当然，用 `$for=''` 或 `$$for=''` 开启一个 callspace 是例外，不算混用，因为它并没有动态组装子节点，只是让它下层的可计算表达式可用。
 
-所以，`duals.id__` 的 setter 函数常这么定义：
+事实上，在 idSetter 动态组装子节点时，开启一个 callspace，用可计算属性传递数据还算不错的做法。因为节点创建与等待就绪有先有后，数据引用的依赖性受动态挂载、卸载影响，用 “可计算表达式自动同步数据” 能省掉不少麻烦。
+
+举一个简单例子：
 
 ``` js
-  function id__(value,oldValue) {
-    if (oldValue == 1) {  // init process
-      console.log('in first render()');
-    }
-    
-    if (value <= 2) {    // no need prepare render content
-      if (value == 1) {  // init process
-        // ...
-      }
-      else if (value == 2) {  // mount process
-        // ...
-      }
-      else if (value == 0) {  // unmount process
-        // ...
-      }
-      return;
-    }
-    
-    console.log('in other render()');
-  }
+01 idSetter['test.info'] = function(value,oldValue,attr) {
+02   if (oldValue == 1) {
+03     var ele = utils.loadElement( ['P', { key:'p',
+04       $html: 'duals.data.name + ": " + duals.data.age',
+~~       $name: 'duals.data.name',
+06       $id__: function(value,oldValue) {
+07         if (oldValue == 1) {
+~~           this.listen('name', function(value,oldValue) {
+~~             console.log('name changed:',value);
+~~           });
+11         }
+12       },
+13     }]);
+14     utils.setChildren(this,[ele]);
+15   }
+16 };
+17 
+18 /*
+19 utils.bindMountData( {
+20   'test.info': {
+21     data: {name:'geroge',age:20},
+22   },
+23 }); */
+24 
+25 main.$onLoad.push( function() {
+26   var bodyComp = W.body.component;
+~~   var ele = utils.loadElement( ['Div',{ key:'div', $for:'',
+~~     'dual-data':{name:'untitled',age:0}, $id__:'test.info',
+~~   }]);
+30   bodyComp.setChild(ele);
+31 });
 ```
 
-当 `valule <= 2` 时，`id__` 的 setter 函数并不用来组织 render 内容（**所以上面代码用 `return` 返回**），具体来说，在上述 `value == 1` 条件段编写代码，等效于在 `getInitialState()` 函数末尾写代码，`value == 2` 条件段等效于在 `componentDidMount()` 中编码，`value == 0` 条件段等效于在 `componentWillUnmount()` 中编码。当 `value` 值大于 2 时，等效于在 `render()` 中编码。
+这个例子在动态创建的子节点中，用 `$name` 表达式自动从上层 `duals.data` 同步数据，数据在 `duals.name` 更新，侦听该 `duals.name` 可驱动预定动作，如上面 `08~10` 行所示。
 
-不难发现，传给 `$id__` 的是一个超强函数，它的功能等效于一个投影定义，在 `getInitialState, componentDidMount, componentWillUnmount, render` 中编码都能等价实现。为方便叙述，后文将这种 setter 函数称为 **idSetter 函数**，该函数所提供的等效于投影定义的功能，称作 **idSetter 定义**。现在，我有 3 种对等的定义体了：WTC 定义、投影定义、idSetter 定义。
+从上面例子不难看出，有了更细粒度，在 `duals.attr` 层面的驱动控制，依赖于过程中动态组装子节点的必要性大大降低。反映在代码上，本来要由 `render()` 每次调用都实施组装的过程，简化为在 `oldValue == 1` 初始化段只安装一次，界面如何变化由各层的 `duals.attr` 变更驱动即可。
 
-注意：
-
-1. 节点的 `render` 函数首次被调时，部分 `props.attr` 传入属性自动注册为双源属性   
-包括：标签的标准属性，`data-*, aria-*, duals-*`，可计算属性等，参见 [“定义双源属性”](#2.2.2.)。
-
-2. 本例中 `value == 1` 与 `oldValue == 1` 两个条件段内的代码用法有差异。   
-前者被执行的时机是：`getInitialState()` 调用刚结束，自动注册的双源属性尚未定义，`props.attr` 尚未赋给同名双源属性，该段代码近似于在 `getInitialState()` 中编程，参见 [“重要设计原则”](#2.7.5.!import_rule)。后者则在：本节点所有双源属性已定义（包括调用 `defineDual()` 注册的与系统自动注册的），而且传入的 `props.attr` 均已赋值给同名双源属性，比如 `props.width` 已赋给 `duals.width`。   
-这两个条件段均可用来编写初始化代码，主要差别是：**前者通常只用来注册回调函数（如追加双源属性定义、调用 `setEvent()` 等），后者则是所有双源属性就绪后的初始化**。前者由 `duals.id__ = 1` 语句触发，后者由 `duals.id__ = N` 触发，在这个 `id__` 的 setter 函数中，当前次赋值 `value=1`，紧接着下次赋值，`value` 转为 `oldValue`，`oldValue == 1` 表明这两次调用之间没插入其它 “对 `duals.id__` 赋值” 的动作，也就是说，两者之间没有其它 `render()` 插入。
-
-给 `duals.id__` 定义 setter 函数有两种方式，其一是用上面介绍的 `props.$id__`，其二是调用 `defineDual('id__',setter)` 定义（所有 WTC 类的根基类就按该方式缺省定义了一个），这两种方式是等效的。
-
-请注意，idSetter 函数在 `value <= 2` 时，并不由 `render()` 调用发起，也即：当前不在渲染中。
-
-#### 用 idSetter 追加双源定义
-
-如下 idSetter 函数，在 `value == 1` 条件段注册 `duals.test` 双源属性，在 `oldValue == 1` 条件段编写其它初始化代码。
+请参考样例 demo20，不妨用浏览器试验一下，在控制台运行如下语句改变数据源：
 
 ``` js
-  function id__(value,oldValue) {
-    if (oldValue == 1) {  // init process
-      console.log('value of duals.test',this.duals.test);
-      // ...
-    }
-    
-    if (value <= 2) {    // no need prepare render content
-      if (value == 1) {  // init process
-        this.defineDual('test', function(value,oldValue) {
-          // ...
-        },0);
-        
-        this.setEvent( { $onMouseOver: function(ev) {
-            // ...
-          }, $onMouseOut: function(ev) {
-            // ...
-          }
-        });
-      }
-      else if (value == 2) {  // mount process
-        console.log('componentDidMount() just called');
-      }
-      else if (value == 0) {  // unmount process
-        console.log('componentWillUnmount() just called');
-      }
-      return;
-    }
-  }
+W.body.div.component.duals.data = {name:'geroge',age:20}
 ```
 
-这里定义 `duals.test` 指定原始值为 0，该值直接设到 `state.test` 中的，并不调用 `duals.test` 的 setter 函数，如果我们有 `props.test` 值传入，首次 `render()` 时它将赋给 `duals.test`（会调用 setter 函数）。
-
-#### 用可计算属性传递节点间数据
-
-编程中，常在一个节点集中获得数据，可能通过向服务器发送请求获得返回数据，也可能在该节点对外提供服务，封装其成员让外界不去关心。这时，集成的数据被各级子成员引用，就涉及数据如何在节点之间传递的问题。
-
-由于各节点的创建、挂载、卸载的时间有先后，给数据传递带来麻烦，比如子成员还没就绪时，如何传数据给它，数据传递依赖的某个节点卸载了（但未删除）如何处理。最好的传递方式是借助可计算属性，比如 `$data='duals(-1).data.member'`，因为：
-
-1. 可计算属性在它所在节点首次 `render()` 时会对可计算表达式求值，这是主动同步。
-2. 节点就绪后，它的可计算表达式由侦听机制自动更新，这是被动同步。
-3. 节点被卸载，或程序中调用 `unlisten` 或 `undefineDual` 时，数据同步关系是自动维护的
-4. 可计算表达式功能强大，数据可被整体引用，也可局部引用，数据还可组装，动态结合各种条件。
-
-如果不借助可计算表达式，自行编写代码组织数据引用，容易把简单事情弄复杂了。
+或者，打开上面 `18~23` 注释行，运行看看会有什么信息输出。
 
 &nbsp;

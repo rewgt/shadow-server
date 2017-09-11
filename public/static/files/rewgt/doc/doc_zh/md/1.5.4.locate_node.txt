@@ -1,0 +1,102 @@
+1.5.4 节点查找
+------------
+
+&nbsp;
+
+Shadow Widget 提供便利的节点定位功能，可以按绝对路径或相对路径，在 W 树查找特定节点。
+
+#### 用 “构件类” 接口定位节点
+
+定义如下界面（后面数项举例以这个界面为背景）：
+
+``` html
+  <div $=BodyPanel key='body'>
+    <div $=Panel key='top'>
+      <div $=P key='p' width='{0.9999}'>
+        <span $=Textarea key='input' sty__='width:300px; height:100px'></span>
+      </div>
+      <div $=P key='p2' width='{0.9999}'>
+        <span $=Span key='info'>state = </span>
+        <span $=Span key='state'>initialized</span>
+      </div>
+    </div>
+  </div>
+```
+
+如下用来查找指定节点：
+
+``` js
+var pWdgt = W.W(".body.top.p"), pComp = pWdgt && pWdgt.component;
+console.log(pWdgt.getPath(), pComp.duals.keyid);  // .body.top.p
+
+var topWdgt = pWdgt.parent, topComp = topWdgt && topWdgt.component;
+console.log(topWdgt && topWdgt.getPath());  // .body.top
+
+var stateWdgt = topWdgt.W('p2.state'), stateComp = stateWdgt && stateWdgt.component;
+console.log(stateWdgt && stateWdgt.getPath());  // .body.top.p2.state
+```
+
+这几行代码演示了借助 “构件类” 的方法（`W()`）与成员定义（`parent`）实施查找。
+
+#### 用 `utils.eachComponent` 遍历子节点
+
+``` js
+var pComp = W.W('.body.top.p').component;
+utils.eachComponent(pComp, function(childComp) {
+  console.log('find:', childComp.duals.keyid);
+});
+```
+
+`utils.eachComponent(comp,callback)` 用于遍历一层子节点，如果 `callback` 参数缺省，则立即返回各子节点的 array 列表。
+
+``` js
+var children = utils.eachComponent(pComp);
+```
+
+#### 用 `componentOf` 定位节点
+
+在任意节点用绝对路径查找：
+
+``` js
+var pComp = W.W('.body.top.p').component;
+var topComp = pComp.componentOf('.body.top');
+var stateComp = pComp.componentOf('.body.top.p2.state');
+```
+
+路径字串 `sPath` 若以 `'.'` 开头表示绝对路径，否则是相对路径，`componentOf(sPath)` 以当前节点为基准进行查找。
+
+``` js
+var topComp = W.W('.body.top').component;
+var stateComp = topComp.componentOf('p2.state');
+```
+
+定位父节点与兄弟节点：
+
+``` js
+var pComp = W.W('.body.top.p').component;
+var topComp = pComp.componentOf('//');
+var p2Comp = pComp.componentOf('//p2');
+```
+
+路径字串 `sPath` 若以 `'//'` 开头，表示向上取父节点，连续多个 `'//'` 表示向上连续取多级，`'//p2'` 表示取父节点下 `p2` 节点，也就是取 key 为 `'p2'` 的兄弟节点。
+
+路径字串 `sPath` 除了上述规格，还支持用 `'./', '../', '../../'` 等定位 “段路径”，段路径是指由导航面板封装的一组构件路径，详情将在 “基础篇” 介绍。
+
+#### `parentOf` 与 `childOf`
+
+``` js
+var pComp = W.W('.body.top.p').component;
+var topComp = pComp.parentOf();
+```
+
+`comp.parentOf(noVirtual,sRole,maxScan)` 用来定位父节点，参数 `noVirtual` 指示是否跳过虚节点，值为 `true` 表示跳过，参数 `sRole` 增加 `duals.role === sRole` 条件检查，如果条件不匹配就跳过，参数 `maxScan` 指示最多向上查询多少个节点。这 3 个参数均可缺省，都缺省时 `comp.parentOf()` 与 `comp.componentOf('//')` 等效。
+
+`comp.childOf(sKey,noVirtual)` 用来定位子节点，`sKey` 指示待查找节点的 key 值，`noVirtual` 指示是否跳过虚节点，值为 `true` 表示跳过虚拟节点层，取其下层再查找。
+
+#### 其它定位节点的方法
+
+构件还支持用 `comp.prevSibling()` 与 `comp.nextSibling()` 查找前一兄弟节点与后一兄弟节点，如果没找到节点，就返回 `undefined` 值。
+
+React 的 `refs` 特性也能用来定位节点，但它必须预先指定 `refs` 子节点，还无法查询上级节点。因为它没有 `componentOf()` 用得方便，一般情况下，我们不用 `refs` 特性。
+
+&nbsp;

@@ -1,0 +1,77 @@
+1.4.5 可继承性与生存期
+------------------
+
+&nbsp;
+
+#### 双源 setter 的继承性
+
+WTC 类定义具有多层继承关系，上层 WTC 从基类继承而来，同一双源属性在继承链各层，可能要求提供不同的定制处理。比如，对于 `Input` 基类，输入任意文字都是合法的，当它被继承，在新派生类中用作有特别要求（比如要求是 EMail）的数据，就会附加特殊转换处理，或限定特定格式。
+
+也就是说，双源属性的 setter 函数要求具备可继承特性，它的 getter 函数则没有特别需求，固定从 `state.attr` 直接读值。
+
+比如，`T.Input_` 用作基类，继承它的投影类要用作 EMail 输入，基类中已有 `duals.value` 的 setter 函数定义，投影类要叠加一个新的 setter 处理。
+
+``` js
+01 main['.body.top.p.input'] = {
+02   getInitialState: function() {
+03     var state = this._getInitialState(this);
+~~     this.defineDual('value', function(value,oldValue) {
+05       if (!checkEmailText(value))
+06         this.invalidEmail = true;
+07     });
+08   },
+09 };
+```
+
+这时，新投影类实例的 `duals.value = value` 处理过程如下：
+
+1. 先调用最底层的 `this.state.value = value` 赋值
+2. 然后调用 Input 中 `duals.value` 的 setter 函数，传入参数 `value` 取 `state.value`
+3. 最后调用投影类中的  setter 函数，传入参数 `value` 取 `state.value`
+
+也即，最底层的 setter 函数最先被调用，逐层向上各级 setter 依次被调用。
+
+#### 借助 setter 函数校验数据
+
+针对同一 duals 属性，除在各级继承类可为它定义 setter 函数外，我们还可以在一个 WTC 类（或投影类）中，定义多次 setter 函数。
+
+比如：
+
+``` js
+01 main['.body.top.p.input'] = {
+02   getInitialState: function() {
+03     var state = this._getInitialState(this);
+~~     this.defineDual('minValue', function(value,oldValue) {
+~~       this.state.minValue = parseInt(value) || 0;
+~~     }).defineDual('minValue', function(value,oldValue) {
+06       // ...
+07     });
+08   },
+09 };
+```
+
+说明：由于 `comp.defineDual()` 调用返回值为 `comp` 自身，所以多个 `defineDual` 调用可串写，比如：`this.defineDual(attr1).defineDual(attr2,fn);`
+
+上面代码为 `duals.minValue` 定义了两个 setter 函数，先定义的先调用，第一个 setter 函数用于校验，确认赋给 `this.state.minValue` 的值是整数，第二个 `setter(value,oldValue)` 被调时，参数 `value` 是最新的 `this.state.minValue` 值，确保已是整数。
+
+说明：在用于校验的 setter 函数中，如果校验未通过，一般要用 `throw` 语句抛出一个 `Error` 异常。
+
+#### 侦听链生存期
+
+一个 duals 属性既可以被其它构件侦听，也可以被自己侦听，即，侦听的源与目标节点可以是同一个构件。
+
+由于建立侦听通常在两个构件进行，创建构件有先有后，为保证侦听时源节点已就绪，我们 **一般在 `componentDidMount()` 函数中调用 `listen()` 建立侦听关系**，而不在 `getInitialState()` 中登记。
+
+一个构件在缷载（即 unmount）时，会自动删除所有侦听其下 duals 属性的侦听项，也自动删除由本构件发起的，侦听其它源头节点的侦听项。
+
+除了自动维护时侦听项会被删除，程序运行中，我们还可调用 `sourComp.unlisten(attr)` 随时主动删除侦听项。
+
+注册一个双源属性要在首次 render 之前，**建立侦听与删除侦听则随时进行**，是动态的，前提只须被侦听的 duals 属性已注册。
+
+#### 双源属性的生存期
+
+双源属性并非在 `defineDual()` 调用时立即完成注册，而是在构件首次 render 时集中注册，也就是：首次 `render()` 调用时，注册 duals 先于其它代码被调用。这种设计一方面保证一个构件的所有 duals 属性，在每次 render 渲染中都可用，另一方面，也支持了 [“前置赋初值”](#1.4.1.!pre_assign) 特性。
+
+当一个构件 unmount 时，它的所有双源属性将自动失效，除了移除各相关侦听链，对其下 `duals.attr` 赋值，也不触发 setter 回调。
+
+&nbsp;

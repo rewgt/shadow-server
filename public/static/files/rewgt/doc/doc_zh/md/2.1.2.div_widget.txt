@@ -1,0 +1,156 @@
+2.1.2 分区构件
+-------------------
+
+&nbsp;
+
+#### Div 类构件与 P 类构件的区别
+
+HTML 标签 `<div>` 表达一种通用的分区或节（division/section），与之类似的还有 `article, section, header, footer, aside, nav, main`，这几项也是通用标签，只是附加了 HTML5 要求的特定语义，这些标签被 Shadow Widget 归入 Div 类。
+
+还有另一些 HTML 标签，像 `<p>, <ul>, <li>, <table>` 等，也像 `<div>` 那样表示一个 `block` 段，但它们不是通用标签，一方面，它们是专用的，像 `<p>` 表示文本段，`<ul>` 表示无序列表，另一方面，它常受上下文环境约束，比如 `"Ul > Li"`，`"Ol > Li"` ，`"Table > TBody"` 等须是固定搭配，不能乱用。这些标签被 Shadow Widget 归入 P 类。
+
+Shadow Widget 还更严格的定义 Div 类构件可包含 P 类构件，但反过来不行，另外，P 类构件可包含 Span 类（即行内构件），而 **Div 类构件不能直接包含 Span 类，它只能包含 Div 类或 P 类**。通俗的理解，Div 类与 P 类共同构成 “非行内” 构件，P 类表达 “特定用途的段落”，Div 类则用作 P 类的容器，一个或多个 P 类构件，要用 Div 类构件包装。
+
+因 Div 类构件常用在 Panel 类构件下，它的 `width` 缺省值为占满行宽，即 `0.9999`。而 P 类构件通常由实际内容确定宽度，其 `width` 缺省值为 `null`。
+
+#### 举例说明
+
+比如用一个 Panel 装 P，同一 Panel 还装入 Div，用该 Div 装入 P 段落，请体会 P 构件与 Div 构件的 `width` 缺省值差异。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_a.txt' input-height='{150}'></div>
+
+把本例中 `"panel.div.p"` 节点的背景设为 `green`，如下：
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_b.txt' input-height='{150}'></div>
+
+为什么 `"Panel > P"` 的缺省宽度由内容决定，而 `"Panel > Div > P"` 的宽度独占整行？因为 Panel 中内容按 flex 方式布局，而 Div 中内容是 block 流式布局，Div 下的 P 独占一个 block 行。 
+
+#### 通用配置：`overflow` 选项
+
+Shadow Widget 提供 `visible-auto-hidden, auto-hidden-visible, hidden-visible-auto` 三个类的 CSS 定义，分别表示 `overflow:visible`，`overflow:auto` 与 `overflow:hidden`。在任意构件的 `klass` 属性均可指定这 3 者之一。
+
+Panel 类构件的 `overflow` 缺省用 `hidden`，Div 与 P 类构件缺省用 `visible`。用 `klass` 显式指定上面 3 者之一，可改变 `overflow` 缺省定义。
+
+请在下面例子的 Div2 节点，让 klass 取不同值试验运行效果。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_c.txt' input-height='{190}'></div>
+
+#### 通用配置：指定宽高、间距等属性
+
+Panel 类、Div 类、P 类构件均提供如下属性：
+
+1. 宽高：`width, height`
+2. 最小、最大宽高：`minWidth, maxWidth, minHeight, maxHeight`
+3. 边宽与间距：`margin, borderWidth, padding`
+4. 左上角位置：`left, top`，当 `position` 取 `relative` 或 `absolute` 时使用
+
+这些属性均对应于同名 CSS 属性，如 `borderWidth` 对应于 CSS 的 `borderWidth`，不赘述。它们如何取值，请参考上一节 [“简便标记法”](#2.1.1.!pos_indicator)。
+
+举个例子，请大家参照着自行推导各种用法。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_d.txt' input-height='{190}'></div>
+
+#### <a name="font"></a>通用配置：字体大小
+
+Shadow Widget 采用 CSS3 规范中的相对单位 rem 方式配置字体大小，文档根节点（即 `html` 节点）的 `font-size` 缺省已设为 `16px`。我们建议产品开发采用 rem 方式指定字号，这样，把产品适配到不同终端设备时，多数情况下只需修改根节点的 rem 值。
+
+为方便编程，本系统已预设 S1、S2、S3、S4、S5、S6 共 6 个类用于指定字号，如下：
+
+```
+  S1:  3.75rem  = 60px
+  S2:  2.75rem  = 44px
+  S3:  2rem     = 32px
+  S4:  1.5rem   = 24px
+  S5:  1rem     = 16px
+  S6:  0.875rem = 14px
+```
+
+同时设定 h1 ~ h6 分别对应于上述 6 种字号，S1 与 h1 字号相同，S2 与 h2 字号相同，其它类推。S1 ~ S6（或 h1 ~ h6） 还与 `default-large-small, large-small-default, small-default-large` 三个类组合使用来微调字号，其中 `large-small-default` 将字号放大到 `1.125` 倍，`small-default-large` 将字号缩小到 `0.875` 倍，`default-large-small` 则不放大也不缩小。
+
+大家用 Shadow Widget 开发产品，可以在 W 树根节点指定 `S1 ~ S5` 中一种作为本文缺省字号，比如设为 `S5`，而用 `ScenePage` 场景页表达演示胶片时，字号要稍大些，比如在 `ScenePage` 的 `klass` 属性包含 `S4`。
+
+在转义标签可以这么指定字号：
+
+``` html
+<div $=P klass='S4 large-small-default'></div>
+```
+
+编程中常按如下方式更换 klass 定义：
+
+``` js
+var all_klass = { S1:true, S2:true, S3:true, S4:true, S5:true, S6:true,
+  'default-large-small':true, 'large-small-default':true, 'small-default-large':true,
+};
+
+var sKlass = utils.klassNames( utils.clearKlass(comp.duals.klass,all_klass), 
+  sClass1, sClass2
+);
+comp.duals.klass = sKlass;
+```
+
+其中，`utils.clearKlass()` 用于删除指定的 class 项，`utils.klassNames()` 用于串接各个 class 项。关于这两个 API 的详细用法，请参考 [“API 手册”](#4.2.3.) 中相关内容。
+
+#### <a name="div2"></a>Div2 构件
+
+对于前端开发，`<div>` 直接装 `<span>` 等行内标签的情况很常见，若按 Shadow Widget 的观点，应该存在两种形态的 `<div>`，其一是用作 P 类构件的容器，其二是用作一个 P 类构件，前者就是 Div 构件，后者是 Div2 构件。
+
+** Div2 是 P 类构件，渲染输出为 `<div>`**，它很常用，因 P 类构件可挂在 Panel 面板下，我们经常在 Panel 面板挂入 Div2，再用 Div2 装入 Span、Button 等行内构件。若改用 Div 就麻烦了，Div 要先装 P，再用 P 装 Span、Button 等。
+
+使用 Div2 的例子如下，因 Div2 的 `width` 缺省值是 `null`，如果想让它独占一行，在下面 Div2 节点的属性中添加 `width='{0.9999}'` 定义，让它占用 `100%` 宽度即可，不妨动手试验一下（改完源码请点 Apply 按钮）。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_e.txt' input-height='{150}'></div>
+
+#### <a name="split"></a>SplitDiv 构件
+
+SplitDiv 分割条用于鼠标拖拉快速改变控件大小，它限在以 flex 布局的面板（即 Panel 或 GridPanel）下使用，通常用来改变在它之前构件的宽度（或高度）。
+
+SplitDiv 具有方向性，视它所在面板的 flex 布局方向而定，横向布局时 SplitDiv 通过左右拖移，来改变其前构件的宽度，纵向布局时 SplitDiv 通过上下拖移，来改变其前构件的高度。SplitDiv 只对在它之前的，以像素值或百分比指定宽度（或高度）的控件起作用。
+
+下面是横向布局、左右拖移的例子。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_f.txt' input-height='{120}'></div>
+
+说明：
+1. 如果未指定 SplitDiv 的 `width` 与 `height`，系统尝试自动取值。
+2. 横向或竖向布局的面板，应在 `klass` 指定 `nowrap-default-wrap_reverse`，让它限在单行布局，这样可避免拖拉 SplitDiv 改变宽高时，当前行（或列）因溢出自动换行（换列），从而使界面产生跳跃。
+
+通过配置 SplitDiv 的 `width, height, margin` 等属性，让它与前后构件对齐，通过指定 `style.backgroundColor` 突显该分割条。见下面例子：
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_g.txt' input-height='{120}'></div>
+
+SplitDiv 还有一项特别功能，如果 SplitDiv 是当前横向（或竖向）布局的最后一个构件，并且在其前的构件正好填满剩余空间，即：指定负值宽（或高）的总量是 -1，这时，SplitDiv 具有伸缩其父构件的能力。见下面例子：
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_2_h.txt' input-height='{190}'></div>
+
+#### 传递 `resizing` 事件
+
+原生 DOM 节点不具备逐层传递宽高变化的能力，`resizing` 事件传递是 Panel 类构件专有设计。当面板构件在宽高发生变化后，它将向子节点逐层向下传递 `resizing` 事件，子级各面板节点收到此事件后，随即自动调整以百分比标识的宽高值。
+
+**凡直属于面板的成员，包括 Div 类、P 类构件，都能响应 `resizing` 事件，但在面板布局之外，`resizing` 事件不再往下传递**。若想让其下非面板构件还能自适应伸缩，需要开发者另行定制 `willResizing()` 函数。
+
+#### 定制 `willResizing` 函数
+
+面板下的构件（包括 Panel 类、Div 类、P 类）均可通过定义 `willResizing(width,height,inPending)` 函数，改变系统对 `resizing` 事件的缺省处理方式。
+
+传入参数 `width` 与 `height` 指示父节点变化后的宽高，`inPending` 指示当前是否还在 `resizing` 变化中，值为 `true` 表示还在变化，比如用鼠标拖动 SplitDiv 来调整某面板大小，鼠标还在拖动中，传入的 `inPending` 参数将是 `true`。
+
+返回值用 `true` 或 `false` 指示本次 `willResizing` 调用后，系统是否继续处理本 `resizing` 事件，返回 `true` 继续处理，否则返回 `false`。
+
+比如面板（`".body.top"`）下有 Div 构件（key 为 `div`），用 `willResizing()` 处理来自上层的 `resizing` 事件：
+
+``` js
+01 main['.body.top.div'] = {
+02   willResizing: function(width,height,inPending) {
+03     if (this.isHooked) {
+~~       console.log('resize to:',width,height);
+~~       // do something ...
+05     }
+06     
+07     return false;
+08   },
+09 };
+```
+
+对于 Div 类或 P 类构件，`willResizing()` 返回 `false` 即可，因为系统已限制它们不再向下传递 `resizing`。但对于 Panel 类构件，`willResizing()` 返回 `false` 表示不再向下传递事件，返回 `true` 则继续传递。
+
+&nbsp;

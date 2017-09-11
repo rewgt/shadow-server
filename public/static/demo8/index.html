@@ -16,62 +16,43 @@
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
 <div $=BodyPanel key='body'>
-  <div $=Panel klass='auto-hidden-visible'>
-    <div $=Panel klass='nowrap-default-wrap_reverse' width='{0.9999}' height='{100}'>
-      <div $=Panel width='{120}' height='{100}' sty__='background-color:red'>
-        <div $=Panel width='{-1}'></div>
-        <div $=SplitDiv></div>
-      </div>
-      <div $=Panel width='{50}' sty__='background-color:#ccc'></div>
+  <div $=Panel key='top' klass='auto-hidden-visible'>
+    <div $=P key='p'>
+      <span $=VirtualSpan key='vir'>
+        <span $=Button>Test</span>
+      </span>
     </div>
-    
-    <div $=Panel klass='nowrap-default-wrap_reverse' width='{0.9999}' height='{160}'>
-      <div $=Panel klass='row-reverse' width='{100}' height='{100}' sty__='background-color:blue'>
-        <div $=Panel klass='col-reverse' width='{-1}'>
-          <div $=Panel height='{-1}'></div>
-          <div $=SplitDiv></div>
-        </div>
-        <div $=SplitDiv></div>
-      </div>
-    </div>
-
-    <div $=GridPanel sizes='{[100,200,-1]}' width='{0.9999}' height='{120}'>
-      <div $=Panel height='{10}' sty__='background-color:#eee'>
-        <div $=Panel width='{-1}'></div>
-        <div $=SplitDiv></div>
-      </div>
-      <div $=Panel height='{10}' sty__='background-color:#eee'>
-        <div $=Panel width='{-1}'></div>
-        <div $=SplitDiv></div>
-      </div>
-      <div $=Panel height='{10}' sty__='background-color:#eee'>
-        <div $=Panel width='{-1}'></div>
-        <div $=SplitDiv></div>
-      </div>
-      <div $=Panel height='{60}' border-width='{[1,0,1,1]}' sty__='border:1px solid #ccc'></div>
-      <div $=Panel height='{60}' border-width='{[1,0,1,1]}' sty__='border:1px solid #ccc'></div>
-      <div $=Panel height='{60}' border-width='{[1,0,1,1]}' sty__='border:1px solid #ccc'></div>
-    </div>
-    
-    <div $=TablePanel>
-      <div $=TableRow>
-        <div $=Panel klass='nowrap-default-wrap_reverse' width='{100}' height='{40}'><div $=P width='{-1}'>A</div><div $=SplitDiv></div></div>
-        <div $=P width='{200}'>B</div>
-        <div $=P td-style='{{"color":"red"}}'>C</div>
-      </div>
-      <div $=TableRow>
-        <div $=P width='{null}' col-span='{2}'>D</div>
-        <div $=P>E</div>
-      </div>
-    </div>
-  </div>  
+  </div>
 </div>
 </div>
 <!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
+
+main['.body.top.p.vir'] = {
+  $onMouseOver: function(event) {
+    this.duals.style = {opacity: '0.5'};
+  },
+  
+  $onMouseOut: function(event) {
+    this.duals.style = {opacity: '1'};
+  },
+};
+
+});
+</script>
+
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

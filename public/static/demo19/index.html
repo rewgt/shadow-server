@@ -9,33 +9,34 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo19</title>
-
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div $=BodyPanel key='body'>
-  <div $=Panel key='top'>
-    <div $=NavPanel key='nav' width='{0.9999}' height='{200}'>
-      <div $=Div key='msg' padding='{[0,6]}' sty__='display:none'>
-        <div $=P>Hello, world!</div>
-      </div>
-      
-      <div $=P key='opt'>
-        <span $=OptButton key='btn' pop-option='{{"path":"./msg","width":0.7,"height":200,"bodyStyle":{"display":"block"}}}'>show hello</span>
-        <span $=OptButton key='btn2' recheckable='1' trigger='//btn'>trigger</span>
-      </div>
-    </div>
+<div $=BodyPanel key='body'> 
+  <div $=Panel key='top' height='{null}'>
+    <div $=P key='p'><span $=HighlightBtn>Click me</span></div>
   </div>
 </div>
 </div>
 <!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];}
+W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
+
+});
+</script>
+
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
-<script src="/app/files/rewgt/web/js/react.min.js"></script>
-<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
-<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+<script src="bundle.js"></script>
 
 </body>
 </html>

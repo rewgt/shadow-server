@@ -1,0 +1,79 @@
+2.2.2 引用模板中节点
+---------------
+
+&nbsp;
+
+上一节已介绍如何从已存在的节点进行引用，本节介绍另一种引用，被引用节点定义在 “模板” 构件下，引用源不是 “实节点”，是 “原始定义”。
+
+#### 三种模板
+
+Shadow Widget 提供 3 种模板：TempPanel、TempDiv、TempSpan，它们分别属于 Panel 类、Div 类、Span 类构件。正式运行时，这 3 种模板构件都不显示到界面，但在可视化设计界面（参见 [可视化设计使用手册](#5.)）它们在选中时将显示界面，以便让模板中各个构件可见、可编辑，这时 TempPanel、TempDiv、TempSpan 分别对应于 Panel、Div、Span 构件。
+
+模板可在 W 树的任意位置添加，但在什么位置该用哪种模板有约束，比如在行内位置只能用 TempSpan，约束条件可从 Panel、Div、Span 构件能往哪儿挂类推。
+
+上一节介绍的是对 “实节点” 作引用，下面介绍引用模板下定义的节点，是对尚不存在的节点作引用。实节点因为已实例化过一次，被引用节点可能受运行过程影响，而模板下的节点，则是原始的界面定义。
+
+#### 一个例子
+
+把上节最后一个例子改用模板来实现，如下：
+
+<div $='.rewgt.ui_demo' src='md/code/2_2_2_a.txt' input-height='{270}'></div>
+
+请体会一下引用源是 “实节点” 与 “原始定义” 的使用差异。实节点要用 `$$for` 且预定义 `dual-data` 数据，因为实节点自身要解析一次 `for` 指令。
+
+``` html
+  <div $=Ul key='ul' $$for='item in duals.data.list' dual-data='{{"list":[],"active":0}}'>
+```
+
+模板下的原始定义，在引用实施时才解析 `for` 指令，而且，一次引用，在引用位置（即复制后的节点）会自动生成一个 callspace 压栈。所以，`for` 表达式中 `duals.data.list` 能在刚压栈的 callspace 中找到。
+
+``` html
+  <div $=Ul key='ul' $for='item in duals.data.list'>
+```
+
+#### 模板中节点的投影定义
+
+在被引用节点定义投影类，各次引用后投影定义也生效，这个规则对模板中的节点同样适用。
+
+比如定义如下界面（参见样例 demo12）：
+
+``` html
+01 <div $=Panel key='top' klass='auto-hidden-visible'>
+02   <div $=P key='test' width='{0.9999}'>
+03     <div $=TempSpan key='temp'>
+~~       <span $=Button key='btn'></span>
+05     </div>
+06     <span $='//temp.btn' key='test1'>test 1</span>
+07     <span $='//temp.btn' key='test2'>test 2</span>
+08   </div>
+09 </div>
+```
+
+这么定义投影类：
+
+``` js
+main['.body.top.test.temp.btn'] = {
+  $onClick: function(event) {
+    alert('key = ' + this.duals.keyid);
+  },
+};
+```
+
+运行本例，在界面分别点击 `"test 1"` 与 `"test 2"` 按钮，将正确显示信息。
+
+#### 模板可以嵌套使用
+
+同一功能组内的多个模板，通常并列定义，有时为了理解方便，让一个模板包含另一模板，也是可以的，比如：
+
+``` html
+<div $=TempDiv key='tmp'>
+  <div $=TempDiv key='tmp'>
+    <div $=P key='hello' width='{0.9999}'>template in template</div>
+  </div>
+</div>
+<div $='//tmp.tmp.hello' sty__='color:blue'></div>
+```
+
+模板包含模板，通常因为它们的业务逻辑要用包含方式表达。须注意，模板下的 “非模板节点” 才供引用，**模板自身不应被引用**。
+
+&nbsp;

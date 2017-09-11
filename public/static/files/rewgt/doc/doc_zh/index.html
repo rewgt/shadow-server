@@ -31,9 +31,119 @@
 
 <script src="/app/files/rewgt/web/js/shadow-book.min.js"></script>
 
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils;
+
+function demo1Id__(value,oldValue) {
+  if (value <= 2) {
+    if (value == 1) {  // on init
+      this.defineDual(['inputHeight','defaultHide']);
+      
+      this.defineDual('src', function(value,oldValue) {
+        if (!value) return;
+        
+        var self = this, sSrc = value;
+        utils.ajax( { url:sSrc, dataType:'text',
+          success: function(data,statusText,xhr) {
+            var inputComp = self.componentOf('input.txt');
+            if (!inputComp) return;
+            
+            inputComp.duals.value = data;
+            var guiComp = self.componentOf('gui');
+            if (guiComp) {
+              guiComp.duals['html.'] = data;
+              setTimeout( function() {
+                var apyComp = self.componentOf('tool.btn2');
+                if (apyComp) apyComp.duals.disabled = '1';
+              },300);
+            }
+          },
+          error: function(xhr,statusText) {
+            console.log('read file (' + sSrc + ') error: ' + statusText);
+          }
+        });
+      },this.props.src);  // avoid initial trigger
+      
+      this.setEvent( {
+        $onClick: function(event) {
+          var inputComp = this.componentOf('input.txt');
+          if (!inputComp) return;
+          
+          var sRole = event.target.getAttribute('role');
+          if (sRole === 'src-btn')
+            setInputShow(inputComp,inputComp.state.style.display === 'none');
+          else if (sRole === 'apy-btn') {
+            var guiComp = this.componentOf('gui');
+            if (guiComp) guiComp.duals['html.'] = inputComp.duals.value;
+            var apyComp = this.componentOf('tool.btn2');
+            if (apyComp) apyComp.duals.disabled = '1';
+          }
+        },
+      });
+    }
+    else if (value == 2) { // on mount
+      var inputComp = this.componentOf('input.txt');
+      if (inputComp) {
+        var hi = this.state.inputHeight;
+        if (typeof hi == 'number')
+          inputComp.duals.style = {height:hi+'px',resize:'none'};
+        if (this.state.defaultHide)
+          setInputShow(inputComp,false);
+        
+        var self = this;
+        inputComp.listen('value',function(value,oldValue) {
+          var apyComp = self.componentOf('tool.btn2');
+          if (apyComp) apyComp.duals.disabled = '';
+        });
+      }
+      
+      var sSrc = this.state.src;
+      if (sSrc) {
+        this.state.src = '';
+        this.duals.src = sSrc; // trigger duals.src = xx
+      }
+    }
+    return;
+  }
+  
+  function setInputShow(inputComp,toShow) {
+    inputComp.duals.style = {display: toShow?'inline':'none'};
+  }
+}
+
+var demoEle_ = null;
+
+main.$$onLoad.push( function(callback) {
+  utils.setVendorLib('rewgt', function(template) {
+    if (!demoEle_) {
+      demoEle_ = utils.loadElement([ ['Panel',{key:'ui_demo',height:null,borderWidth:1,padding:4,style:{borderStyle:'dotted',borderColor:'#ccc'},$id__:demo1Id__}],
+        ['MarkedDiv',{key:'gui',width:0.9999, padding:4}],
+        [ ['P',{key:'tool'}],
+          ['Button',{key:'btn1',role:'src-btn',style:{padding:'4px'},'html.':'Source'}],
+          ['Button',{key:'btn2',role:'apy-btn',style:{padding:'4px'},'html.':'Apply',disabled:'1'}],
+        ],
+        [ ['P',{key:'input',width:0.9999,margin:0,padding:[0,0,0,4]}],
+          ['Textarea',{key:'txt',style:{width:'98%',height:'160px',fontFamily:'Courier New',display:'inline',overflow:'auto',wordBreak:'break-all'}}],
+        ],
+      ]);
+    }
+    template.setChild(demoEle_,callback);
+  });
+});
+
+});
+</script>
+
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 <style>

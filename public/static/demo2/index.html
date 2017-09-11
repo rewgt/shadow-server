@@ -16,19 +16,35 @@
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
 <div $=BodyPanel key='body'>
-  <div $=Panel key='top'>
-    <div $=P key='test' name='desc' data-state='OK' width='{0.9999}' height='{40}'>example</div>
-    <div $=P klass='default-large-small auto-hidden-visible' width='{0.9999}' height='{40}'>example</div>
-    <div $=P sty__='{{"backgroundColor":"#ccc"}}' width='{0.9999}' height='{40}'>example</div>
-    <div $=P width='{0.9999}'><span>text1</span><span>text2</span></div>
+  <div $=Panel key='top' klass='auto-hidden-visible'>
+    <div $=P key='p'><span $=Button key='btn'>Click me</span></div>
   </div>
 </div>
 </div>
 <!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 
+<script>
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
+
+main['.body.top.p.btn'] = {
+  $onClick: function(event) {
+    alert('clicked!');
+  },
+};
+
+});
+</script>
+
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

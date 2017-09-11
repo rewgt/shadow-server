@@ -9,7 +9,7 @@
 
 &nbsp;
 
-main 模块下定义三种初始化列表 `$$onLoad`，`$onReady`与 `$onLoad`，`$$onLoad` 的初始化函数在转义标签进行引用关联（由 `'$=path'` 指示路径）之前依次执行，在引用关联完成后 `$onReady` 中的函数依次执行，之后 `$onLoad` 中的函数依次执行。
+main 入口模块下定义三种初始化列表 `$$onLoad`，`$onReady`与 `$onLoad`，`$$onLoad` 的初始化函数在转义标签进行引用关联（由 `'$=path'` 指示路径）之前依次执行，在引用关联完成后 `$onReady` 中的函数依次执行，之后 `$onLoad` 中的函数依次执行。
 
 #### <a name="onload_a"></a>`$$onLoad`
 

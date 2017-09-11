@@ -12,9 +12,9 @@
 对于运行中的工程，系统通过 `W.__debug__` 取值识别当前版本是否处于调测态，编程中我们可以广泛插入如下代码来辅助调测：
 
 ``` js
-    if (W.__debug__) {
-      // write some code for debugging
-    }
+if (W.__debug__) {
+  // write some code for debugging
+}
 ```
 
 对于经 browserify 或 webpack 组织的开发项目，调测通过后，发布产品有三种方式：
@@ -34,11 +34,11 @@
 
 如何生成剔除标准库的 bundle.js 文件在下文介绍。
 
-其三，将 bundle.js 分拆成底层依赖的标准库与自己的代码两部分，标准库如 React 等采用 cdn 版本，自己的代码则改造成 main 模块，如何改造在下文介绍。这么做的好处理是实现代码分离，方便了重用，如果代码都一股脑打包在 bundle.js 中，换个开发场景很难重的。
+其三，将 bundle.js 分拆成底层依赖的标准库与自己的代码两部分，标准库如 React 等采用 cdn 版本，自己的代码则改造成 “MAIN 模块”，如何改造在下文介绍。这么做的好处理是实现代码分离，方便了重用，如果代码都一股脑打包在 bundle.js 中，换个开发场景很难重的。
 
 #### 发布前的版本如何调测？
 
-如果不搭建工程环境，像 [“简单示例”](#1.4.) 举例的 demo1 工程那样，只在 html 网页中编程，运行被测工程比较简单，只两步：
+如果不搭建工程环境，像 [“简单示例”](#1.1.4.!demo) 举例的 demo1 工程那样，只在 html 网页中编程，运行被测工程比较简单，只两步：
 
 1. 在本机启动 WebService 服务
 2. 在浏览器访问工程目录（如 `http://localhost:3000/demo1/`），就把被测工程运行起来了
@@ -69,9 +69,9 @@
 
 打包过程可能很复杂，上面只涉及 js 文件，实践中可还会涉及 css 转换、图片合并等，请尽量采用第 3 方工具（如 gulp），把打包过程自动化起来。
 
-####  main 模块的导入过程
+####  MAIN 模块的导入过程
 
-如 [模块化管理](#2.7.6.) 一节介绍，main 模块不是一个模块，而是一系列模块，这些模块要在 shadow-widget 库之前用 `<script>` 导入进来，各 main 模块均按如下格式编写：
+如前文 [“用户扩展 JS 文件”](#2.7.2.!js_module) 介绍，“MAIN 模块” 不是一个模块，而是多个 js 文件，这些文件要在 shadow-widget 库导入之前用 `<script>` 导入进来，各 “MAIN 模块” 均按如下格式编写：
 
 ``` js
 if (!window.W) { window.W = new Array(); W.$modules = [];}
@@ -82,25 +82,25 @@ W.$modules.push( function(require,module,exports) {
 });
 ```
 
-上述代码实质是在 `W.$modules` 登记本模块代码，然后等 shadow-widget 库就绪后，由 shadow widget 逐一导入各 main 模块的代码，此时，“就绪” 意味着：
+上述代码实质是在 `W.$modules` 登记本模块代码，然后等 shadow-widget 库 “就绪” 后，由 “shadow-widget 库” 逐一导入各 MAIN 模块的代码，这里，“就绪” 意味着：
 
 1. React 与 Shadow Widget 库已导入
 2. 在 HTML 网页定义的转义标签尚未导入
-3. 已准备好 require 函数，所以，各 main 模块中可用如下 require 语句：
+3. 已准备好 require 函数，所以，各 MAIN 模块中可用如下 require 语句：
 
 ``` js
-  var React = require('react');
-  var ReactDOM = require('react-dom');
-  var W = require('shadow-widget');
+var React = require('react');
+var ReactDOM = require('react-dom');
+var W = require('shadow-widget');
 ```
 
-各 main 模块在 `main.$$onLoad, main.$onReady, main.$onLoad` 注册初始化函数（参见 [API 手册：初始化列表](#4.1.3.)），当所有 main 模块导入后，系统接着导入在网页中定义的转义标签，之后，依次执行在 `main.$$onLoad, main.$onReady, main.$onLoad` 注册的初始化函数。
+各 MAIN 模块在 `main.$$onLoad, main.$onReady, main.$onLoad` 注册初始化函数（参见 [API 手册：初始化列表](#4.1.3.)），当所有 MAIN 模块导入后，系统接着导入在网页中定义的转义标签，之后，依次执行在 `main.$$onLoad, main.$onReady, main.$onLoad` 注册的初始化函数。
 
-#### 将 bundle.js 中的代码改造成 main 模块
+#### 将 bundle.js 中的代码改造成 MAIN 模块
 
 经 browserify 或 webpack 管理的 JS 模块，已将所有用到 JS 文件，包括依赖库，一并打包了。像 react、react-dom、shadow-widget 等源码缺省也一起打包，除非用了特别指令（如 browserify 的 `-u`）将特定的库排除。
 
-如果想把自己编的代码从 bundle.js 挪出来，改造成 main 模块，只需：
+如果想把自己编的代码从 bundle.js 挪出来，改造成 “MAIN 模块”，只需：
 
 1. 创建一个新的 JS 文件，编写如下代码   
 `if (!window.W) { window.W = new Array(); W.$modules = [];}`   
@@ -112,6 +112,6 @@ W.$modules.push( function(require,module,exports) {
 
 3. 之后，在 HTML 页面用 `<script>` 导入这个 JS 文件即可
 
-这种 main 模块可以用作 cdn 版本，Shadow Widget 官方的 [shadow-slide 项目](https://github.com/rewgt/shadow-slide) 就是按上述方法制作 cdn 版本的。
+这种 “MAIN 模块” 可以用作 cdn 版本，Shadow Widget 官方的 [shadow-slide 项目](https://github.com/rewgt/shadow-slide) 与 [bootstrap 构件库](https://github.com/rewgt/shadow-bootstrap) 就是按上述方法制作 cdn 版本的。
 
 &nbsp;

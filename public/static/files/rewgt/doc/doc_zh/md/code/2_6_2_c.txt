@@ -1,0 +1,10 @@
+<div $=NavPanel $for=''>
+  <pre $=MarkedDiv key='mark' sty__='display:none'>
+<div $=P key='first'>First paragraph.</div>
+<div $=P key='next'>Next paragraph.</div>
+</pre>
+  
+  <div $=Ol $for='item in duals("mark").nodes'>
+    <div $=Li $key='"a" + index' $title='item[0]' $children='item[1]'></div>
+  </div>
+</div>

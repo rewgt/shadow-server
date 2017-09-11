@@ -5,11 +5,9 @@ if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( func
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-var createClass_ = React.createClass;
-if (!createClass_) console.log('fatal error: invalid React.createClass'); // before v15.5
-
 var W = require('shadow-widget');
 var main = W.$main, utils = W.$utils, T = W.$templates, creator = W.$creator;
+var createClass_ = creator.createClass_;
 
 var RefDiv__  = T.RefDiv._createClass(null);
 var RefSpan__ = T.RefSpan._createClass(null);

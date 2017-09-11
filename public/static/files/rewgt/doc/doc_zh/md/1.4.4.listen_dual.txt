@@ -1,0 +1,97 @@
+1.4.4 侦听双源属性
+----------------
+
+&nbsp;
+
+我们可通过调用 `listen(attr)` 侦听某源节点的双源属性（`attr`），当源头数据有变化后，相关动作将自动触发，包括：
+
+1. 指定的侦听函数自动被调用
+2. 目标节点中特定方法（`onAttr`）被调用
+3. 目标节点中特定的 duals 属性自动与源数据同步
+
+本节详细介绍这 3 种用法。
+
+#### 登记侦听函数
+
+比如我们设计如下界面，当输入框的值变化后，想让 `"Hello, wayne!"` 的信息提示跟随变化。
+
+<div $='.rewgt.ui_demo' src='md/code/1_4_4_a.txt' default-hide='1' input-height='{110}'></div>
+
+我们只须让信息提示节点侦听输入框的 `duals.value` 属性，代码如下（参见样例 demo6）：
+
+``` js
+01 main['.body.top.p.hint'] = {
+02   componentDidMount: function() {
+03     this._componentDidMount(this);
+04     var sourComp = W.W('.body.top.p.input').component;
+05     
+06     var self = this;
+~~     sourComp.listen('value', function(value,oldValue) {
+08       if (!self.isHooked) return;
+09       self.duals['html.'] = 'Hello, ' + value + '!';
+10     });
+11   },
+12 };
+```
+
+上面代码中，先用绝对路径找到文本输入框节点（`sourComp`），然后在该源节点，调用 `sourComp.listen('value')` 侦听其下 `duals.value` 双源属性。
+
+若调用 `sourComp.listen(sAttr,callback)` 表示登记一个侦听函数，当被侦听源发生变化，回调函数 `callback` 将自动被调用，`callback` 要求带 `value` 与 `oldValue` 两个参数，分别是被侦听属性的新值与旧值。
+
+因为侦听链的目标节点若存活（尚未 unmount），链上的源节点必然存活，但源节点存活无法反推目标节点必然存活，所以，我们要添加 `if (!self.isHooked) return` 条件检查。
+
+说明：所有构件都有 `isHooked` 定义，其值由系统自动维护，如果值为 `true` 表示该节点已 mount 挂载，且未被 unmount 卸载，即，节点是存活的，反之，`false` 表示未存活。
+
+#### 登记侦听类方法
+
+上例中登记 listen 的是即时定义的侦听函数，我们还可改成 listen 类方法，方法命名建议以 `"on"` 作前缀，并采用驼峰风格（calmeCased），比如被侦听的属性是 `value`，类方法宜命名为 `onValue`。
+
+接上例，把 `listen()` 语句改写一下：
+
+``` js
+01 main['.body.top.p.hint'] = {
+~~   onValue: function(value,oldValue) {
+03     this.duals['html.'] = 'Hello, ' + value + '!';
+04   },
+05   
+06   componentDidMount: function() {
+07     this._componentDidMount(this);
+08     var sourComp = W.W('.body.top.p.input').component;
+~~     sourComp.listen('value',this);  // --> this.onValue
+10   },
+11 };
+```
+
+这里 listen 函数的格式是：
+
+> `sourComp.listen(sAttr, targetComp, sMethod)`
+
+当 `sMethod` 参数缺省时，系统自动按上述规则自动取值。
+
+当调用 listen 函数传递的第 2 个参数是目标节点时，源节点与目标节点的侦听关系会自动维护，也就是说，当目标节点 unmount 时，登记在源节点的触发钩子会自动删除，所以，这个例子的 `onValue` 函数头部不必加 `if (!this.isHooked) return` 语句。
+
+说明：用 `sourComp(['attr1','attr2'],this)` 方式可以一次侦听多个数据源，被串接的类方法自动取上面建议的 `"on"` 前缀驼峰命名，如 `onAttr1`、`onAttr2`。
+
+#### 串接两个 duals 属性
+
+两个 dual 属性可以串接，比如：
+
+``` js
+01 main['.body.top.p.hint'] = {
+02   getInitialState: function() {
+03     var state = this._getInitialState(this);
+04     this.defineDual('textValue');
+05     return state;
+06   },
+07   
+08   componentDidMount: function() {
+09     this._componentDidMount(this);
+10     var sourComp = W.W('.body.top.p.input').component;
+~~     sourComp.listen('value',this,'textValue');
+12   },
+13 };
+```
+
+这里 `sourComp.listen('value', this, 'textValue')` 语句，当系统找不到 `this.textValue` 函数定义，自动将 `textValue` 看作 duals 属性名，其结果将 `this.duals.textValue` 串接到 `sourComp.duals.value`。当 `sourComp.duals.value` 有变化，系统会自动更新 `this.duals.textValue` 的值。
+
+&nbsp;

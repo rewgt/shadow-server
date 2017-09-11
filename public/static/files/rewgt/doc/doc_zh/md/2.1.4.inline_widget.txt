@@ -1,0 +1,32 @@
+2.1.4 行内构件
+------------
+
+&nbsp;
+
+#### Span 类构件
+
+Shadow Widget 对 Span 类构件较少封装，内置的 duals 属性只有 `keyid, klass, style, trigger, 'html.'` 等数项，若想配置 Span 类构件的 `width, height, borderWidth, margin, padding` 等 css 项，需要借助 `style` 属性。
+
+比如，对 P 类构件这么指定宽度：`comp.duals.width = 200`，对 Span 类要这么做：`comp.duals.style = {width:'200px'}`。
+
+#### 受控的输入构件
+
+Shadow Widget 内置构件中，对带内容输入的构件均采用受控方式，即，按 Controlled Components 方式做封装。比如对于 Input 构件，`duals.value` 已自动定义，而且界面输入文本与 `duals.value` 已建立自动同步，我们既可以用 `duals.value = some_text` 更改输入框中的文本，也可以在输入框键入文本，系统会自动同步到 `duals.value`，从 `duals.value` 或 `state.value` 读结果，甚至我们还能通过侦听 `duals.value`，构造数据流驱动。
+
+Input 构件用作文本输入时，`duals.value` 能自动同步，用作选项输入时（`type='checkbox'` 或 `type='radio'`），`duals.checked` 能自动同步，见下面例子。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_4_a.txt' input-height='{270}'></div>
+
+如果想指定 Input 构件的初始值，只需传入 `value` 或 `checked` 属性，类似这样：`value='Donald Trump'` 或 `checked='1'`。
+
+与 Input 类似，Textarea、Select 也是受控构件，`duals.value` 能自动同步，Textarea 举例如下。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_4_b.txt' input-height='{90}'></div>
+
+Select 构件举例如下。
+
+<div $='.rewgt.ui_demo' src='md/code/2_1_4_c.txt' input-height='{290}'></div>
+
+对于多选的 Select，它的 `duals.value` 是 array 类型。
+
+&nbsp;

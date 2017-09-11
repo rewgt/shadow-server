@@ -1,0 +1,109 @@
+1.4.1 定义双源属性
+-----------
+
+&nbsp;
+
+#### 从双源驱动角度优化 Component 接口
+
+前文已介绍 [“双源驱动”](#1.1.2.!dual_driven) 的概念，包括 props 属性驱动与 state 属性驱动，原生 React 的双源是隐式双源，而且 props 驱动要借助父节点，而且只在 `render()` 渲染函数中进行，编程并不方便。Shadow Widget 要优化这种设计，把 “隐式双源驱动” 改造成 “显式双源驱动”。
+
+首先，我们尝试把基于过程的渲染组装，改造成以属性变迁来触发驱动。也就是，原先在 `render()` 函数中编码，组装出本级与下级节点，现在改为不去定制 `render()` 函数，仅在 props 与 state 属性上做文章，识别（或捕获）属性变化，然后触发一系列动作，以此对等的更新节点渲染。这是一种 **“资源驱动式”** 改造，在 props 与 state 属性视作资源，在此粒度上构建数据驱动机制。
+
+其次，优化 Component 接口对外提供的服务方式。props 属性只读，在 Component 生存期内用作 “不变量”，state 属性表达可变状态，另增加 duals 属性对外界提供读写操作；duals 属性从 props 与 state 属性改造而来，原先用 `props.attr` 与 `state.attr` 存取的，改用 `duals.attr` 存取；state 属性可被 duals 属性替代 ，但我们保留它，仍支持用 `comp.setState()` 更新状态，不过 state 要降级，把它视作 private 属性，只在自身 WTC 类或投影类定义中使用，而 duals 视作 public 属性，可在任意地方使用。总结一下：**props 是不变资源，duals 是对外可存取的资源，state 则视作内部私有资源。**
+
+不过，以上对 props、state、duals 属性是否可变、是否私用的要求，是建议性质的，不强制。因为增加 duals 机制后，原有 props 与 state 机制并未破坏，用回原有方式系统也照常运行。
+
+#### 注册 duals 属性
+
+Shadow Widget 要求在构件初始化阶段，比如在 `getInitialState` 函数中，调用 `defineDual()` 注册双源属性。比如（见样例 demo5）：
+
+``` js
+01 main['.body.top.p2'] = {
+02   getInitialState: function() {
+03     var state = this._getInitialState(this);
+~~     this.defineDual('data');
+05     return state;
+06   },
+07   
+08   $onClick: function(event) {
+09     console.log('before click:',this.duals.data);
+10     this.duals.data = (this.duals.data || 0) + 1;
+11   },
+12 };
+```
+
+这里注册一个缺省值为 `undefined` 的 duals 属性 `data`， 然后每次点击都将 `duals.data` 的值累加一。
+
+双源属性实现原理是：预先调用 javascript 的 `Object.defineProperty()` 来注册 `getter` 与 `setter` 函数，**把针对 `duals.attr` 的读值与赋值过程转变为 `getter` 与 `setter` 函数调用**。一般来说，一个 `duals.attr` 变量对应于一个 `state.attr` 变量，即：双源属性 `dual.attr` 就是对 `state.attr` 读写过程的定制化封装。而且，执行 `comp.duals.attr = value` 时，赋值语句 `this.state.attr = value` 会在它的 setter 函数调用之前自动执行。
+
+注册双源属性的 API 为 `defineDual(sAttr,setterFunc,initialValue)`，后面两个参数可以缺省。首参数指示待注册的 dual 属性，传入非空字串；第二个参数是 setter 函数，如果未指定，系统将自动生成缺省的 setter 函数；第三个参数指示该属性的缺省值（若未指定就自动取 `undefined`），注意，这里此参数直接赋给 `state[sAttr]` 而不触发 setter 函数调用。
+
+说明：在构件的类定义（WTC 定义或投影定义）中，读取自身节点的双源属性值，我们常用 `state.attr` 替代 `duals.attr`，因为 state 被视作内部私有变量的集合，`duals` 则对外，或用于触发驱动，内部函数实现时使用内部变量会更直接，运行效率也高出一丁点。所以，上例第 10 行常写成：
+
+``` js
+  this.duals.data = (this.state.data || 0) + 1;
+```
+
+#### 指定 setter 函数
+
+让 duals 使用指定的 setter 函数，比如在上面代码基础上，增加 `duals.test2` 定义：
+ 
+``` js
+01 main['.body.top.p2'] = {
+02   getInitialState: function() {
+03     var state = this._getInitialState(this);
+04     this.defineDual('data');
+05     
+~~     this.defineDual('test2', function(value,oldValue) {
+~~       if (oldValue === undefined)
+~~         console.log('first assign');
+~~       console.log('state.test2 is',this.state.test2);
+~~     });
+11     
+12     return state;
+13   },
+14   
+15   $onClick: function(event) {
+16     console.log('before click:',this.duals.data);
+17     this.duals.data = (this.duals.data || 0) + 1;
+18   },
+19 };
+```
+
+setter 函数要求带两个参数，`value` 是新赋的值，`oldValue` 是旧值，这里 `defineDual()` 因未指定 `duals.test2` 的缺省值，所以它自动取 `undefined` 值。我们可以用 `oldValue === undefined` 来判断当前是否为首次赋值。
+
+说明：
+1. 应在构件的首次 `render()` 调用前注册它的所有双源属性，凡构件调用过一次 `render()` 函数之后，再用 `this.defineDual()` 注册双源属性，系统将报错。
+2. 构件所有双源属性(`duals.attr`）在首次 `render()` 以后（包括首次 render）就绪，若在此前调用 `this.duals.attr = value`，系统也会将实际的赋值操作延后至首次 render 时实施。
+3. 在注册 dual 属性所传入的 setter 函数中，`this` 正常可用，因为 `this.defineDual()` 调用时，系统会自动将当前节点 `bind` 到 setter 函数。
+
+#### 在浏览器控制台读写 duals 属性
+
+在浏览器打开上面举例的网页：`http://localhost:3000/demo5/`，然后打开调试网页用的控制台，在控制台键入 `W.body.top.p2.component.duals.test2` 命令，可读 `duals.test2` 当前值。如果执行如下命令可修改它的值：
+
+``` js
+  W.body.top.p2.component.duals.test2 = 'demo';
+```
+
+当双源属性被修改，它所属的构件将自动触发一次 render 刷新界面输出，即：用 `duals.attr = value` 赋值时，相应的 `render()` 调用会自动触发。
+
+说明：在 `W` 下用路径（如 `.body.top.p2`）可定位一个构件（`widget`），再用 `widget.component` 可得相应 Component 对象。
+
+#### <a name="pre_assign"></a>双源属性的前置赋初值
+
+当构件在调用 `this.defineDual(attr)` 定义一个双源属性后，无法立即对 `this.state.attr` 赋值，因为调用 `defineDual` 时，系统尚在初始化，比如，还在 `getInitialState()` 调用中，`this.state` 还不存在。这时，针对 `this.duals.attr = value` 语句，系统临时记住，等到首次 `render()` 调用时，才实施真正赋值。
+
+比如下面代码：
+
+``` js
+    this.defineDual('test2', function(value,oldValue) {
+      // ...
+    });
+~~     this.duals.test2 = "hello";
+```
+
+针对 `duals.test2` 的赋值将自动延后执行，此种延后赋值特性我们称为 **“前置赋初值”**。
+
+前置赋初值除了延后执行，还会屏蔽同名 props 属性。比如，这个构件有 `props.test2` 传入，此时传入的 `props.test2` 将被忽略。所以，**前置赋初值为特定条件下忽略某个 props 传入值提供了可能**。
+
+&nbsp;

@@ -1,0 +1,13 @@
+<div $=Div key='div'>
+  <div $=HiddenDiv key='hidden'>
+    <div $=Ul key='ul' $$for='item in duals.data.list' dual-data='{{"list":[],"active":0}}'>
+      <div $=Li $key='"a" + index' $html='item'
+           $klass='index===duals(-1).data.active? "hljs-hint": ""'>
+      </div>
+    </div>
+  </div>
+  
+  <div $='//hidden.ul' dual-data='{{"list":["item 1","item 2","item 3"],"active":0}}'></div>
+  <div $=P>-------------</div>
+  <div $='//hidden.ul' dual-data='{{"list":["item A","item B","item C"],"active":1}}'></div>
+</div>

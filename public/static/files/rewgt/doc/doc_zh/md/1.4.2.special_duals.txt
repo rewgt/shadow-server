@@ -1,0 +1,31 @@
+1.4.2 几个特殊的双源属性
+----------------
+
+#### keyid 属性
+
+Shadow Widget 缺省为每个构件自动注册 `keyid` 双源属性，用来表示各节的 `key` 值。因为 React Component 的 key 值在它生存周期内不变，所以 `duals.keyid` 是只读的，此外，它的值并不在 `state.keyid` 记录，只能用 `duals.keyid` 方式取得。 
+
+一个构件若指定了 `key` 值，`duals.keyid` 值为字串，如果未指定 `key`，由系统自动分配，`duals.keyid` 将是随机生成的整数值，是 number 类型。
+
+#### `"html."` 属性
+
+Shadow Widget 用 `"html."` 表达节点的文本值，如下两行转义标签效果等同：
+
+``` html
+  <div $=P html.='example'></div>
+  <div $=P>example</div>
+```
+
+某节点只有未定义子节点时，`"html."` 指示的内容才被显示，比如下面只显示 `"text"`，`"html."` 指示的值并不显示，因为已存在一个 `Span` 子节点：
+
+``` html
+  <div $=P html.='example'><span $=Span>text</span></div>
+```
+
+ `"html."` 也是系统自动定义的双源属性，程序运行中这么赋值：
+
+``` html
+  comp.duals['html.'] = 'example';
+```
+
+&nbsp;

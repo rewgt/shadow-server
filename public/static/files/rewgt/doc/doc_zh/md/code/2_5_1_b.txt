@@ -1,0 +1,4 @@
+<div $=P key='p'>
+  <span $=OptButton key='btn' fire-type='onsite' recheckable='' $$for=''
+        $trigger='["",{$set:ex.time()+""},"html."]'>Click me</span>
+</div>

@@ -1,0 +1,185 @@
+3.4.5 函数式编程
+----------------
+
+&nbsp;
+
+#### 结合 markdown 的 idSetter 编程
+
+由于 markdown 构件（包括 `MarkedDiv` 与 `MarkedTable`）支持用 [`duals.nodes`](#2.6.2.!nodes) 表达在 markdown 文本中定义的节点，结合 `props.noShow='1'` 配置，再结合 idSetter 定义，形成一种快速定制构件的方法。
+
+比如一个 `MarkedDiv` 构件计划用来描述菜单列表，它的 MD 文本这么书写：
+
+``` html
+<div $=bs.MenuItem key='m1'>Menu item1</div>
+<div $=bs.MenuItem key='m2'>Menu item2</div>
+<div $=bs.MenuItem key='m3' divider='1'></div>
+<div $=bs.MenuItem key='m4'>Menu item3</div>
+<div $=bs.MenuItem key='m5'>Menu item4</div>
+```
+
+定义 idSetter 函数如下：
+
+``` js
+  this.defineDual('id__', function(value,oldValue) {
+    if (value <= 2) return;
+    
+    var bMenu = this.duals.nodes.map( function(item){return item[1]} );
+    utils.setChildren(this, [
+      <t.Ul key='menu' klass='dropdown-menu'>
+        {bMenu}
+      </t.Ul>
+    ]);
+  });
+```
+
+配置 `props.noShow='1'` 使得该构件在 `duals.nodes` 获得更新后，原有子节点定义自动清空；然后，idSetter 函数就可以根据 `duals.nodes` 定义，重新组织子节点了；最后，调用 `utils.setChildren()` 将重组过的子节点设进去。
+
+#### 上举 State 编程
+
+原生 React 编程要求通过 props 逐层传递数据，将若干 Component 组织起来，共同实现某项功能。实际开发中，这种仅借助 props 传递数据或函数的方式很麻烦，处理两、三层还能忍受，但面对四、五层，甚至七、八层时，情况会很糟糕。
+
+解决 props 单向长链问题主要有个方法，一是采用 “Lifing State Up”，二是引入 Redux 之类的 FLUX 方案，我们暂不管后一方案，单看 React 官方介绍的 [“Lifting State Up”](https://facebook.github.io/react/docs/lifting-state-up.html)。上举 State 的大致思路是，借助 javascript 函数式编程的特性，函数可嵌套定义、可任意传递、可 bind 特定 object 等，用大函数定义上层 Component 的行为，大函数套小函数，用小函数定义里层 Component 的行为，里层小函数具有读写或调用外层函数的变量与函数的能力，所以，层层 props 透传的数据流向可被 “短路”，编程因此变简单。
+
+Shadow Widget 将 “Lifing State Up” 的思路继续发扬光大，其双源驱动特性，让 “一线单传”（指 props 单向长链）方式，过渡到 “纵横交织成面” 的组织形式。
+
+我们以判断温度是否达到沸点为背景，举例如下，采用这种代码框架：
+
+``` js
+01 ( function() {
+02 
+~~ var fieldComp = null, verdictComp = null;
+04 
+05 idSetter['.body.panel.field'] = function(value,oldValue) {   // for <fieldset>
+06   if (value <= 2) {
+07     if (value == 1) {      // init process
+~~       fieldComp = this;
+09       // this.defineDual(...)
+10     }
+11     else if (value == 0) { // on unmount
+~~       fieldComp = null;
+13     }
+14     return;
+15   }
+16 };
+17 
+18 idSetter['.body.panel.verdict'] = function(value,oldValue) {  // for <p>
+19   if (value <= 2) {
+20     if (value == 1)       // init process
+~~       verdictComp = this;
+22     else if (value == 0)  // on unmount
+~~       verdictComp = null;
+24     return;
+25   }
+26 };
+27 
+28 })()
+```
+
+这里用 `(function(){})()` 创建一个独立的 Namespace，同一功能块的多个构件的 idSetter 集中在此定义，各构件共享若干变量，如上面两个表示 Component 变量的 `fieldComp` 与 `verdictComp`，有了主要 Component 变量，大量依附于 `comp.duals.attr` 的编程可以顺利实施了。
+
+之所以用独立的 Namespace，是为了避免本功能块专用的变量污染外层 Namespace。
+
+再看一下 State 如何上举。
+
+``` js
+01 var fieldComp = null, verdictComp = null;
+02 
+03 function onChange(event) {
+04   if (!fieldComp) return;
+05   var degree = parseFloat(event.target.value) || 0;  // take NaN as 0
+06   fieldComp.duals.temperature = ['c',degree];    // 'c' means Celsius
+07 }
+08 
+09 idSetter['.body.panel.field'] = function(value,oldValue) {
+10   if (oldValue == 1) {
+11     utils.setChildren(this,[ <t.Legend key='legend'>Temperature in Celsius</t.Legend> ,
+~~       <t.Input key='input' type='text' defaultValue='0' $onChange={onChange}/>
+13     ]);
+14   }
+15   
+16   if (value <= 2) {
+17     if (value == 1) {      // init process
+18       fieldComp = this;
+19       this.defineDual('temperature',null,['c',0]);
+20     }
+21     else if (value == 0) { // on unmount
+22       fieldComp = null;
+23     }
+24     return;
+25   }
+26 };
+```
+
+响应输入框变化的 `onChange` 函数在上层定义，由 `'.body.panel.field'` 节点传递到 `key='input'` 子节点，它并不经 `props.$onClick` 逐层下传。动态组装子节点时，我们可以跨层级，把事件函数直接赋给任意子节点。
+
+在上面代码基础上，我们让提供输入的 `'.body.panel.field'` 构件，改用两份构件，`'.body.panel.field_c'` 与 `'.body.panel.field_f'`，各以 `props.scale` 的 `'c'` 或 `'f'` 值指示采用 Celsius 摄氏度，还是 Fahrenheit 华氏度。代码如下：
+
+``` bash
+01 var scaleNames = { c:'Celsius', f:'Fahrenheit' };
+02 
+03 function onChange(event) {
+04   var degree = parseFloat(event.target.value) || 0;  // take NaN as 0
+~~   var scale = this.props.scale || 'c';
+~~   this.duals.temperature = [scale,degree];
+07 }
+08 
+~~ idSetter['.body.panel.field_c'] = idSetter['.body.panel.field_f'] = function(value,oldValue) {
+10   if (oldValue == 1) {
+11     utils.setChildren(this,[ <t.Legend key='legend'></t.Legend> ,
+~~       <t.Input key='input' type='text' defaultValue='0' $onChange={onChange.bind(this)}/>
+13     ]);
+14   }
+15   
+16   if (value <= 2) {
+17     if (value == 1) {      // init process
+18       this.defineDual('temperature', function(value,oldValue) {
+19         var scale = value[0] || 'c', degree = value[1] || 0;
+20         var legend = this.componentOf('legend'), input = this.componentOf('input');
+21         if (legend) legend.duals['html.'] = 'Temperature in ' + scaleNames[scale];
+22         if (input) input.duals.value = degree + '';
+23       });
+24     }
+25     else if (value == 2) { // on mount, try set default value
+~~       var scale = this.props.scale || 'c', degree = scale == 'c'? 0: 212;
+~~       this.duals.temperature = [scale,degree];
+28     }
+29     return;
+30   }
+31 };
+```
+
+用 `onChange.bind(this)` 让已上举的函数适应不同的 Component，温度的格式（`'c'` 或 `'f'`）与度数，在 `"legend"` 与 `"input"` 两个子节点用到，现在将它上举，在父节点定义 `duals.temperature`，编程更容易了。这种把用于控制下层节点行为的 “函数或变量”，转移到上层实现，便是 “Lifing State Up” 的概念。
+
+#### idSetter 的三级定制
+
+前面已介绍定义构件行为有 3 种方式：WTC、投影类、idSetter 函数。把它们串起来理解，我们实质上在 3 个环节，保证了构件高度可定制性。
+
+1. 继承已有 WTC 来创建新的 WTC，构件全部行为可在新 WTC 定制。
+2. 取现有 WTC，用 `WTC._createClass(defs)` 绑捆一个投影类，实现另一层面的定制。
+3. 在投影类里，用 `$id__` 指定 idSetter 函数，然后借助 idSetter 再实施一层定制。
+
+有了这 3 级定制，自然实现如下目标：
+1. 技术得到分层，人员得以分工   
+让 ES5 编码与 ES6+ 分离，成就前端开发两大分工：构件（Widget）开发与界面（GUI）开发。
+2. 支持可视化编程   
+描述界面的 JSX 与源码混一起，无法支持可视设计，转义标签解决了这个问题；构件行为若被 class 类定义限制，也无法支持可视化，`WTC._createClass(defs)` 动态捆绑解决了这个问题。
+3. 从 MVC 框架进化到 MVVM   
+这种进化可以上升到哲学高度，“函数式开发” 收获灵活性，但丧失直观易用性，而 “指令式开发” 正相关。Shadow Widget 独特创新正是将两种优势高效的融合起来。
+
+#### 从 MVC 到 MVVM 框架
+
+如 React 官方宣传的那样，原生 React 提供了虚拟 DOM，可视作 MVC 框架中的 View，但由于 JSX 描述虚拟 DOM，内嵌于 javascript 代码中，导致它的 View 并不独立，界面呈现与业务实现纠缠一起，给编码与维护带来很大困扰。
+
+![MVC framework](md/res/mvc.jpg)
+
+Shadow Widget 提供 W 树、双源驱动、可计算属性等机制，MVC 框架因此顺利演进到 MVVM（Model-View-ViewModel）。
+
+![MVVM framework](md/res/mvvm.jpg)
+
+在 MVVM 框架中，3 种逻辑处理得到良好分离：
+1. 界面逻辑（UI Logic），由 View 处理，也就是我们用转义标签描述的那部分。
+2. 展现逻辑（Presentation Logic），由 ViewModel（即 VM）处理，投影定义是 VM，前面介绍 `$id__` 的 setter 函数等效于投影定义，也可用作 VM。
+3. 业务逻辑（Business Logic），由 Model 处理，创建 VM 传入的 props 数据，或在 `componentDidMount()` 时发送请求获得的 json 数据，都属于 Model。   
+说明：Model 是满足业务需求的数据模型，对于简单应用，Model 缩减为几项平白数据，但对于复杂应用，宜独立封装出类似可称作 `DataCenter` 的实体，集中处理业务数据间的底层逻辑，提供查询、存贮、转换等功能。
+
+&nbsp;

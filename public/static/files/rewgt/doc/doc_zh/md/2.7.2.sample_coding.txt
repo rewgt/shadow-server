@@ -1,0 +1,124 @@
+2.7.2 编程惯例
+--------------
+
+&nbsp;
+
+Shadow Widget 中的全局定义，除上一节提到的公共模块，还有：构件定义，CSS 文件，JS 文件等。前面手册已有不少介绍，本节着眼于编程惯例，补充介绍若干知识。所谓惯例，通常是建议性质的，并不强制，但理解并遵循它对开发有益。
+
+#### 理解构件关系
+
+Shadow Widget 除了提供 [原生构件](#2.1.5.!org_widget)，还内置定义若干常用构件，很显然，扩展了这些非原生构件，并不意味着内置 WTC 就够用了。那么，内置式扩展 WTC 定义的原则是什么？边界在哪儿？
+
+焦点在于 “布局”，Shadow Widget 要封装与 DOM 布局相关的功能，一方面是可视化界面设计需求，另一方面是简化产品开发需要。所以，内置扩展什么，不扩展什么，主要视扩展的构件对 “布局” 是否产生影响而定。
+
+要简化编程，先理清网页编程中各元素的关联关系，进行恰当分类，然后 **抽像出若干易用、普适的应用范式**。比如，“面板” 反映了 “功能块” 快速布局的一种范式；“场景页” 对应演示胶片一类应用；Markdown 是简易文档化表述的应用范式，我们把它强化成可定义任意 GUI；“导航面板” 也是一种范式，与 `react-router` 的导航具备替换关系，`react-router` 以 “如何设计 URL 路由” 为第一思考方式，导航面板则进化成以 “如何操作可视界面” 为第一思考方式。
+
+Shadow Widget 描述四种构件关系：顺序、包含、导航、层叠。
+
+1. 顺序，指同级紧邻构件之间的定位关系
+2. 包含，指父级与子级构件之间的定位关系
+3. 导航，动态可选择的让构件切入显示
+4. 层叠，栈式浮窗形态，最后显示的要最先关闭
+
+上述 4 种关系相对完备，虽未囊括所有情形，但常见的、典型的应用形式已较好覆盖。具体而言：flex 布局既处理顺序关系，也处理包含关系，流式布局处理顺序关系，表格布局既处理顺序关系，也处理包含关系，绝对定位使构件从顺序关系中游离出来，场景页则提供屏幕中心为基点的绝对定位机制。
+
+#### 一条重要的设计原则
+
+Shadow Widget 兼存函数式风格与指令式风格，构件的 “属性定义” 是这两种风格的交汇点。为了保证两种处理是等效的，首先，我们 **将构件的属性数据看作一种 “资源”**，类似于 RESTful 接口设计，将原先基于过程的各种操作，抽像成资源管理，用统一的 `GET, POST, PUT, DELETE` 方法实现各种功能。其次，对 React 内置方法附加若干约束，或约定，遵守一条原则：**所有控制逻辑都集中在 `render()` 中处理**。
+
+细化一下这条原则：
+
+1. `getInitialState()` 中的代码一般只用来安装回调函数，包括：   
+ - 注册双源属性   
+注册也就是登记 setter 回调函数，给双源属性赋值时，最终在 `render()` 中通过调用 setter 函数实现。
+ - 侦听父级节点的双源属性   
+触发函数也是回调函数，回调最终也是在 `render()` 中运行的。侦听源若非本级或父级节点，可能无法保证它的 duals 属性已就绪，我们不妨可改在 `componentDidMount()` 中登记侦听。
+ - 分析特定 props 属性值做特定处理   
+通常只能分析构件生存期内固定不变的属性，否则，应改在其它地方实施。
+ - 调用 `setEvent()` 以编程方式安装事件回调函数   
+比如 `$onClick` 函数，既能在投影类中定义，也允许在首次 `render()` 之前调用 `this.setEvent({$onClick:func})` 进行安装。
+
+2. `componentDidMount()` 一般用来登记侦听，以及触发初始化相关的动作
+
+3. `componentWillUnmount()` 一般用来清理现场、卸载回调函数
+
+总之，在 `render()` 之前的工作都是预备、注册、登记，本质是为 render 渲染输出做准备，`render()` 开始后，各种控制逻辑集中在 `render()` 调用中生效，即使像 `onClick` 事件在 `render()` 之外执行，但处理过程中若涉及自身或其它构件的 “资源”（`duals.attr`）更改，最终实现各 `duals.attr` 更替，也都在 `render()` 调用中进行。
+
+#### 内置支持的 CSS 文件
+
+所有基于 Shadow Widget 开发的程序，都要求在 html 页面用 `<link>` 标签导入 `sw_base.css` 文件，因为许多内置构件的 CSS 规格在此文件定义。比如 Panel 的 flex 布局、TablePanel 的表格布局等，另外 `sw_base.css` 还确立 Shadow Widget 程序对字号的使用规则，参见 [“通用配置：字体大小”](#2.1.2.!font)。
+
+`sw_base.css` 定义了如下常用 class 类：
+
+1. 文本是否可选   
+`select-txt  noselect-txt`
+
+2. 字体大小   
+`default-large-small  large-small-default  small-default-large`
+
+3. `text-align` 对齐   
+`default-align_center-right  align_center-right-default  right-default-align_center`   
+`left-align_center-right  align_center-right-left  right-left-align_center`
+
+4. `overflow` 选项   
+`overflow_auto  overflow_hidden  overflow_visible`   
+`auto-hidden-visible  hidden-visible-auto  visible-auto-hidden`   
+`x_auto-hidden-visible  hidden-visible-x_auto  visible-x_auto-hidden`   
+`y_auto-hidden-visible  hidden-visible-y_auto  visible-y_auto-hidden`
+
+5. `visibility` 选项   
+`default-hidden  hidden-default`
+
+6. 行高   
+`p0-p1-p2-p3  p1-p2-p3-p0  p2-p3-p0-p1  p3-p0-p1-p2`
+
+7. `list-style` 选项   
+`default-square-circle  square-circle-default  circle-default-square`
+`decimal-alpha-roman  alpha-roman-decimal  roman-decimal-alpha`
+
+8. 表格行或单元格 hover 选项   
+`default-row_hover-col  row_hover-col-default  col-default-row_hover`
+
+#### <a name="user_link"></a>用户扩展 CSS 文件
+
+用户可以自己定义一个 CSS 文件，用 `<link>` 标签导入进来，比如：
+
+``` html
+<link rel="stylesheet" shared="true" href="css/my.css" />
+```
+
+指定 `shared="true"` 便于在可视化编辑环境下，弹出窗口编辑构件内容时，让该处引入的 CSS 文件在弹窗中也自动生效。
+
+#### <a name="js_module"></a>用户扩展 JS 文件，成为 MAIN 模块
+
+前文 [“准备 JS 编码工作环境”](#1.3.1.!prepare_env) 已介绍一个通用的 **“MAIN 模块”** 如何编写，实际开发中，大家可能编写多份 “MAIN 模块”，保存到多个 `*.js` 文件。假设我们已编写 `module_a.js` 与 `module_b.js` 文件，用 `<script>` 标签把它们导入到当前网页，如下：
+
+``` html
+<script src="js/module_a.js"></script>
+<script src="js/module_b.js"></script>
+
+<link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
+<script src="/app/files/rewgt/web/js/react.min.js"></script>
+<script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
+```
+
+用户开发的 “MAIN 模块” 应在 `react, react-dom, shadow-widget` 库之前导入。因为 “MAIN 模块” 中所做的，无论是登记投影定义，还是在 `main.$onLoad` 注册初始化回调函数，都要由 Shadow Widget 库接管，最终完成初始化工作。
+
+用户扩展的各个 “MAIN 模块” 应按如下框架编程：
+
+``` js
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
+var W = require('shadow-widget');
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
+
+// write your code here ...
+
+});
+```
+
+&nbsp;

@@ -1,0 +1,6 @@
+<div $=Panel key='panel' klass='visible-auto-hidden'>
+  <div $=P key='p1' width='{0.9999}' padding='{[0,0,0,30]}' sty__='background:blue;color:white'>Hello, world!</div>
+  <div $=Div key='p2' width='{100}' height='{40}' sty__='background:red'></div>
+  <div $=Div key='p3' width='{100}' height='{40}' border-width='{4}' sty__='border-color:gray'></div>
+  <div $=Div key='p4' width='{100}' height='{30}' border-width='{1}' margin='{5}' sty__='border-color:blue'></div>
+</div>

@@ -15,42 +15,7 @@
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div $=BodyPanel key='body'>
-  <div $=Panel key='top'>
-    <div $=NavPanel key='nav' width='{0.9999}' height='{80}' $for=''>
-      <div $=P key='opt'>
-        <span $=Span key='txt' dual-data='{["text",0]}' 
-          $html='duals("./opt.txt").data + ""'></span>
-        <span $=Br></span>
-        <span $=Label key='lab'>
-          <span $=OptInput type='radio' key='btn' trigger='{[["./opt.txt",{"$set":["text",1]}]]}'></span>
-          <span $=Span>trigger</span>
-        </span>
-        <span $=Label key='lab2'>
-          <span $=OptInput type='radio' key='btn2'></span>
-          <span $=Span>trigger2</span>
-        </span>
-      </div>
-    </div>
-    
-    <div $=NavPanel key='nav2' width='{0.9999}' height='{80}' dual-data='{0}' $for=''>
-      <div $=P key='log' width='{0.9999}'>
-        <span $=Span $html='"time: " + duals.data'></span>
-        <span $=Br></span>
-        <span $=OptButton key='test' recheckable='1' fire-type='onsite' 
-          $trigger='[["./",{$set:ex.time()}]]'>Test</span>
-      </div>
-    </div>
-    
-    <div $=NavPanel key='nav3' width='{0.9999}' height='{80}' dual-data='{0}' $for=''>
-      <div $=P key='log' width='{0.9999}'>
-        <span $=Span $html='"time: " + duals.data'></span>
-        <span $=Br></span>
-        <span $=Button key='test' fire-type='none'
-          $trigger='[["./",{$set:1}]]'>Test</span>
-      </div>
-    </div>
-  </div>
+<div $=BodyPanel key='body'> 
 </div>
 </div>
 <!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
@@ -62,25 +27,41 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var W = require('shadow-widget');
-var main = W.$main, utils = W.$utils, ex = W.$ex;
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
 
-main['.body.top.nav.opt.lab.btn'] = {
-  componentDidMount: function() {
-    this._componentDidMount(this);
-    
-    var self = this;
-    this.listen('data-checked', function(value,oldValue) {
-      console.log('data-checked =',value);
-      self.duals.trigger = [["./opt.txt",{"$set":["text",ex.time()]}]];
-    });
-  },
+var idSetter = W.$idSetter;
+
+idSetter['test.info'] = function(value,oldValue,attr) {
+  if (oldValue == 1) {
+    var ele = utils.loadElement( ['P', { key:'p',
+      $html: 'duals.data.name + ": " + duals.data.age',
+      $name: 'duals.data.name',
+      $id__: function(value,oldValue) {
+        if (oldValue == 1) {
+          this.listen('name', function(value,oldValue) {
+            console.log('name changed:',value);
+          });
+        }
+      },
+    }]);
+    utils.setChildren(this,[ele]);
+  }
 };
 
-main['.body.top.nav3.log.test'] = {
-  $onClick: function(event) { // not recheckable, but call 'utils.fireTrigger()'
-    utils.fireTrigger(this,[["./",{$set:ex.time()}]]);
+/*
+utils.bindMountData( {
+  'test.info': {
+    data: {name:'geroge',age:20},
   },
-};
+}); */
+
+main.$onLoad.push( function() {
+  var bodyComp = W.body.component;
+  var ele = utils.loadElement( ['Div',{ key:'div', $for:'',
+    'dual-data':{name:'untitled',age:0}, $id__:'test.info',
+  }]);
+  bodyComp.setChild(ele);
+});
 
 });
 </script>
@@ -88,6 +69,7 @@ main['.body.top.nav3.log.test'] = {
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

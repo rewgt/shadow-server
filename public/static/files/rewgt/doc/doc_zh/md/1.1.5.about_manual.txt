@@ -1,0 +1,55 @@
+1.1.5 关于本手册
+----------------
+
+&nbsp;
+
+#### 关于本系列教程
+
+本系列教程是 Shadow Widget 官方推出的正式入门文档，适合 WTC 封装者与 GUI 开发者两类用户使用。本教程由若干本手册组成，包括：
+
+1) [理论篇：Widget 层接口](#1.)
+
+ > 介绍 Shadow Widget 技术体系的主要概念与基础用法，涉及转义标签、WTC类、双源属性、W 树、单向数据流、MJI 解释器等。重点讲解 Widget 构件的通用知识，不涉及具体构件的具体应用，具体的各个基础构件的用法将在 “基础篇：在网页中编程” 中介绍。
+ 
+2) [基础篇：在网页中编程](#2.)
+
+ > 系统化介绍 Shadow Widget 内置支持的各个基础构件，包括：面板、分区、导航、选项、模板、场景页、Markdown 等构件。
+
+> 对于 GUI 开发者而言，以上 “理论篇” 与 “基础篇” 是重点学习材料。
+
+3) [进阶篇：工程化开发](#3.)
+
+> 重点介绍 WTC 封装所需的各项知识，另外还介绍深入使用 Shadow Widget（即高级应用），须掌握的若干知识点。
+
+> 对于 WTC 封装者，以上 “理论篇”、“基础篇” 与 “进阶篇” 是重点学习材料。
+
+本教程还提供 [“4. API手册”](#4.) 与 [“5.可视化设计使用手册”](#5.)，作为日常参考书，在开发过程中，供大家随时查阅。
+
+#### 学习 Shadow Widget 的捷径
+
+Shadow Widget 基于 React，所以，React 应首先要学好，如果您刚上手学 React，如下 React 内容 Shadow Widget 未涉及，略过不学也是可以的：
+
+1. mixin
+2. PropTypes
+3. Context
+4. Web Components
+5. Higher-Order Components
+
+学习 Shadow Widget 的重点是 “理论篇”、“基础篇” 与 “进阶篇” 三本手册，请按顺序学习，我们推荐在学习中结合样例代码，实地操作一遍。
+
+除了手册，您还可参考 [Shadow Widget 的产品博客](https://rewgt.github.io/product-blogs/)，了解更多背景知识。
+
+#### 相关工程
+
+Shadow Widget 作为一个通用的 Web 前端开发框架，在它之上会发展出许多软件，有重要参考价值的开源项目，会在 [Shadow Widget 项目主页](https://github.com/rewgt/shadow-server) 列出，我们会不定期整理、介绍优质的，基于 Shadow Widget 的第 3 方软件。
+
+Shadow Widget 官方已推出数个基于 Shadow Widget 的项目，包括：
+
+ - [一个简易的用户手册制作系统](https://github.com/rewgt/shadow-book)
+ - [一种演示胶片制作系统](https://github.com/rewgt/shadow-slide)
+ - [简便的博客管理与免费托管系统](https://github.com/rewgt/blogs)
+ - [bootstrap 构件库](https://github.com/rewgt/shadow-bootstrap)
+
+这些项目均有完善的文档，使用与研究都方便，因为开源，还可用作样例，供大家在源码层面深度研究，尤其是 “bootstrap 构件库”，把它琢磨一遍，仿照它，相信大家能轻松封装出自己的构件库。
+
+&nbsp;

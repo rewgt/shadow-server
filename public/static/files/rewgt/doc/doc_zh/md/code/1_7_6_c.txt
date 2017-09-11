@@ -1,0 +1,11 @@
+<div $=Div key='div' $for='' dual-data='{5}'>
+  <div $=P $if='duals.data >= 1 && duals.data <= 4'>
+    <span $=Span $if='duals.data >= 3'>
+      <span $=Span $if='duals.data == 3'>data = 3</span>
+      <span $=Span $else=''>data = 4</span>
+    </span>
+    <span $=Span $elif='duals.data == 1'>data = 1</span>
+    <span $=Span $else=''>data = 2</span>
+  </div>
+  <div $=P $else=''>others</div>
+</div>

@@ -1,0 +1,74 @@
+2.4.2 浮层窗口
+-------------
+
+&nbsp;
+
+#### 弹出浮层窗口
+
+先定义弹窗界面，比如让弹窗显示如下 `.body.top.msg` 节点的内容：
+
+``` html
+01 <div $=Panel key='top'>
+~~   <div $=Div key='msg' padding='{[0,6,0,6]}'>
+~~     <div $=P>Hello, world!</div>
+~~   </div>
+05 </div>
+```
+
+然后用如下 javascript 弹出浮层窗口：
+
+``` js
+01 var bodyComp = W.W('.body').component;
+02 
+03 var ele = bodyComp.elementOf('.body.top.msg');
+04 var popOption = { width:0.7, height:200 };
+~~ utils.popWin.showWindow(ele,popOption, function() {
+~~   console.log('popup window has shown, opened =',popOption.opened);
+~~ });
+```
+
+函数 `utils.popWin.showWindow(element,popOption,callback)` 用于弹出浮层窗口，弹出的窗口将浮现于当前界面之上，弹窗底部有一层背景蒙板（通常是半透明的）。弹窗浮现后，用鼠标点击窗口之外的区域，也就是在蒙板上点击，可以关闭该窗口。这 3 个参数中，`element` 是浮窗要展示的内容，`popOption` 是弹窗配置，`callback` 为弹窗显示后的自动回调函数。
+
+任意非行内构件，都可用作弹窗的展示内容，`comp.elementOf(sPath)` 用于从 W 树取得指定节点的 React Element，参数 `sPath` 可以传绝对路径，也可以传相对路径。
+
+#### <a name="pop_option"></a>弹窗配置
+
+弹窗配置 `popOption` 内容较多，这里只介绍几项主要配置。
+
+- `left` 与 `top`，指定弹窗的左上角位置，取值为像素值（大于等于 1）或百分比（0 ～ 0.9999），如果缺省未给出，系统按 “弹窗在屏幕居中” 自动计算其左上角位置。
+
+- `width` 与 `height`，指定弹窗的长与宽，取值为像素值（大于等于 1）或百分比（0 ～ 0.9999`），如果缺省未给出，自动取值 `0.8`（即 80%）
+
+- `state.opened`，指示弹窗是否已展示，值为 `true` 表示弹窗已在显示，值为 `false` 表示弹窗已关闭。这个值是系统在弹出或关闭弹窗时自动设置的。
+
+- `bodyStyle`，指定弹窗主体内容的 `style` 值。
+
+- `manualClose`，用来指示弹窗是否手工关闭，缺省是 `false` 自动关闭，即，用鼠标点击背景蒙板就关闭弹窗。
+
+- `callback`，弹窗关闭后的自动回调函数。
+
+上面例子中 `.body.top.msg` 节点用来定义弹窗内容，弹出窗口时通过节点克隆创建新界面展示出来，被克隆的源头节点保持不变。源节点通常缺省不显示，浮窗弹出后才显示，把源节点的 `style.display` 设为 `none` 就可以了，或者把源节点改放在模板（如 TempPanel）下也行。
+
+然后改用如下 `popOption`：
+
+``` js
+01 var popOption = { width:0.7, height:200,
+~~   bodyStyle: {display:'block', backgroundColor:'#eee'},
+03 };
+```
+
+以上用 `popOption` 指定弹窗内容可见，背景色设为 `#eee`。
+
+关于 `popOption`，上面未涉及的配置项还有：为弹窗背景蒙板指定颜色、透明度，定制弹窗边框等，完整规格请参考 [API 手册中相关章节](#4.2.2.!pop_win)。
+
+说明：浮层弹窗是模态的，窗口关闭后才可继续操作其它界面。但这个模态是 “伪模态”，它并不像 javascript 中的 `alert` 弹窗，`alert` 弹窗会挂住 javascript 运行，但浮层弹窗不会。浮层弹窗只是借助背景蒙板来隔离界面操作，比如用蒙板屏蔽鼠标点击、双击等操作。
+
+#### 如何关闭弹窗
+
+弹窗可以有多层，一层套一层，每调用一次 `utils.popWin.showWindow()` 就叠加一层。
+
+如果弹出窗口时，`popOption.manualClose` 设为 `true`，表示该弹窗要通过 `utils.popWin.popWindow(retData)` 调用才可关闭。该函数用 `retData` 参数指示返回值，如果 `popOption` 给出了 `callback` 回调函数，窗口关闭时，系统会自动回调：`popOption.callback(retData)`。
+
+多层弹窗需关闭多次，从最顶层开始，每调用一次 `utils.popWin.popWindow()` 就关闭一层。
+
+&nbsp;

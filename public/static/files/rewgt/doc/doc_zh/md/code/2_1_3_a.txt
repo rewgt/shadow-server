@@ -1,0 +1,6 @@
+<div $=Panel key='panel' klass='nowrap-default-wrap_reverse align_center-right-default' sty__='color:white'>
+  <div $=P key='p1' width='{80}' sty__='background:gray'>80px</div>
+  <div $=P key='p2' width='{100}' sty__='background:red'>100px</div>
+  <div $=P key='p3' width='{-0.4}' sty__='background:blue'>-0.4</div>
+  <div $=P key='p4' width='{-0.6}' sty__='background:green'>-0.6</div>
+</div>

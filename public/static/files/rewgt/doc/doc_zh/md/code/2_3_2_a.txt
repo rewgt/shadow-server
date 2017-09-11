@@ -1,0 +1,6 @@
+<div $=Panel key='row' width='{500}' klass='row-reverse'
+     $for='item in ["#eee","#ddd","#ccc","#bbb","#aaa","#999"]'>
+  <div $=Panel $key='"a" + index' width='{100}' height='{40}' 
+     margin='{4}' $style='{backgroundColor:item}'>
+  </div>
+</div>

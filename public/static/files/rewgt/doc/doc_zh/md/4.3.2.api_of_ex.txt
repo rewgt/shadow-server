@@ -41,7 +41,7 @@
 
 ##### <a name="eval_info"></a>`evalInfo()`
 
-> 用于查询当前可计算表达式的相关信息，返回值为 `[component, attrName, iTimeId]`，其中 `attrName` 是当前正在运算的可计算属性，`component` 是当前可计算属性所在的 R 节点，`iTimeId` 指示当前可计算表达开始计算的时间，是毫秒为单位的整数值。如果查询失败，返回 `undefined`。
+> 用于查询当前可计算表达式的相关信息，返回值为 `[component, attrName, iTimeId]`，其中 `attrName` 是当前正在运算的可计算属性，`component` 是当前可计算属性所在的节点，`iTimeId` 指示当前可计算表达开始计算的时间，是毫秒为单位的整数值。如果查询失败，返回 `undefined`。
 
 ##### <a name="ajax"></a>`ajax(config,initValue)`
 

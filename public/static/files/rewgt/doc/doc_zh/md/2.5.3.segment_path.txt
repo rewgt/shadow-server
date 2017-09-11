@@ -1,0 +1,112 @@
+2.5.3 段路径
+-----------
+
+&nbsp;
+
+#### 导航段路径表达方式
+
+可选导航具备功能分组的特性，我们常用导航面板（NavPanel 或 NavDiv）归拢一组专为某功能而设计的构件，成为一个导航段。
+
+举例来说，比如一个界面定义如下：
+
+```
+   +- body (BodyPanel)
+   |   +- top (Panel)
+   |   |   +- nav (NavPanel)
+   |   |   |   +- p (P)
+   |   |   |   |   +- a (OptButton)
+   |   |   |   |   +- b (OptButton)
+   |   |   |   |   +- c (OptButton)
+   |   |   |   +- a (GroundDiv)
+   |   |   |   |   +- nav2 (NavPanel)
+   |   |   |   |   |   +- x (GroundDiv)
+   |   |   |   |   |   |   +- p (P)
+   |   |   |   |   |   +- y (GroundDiv)
+   |   |   |   +- b (GroundDiv)
+   |   |   |   |   +- ul (Ul)
+   |   |   |   |   |   +- li (Li)
+   |   |   |   +- c (GroundDiv)
+```
+
+节点 `".body.top.nav"` 开启一个导航段，`".body.top.nav.a.nav2"` 又开启另一个导航段。表达路径时可用字符 `'/'` 表示开启导航段，导航面板下的场景面板因为可选，表现为分支路径，如：`"/a", "/b", "/c"`，上述界面中几个节点的路径可描述如下：
+
+```
+  .body.top.nav.a            描述为： /a
+  .body.top.nav.b.ul         描述为： /b.ul
+  .body.top.nav.a.nav2.x     描述为： /a/x
+  .body.top.nav.a.nav2.x.p   描述为： /a/x.p
+```
+
+上述略去非可选节点的路径表达形式，称为 “段路径” 方式。
+
+在同一导航段内，可用 `"./"` 指示 “当前段” 根节点，比如，在上面 `".body.top.nav"` 开启的导航段内，用相对路径 `"./"` 指示 `".body.top.nav"` 节点，用 `"./p.a"` 指示 `".body.top.nav.p.a"` 节点。另外，相对路径 `"../"` 表示 “前一段” 根节点，`"../../"` 表示 “前一段的前一段” 的根节点。
+
+比如，在 `".body.top.nav.a.nav2.x.p"` 节点（`comp`）定位 `".body.top.nav.b.ul"` 节点，可以这么实现：
+
+``` js
+var targComp = comp.componentOf('../b.ul');
+```
+
+这是 **“相对段路径”** 的引用方式，比较有用。当前段内均以类似于 `"./seg1.seg2"` 的方式相互引用，让本段与外界独立开来，有利于提高产品的可移植性、可维护性。
+
+#### 用段路径实现路由
+
+把若干导航段用字符 `'/'` 串起来，形成段路径。若用当前网页 URL 的 hash 指定段路径，系统将自动实现路径选择，比如：在浏览器地址栏输入：
+
+``` html
+localhost:3000/demo14/#/b
+```
+
+网页打开后，系统按 `"/b"` 段路径自动跳转，其效果相当于用 `"localhost:3000/demo14/"`  （不带段路径）打开网页，然后手工点击该例子中的  `page B` 按钮，切换到 key 为 `"b"` 的活页。
+
+为描述方便，这种以 “段路径” 引导界面功能展示的导航过程，我们称 “段路由导航”，简称 **“段路由”**。
+
+段路由导航时，我们还可以段路径的末尾添加 `"!anchor"` 的方式，指示网页在按段路由导航后，再跳转到网页的 `"#anchor"` 锚点位置。例如：`"localhost:3000/demo14/#/b/!abc" 最后跳至 `<a name="abc">` 锚点定义处。
+
+#### 以编程方式实现段路由
+
+若以编程方式实现 “段路由”，调用如下 API：
+
+``` js
+var sHash = '/b/!abc';
+utils.gotoHash(sHash,callback)
+```
+
+用 `sHash` 指示段路径，跳转后 `callback` 自动被调用，`callback` 带一个参数 `sRetHash`，其值若为空字串表示跳转失败，否则其值是当前成功跳转的段路径。
+
+#### 结合段路由的 hash 导航
+
+在 Shadow Widget 中很容易构造类似 react-router 那样的路由机制，下面给一个例子（参见样例 demo15），大致思路是：用 `window.onhashchange` 捕获当前网页的 URL 变化，提取出 `location` 的 `hash` 部分字串，得到段路径。然后用 `utils.gotoHash()` 实现跳转。
+
+主要代码如下所示：
+
+``` js
+  window.onhashchange = function() {
+    var sHash = window.location.hash;
+    sHash = sHash? sHash.slice(1): '';
+    
+    if (sHash) {
+      utils.gotoHash(decodeURIComponent(sHash), function(sRetHash) {
+        if (sRetHash) console.log('Jump successful:',sRetHash);
+      });
+    }
+  };
+  
+  function jumpToHash(sHash) {
+    window.open(sHash,'_self');
+  }
+```
+
+#### 用 hash 导航切换场景页
+
+如果定义了若干场景页，我们用 `#0` 、`#1` 等带 hash 参数的 URL 路径打开网页，相应的场景页将自动显示。如前面 [“切换场景页”](#2.4.3.!hash_jmp) 已举例。
+
+我们还可在 hash 参数，将跳转到哪个场景页及其下某段路径合起来写，实现双重跳转。
+
+``` html
+http://localhost:3000/demo16/#third_pg/b
+```
+
+这个例子先跳至 `third_pg` 场景页，然后再路由至其下 `"/b"` 段路径。
+
+&nbsp;

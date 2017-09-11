@@ -1,0 +1,30 @@
+2.2.1 引用已存在节点
+--------------------
+
+&nbsp;
+
+基础篇的 [“节点引用”](#1.5.5.) 已介绍引用的基础用法，这一节，我们介绍若干深入些的用法。
+
+#### <a name="hidden"></a>使用 `HiddenDiv` 与 `HiddenSpan`
+
+内置构件 `HiddenDiv` 继承自 `Div`，仅指定 `style.display` 为 `none`，使该节点及其下节点缺省不显示到界面。我们不妨将被引用的节点定义到 `HiddenDiv` 之下，比如：
+
+<div $='.rewgt.ui_demo' src='md/code/2_2_1_a.txt' input-height='{160}'></div>
+
+类似的，`HiddenSpan` 继承自 `Span`，也缺省不显示到界面，被引用的行内构件可挂在它下面，比如：
+
+<div $='.rewgt.ui_demo' src='md/code/2_2_1_b.txt' input-height='{170}'></div>
+
+说明：`HiddenDiv` 与 `HiddenSpan` 在可视设计器中是可见的，便于让界面设计过程所见即所得。
+
+#### 分离数据
+
+节点引用是一种 **数据驱动框架**，它实现两项功能：
+1. 重用了被引用节点的界面设计
+2. 引用时指定不同数据来驱动不同界面
+
+如下是典型用法，在被引用节点用 `for` 指令循环生成列表项，引用时传入 `duals.data` 数据，`duals.data.list` 指示列表项，`duals.data.active` 指示哪个是活动项。
+
+<div $='.rewgt.ui_demo' src='md/code/2_2_1_c.txt' input-height='{270}'></div>
+
+&nbsp;

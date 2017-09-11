@@ -1,0 +1,11 @@
+<div $=TablePanel klass='row_hover-col-default'>
+  <div $=TableRow>
+    <div $=Panel width='{100}' height='{40}'><div $=P>A</div></div>
+    <div $=P width='{200}'>B</div>
+    <div $=P td-style='{{"color":"red"}}'>C</div>
+  </div>
+  <div $=TableRow>
+    <div $=P col-span='{2}'>D</div>
+    <div $=P>E</div>
+  </div>
+</div>

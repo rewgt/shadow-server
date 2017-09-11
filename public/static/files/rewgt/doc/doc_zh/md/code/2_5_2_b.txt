@@ -1,0 +1,11 @@
+<div $=NavPanel key='nav' width='{0.9999}' height='{100}'>
+  <div $=P key='p' width='{0.9999}'>
+    <span $=OptButton key='a' data-checked='1'>page A</span>
+    <span $=OptButton key='b'>page B</span>
+    <span $=OptButton key='c' isolated='1'>page C</span>
+  </div>
+  
+  <div $=GroundDiv key='a'>It is page A</div>
+  <div $=GroundDiv key='b'>It is page B</div>
+  <div $=GroundDiv key='c'>It is page C</div>
+</div>

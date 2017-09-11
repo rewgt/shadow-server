@@ -1,0 +1,7 @@
+<div $=Div key='div'>
+  <div $=HiddenDiv key='hidden'>
+    <div $=P key='hello' width='{0.9999}'>Hello, world!</div>
+  </div>
+  <div $='//hidden.hello' sty__='color:red'></div>
+  <div $='//hidden.hello'>How are you?</div>
+</div>

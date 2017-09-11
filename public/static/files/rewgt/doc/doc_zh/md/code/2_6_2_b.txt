@@ -1,0 +1,11 @@
+<div $=NavPanel $for='' dual-data='{[]}'>
+  <pre $=MarkedDiv key='mark' sty__='display:none' $trigger='["./",{$set:duals("./mark").nodes}]'>
+<div $=P key='first'>First paragraph.</div>
+<div $=P key='next'>Next paragraph.</div>
+</pre>
+  
+  <div $=Ol>
+    <div $=Li $html='((duals.data.first||{}).props||{})["html."]'></div>
+    <div $=Li $html='((duals.data.next||{}).props||{})["html."]'></div>
+  </div>
+</div>

@@ -1,0 +1,3 @@
+<div $=Ul key='list' $$for='item in duals.data' dual-data='{["item1","item2","item3"]}'>
+  <div $=Li $key='"a"+index' $html='item'></div>
+</div>

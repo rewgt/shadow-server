@@ -1,0 +1,9 @@
+<div $=Div key='div'>
+  <div $=Div key='div2' sty__='display:none'>
+    <div $=P key='p1'>Demo 1</div>
+    <div $=P key='p2'>Demo 2</div>
+  </div>
+  <div $=Div key='list' $for='item in [ex.elementOf("//div2.p1"),ex.elementOf("//div2.p2")]'>
+    <div $=VirtualDiv $key='"a" + index' $children='item'></div>
+  </div>
+</div>

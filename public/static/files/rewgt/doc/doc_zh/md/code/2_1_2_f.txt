@@ -1,0 +1,5 @@
+<div $=Panel key='panel' klass='nowrap-default-wrap_reverse' height='{40}'>
+  <div $=Div key='div1' width='{80}' height='{0.9999}' sty__='background:#f4f4f4'></div>
+  <div $=SplitDiv key='split'></div>
+  <div $=Div key='div2' width='{100}' height='{0.9999}' sty__='background:#f4f4f4'></div>
+</div>

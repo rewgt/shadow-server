@@ -1,0 +1,106 @@
+2.5.2 导航构件
+---------------
+
+&nbsp;
+
+可选导航是若干构件组合起来的应用，它由一个 “导航面板”（NavPanel 或 NavDiv）、1 个或多个 “选项构件”，以及 N 个 “场景面板”（GroundPanel 或 GroundDiv）组成。当某个的选项构件被选中，相应的场景面板就自动切入显示。
+
+#### 一个简单例子
+
+用转义标签定义界面（见样例 demo14）：
+
+``` html
+<style>
+.ctrl-page {
+  margin: 0px 2px 0px 0px;
+}
+.ctrl-page[data-checked="1"] {
+  color: #c00;
+}
+</style>
+
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div $=BodyPanel key='body'>
+  <div $=Panel key='top' klass='auto-hidden-visible'>
+    <div $=NavPanel key='nav' width='{0.9999}' height='{200}'>
+      <div $=P key='p' width='{0.9999}'>
+        <span $=OptButton klass='ctrl-page' key='a' data-checked='1'>page A</span>
+        <span $=OptButton klass='ctrl-page' key='b'>page B</span>
+        <span $=OptButton klass='ctrl-page' key='c'>page C</span>
+      </div>
+      
+      <div $=GroundDiv key='a'>It is page A</div>
+      <div $=GroundDiv key='b'>It is page B</div>
+      <div $=GroundDiv key='c'>It is page C</div>
+    </div>
+  </div>
+</div>
+</div>
+```
+
+展示如下界面：
+
+> ![用按钮切换页面](md/res/button_nav_panel.png)
+
+本例用一个导航面板（NavPanel）包含所有构件，面板下定义 3 个选项构件（上图第一行 3 个按钮，用 OptButton 定义），及 3 个动态选择显示的场景面板（GroundDiv），如上图显示 "It is page A" 的构件是其中一个。当用鼠标点击第一行各个按钮时，相应的场景面板将切换进来显示，即：这里的按钮相当于页标签，点选不同标签显示不同页面。
+
+说明：导航面板的动态换页，与场景页（ScenePage）切换有所不同，前者每次切入场景面板（GroundPanel 或 GroundDiv）都会创建 Component，切出则删除 Component，而后者场景页的切换只是把指定页面显示出来，各页 Component 早已创建，切换过程中也不删除。
+
+#### <a name="ground"></a>场景面板
+
+Shadow Widget 中，只有 `GroundPanel` 或 `GroundDiv` 能用作场景面板，前者对应于 `Panel`，后者对应于 `Div`。
+
+说明，Panel 与 Div 主要差别是：前者按 flex 对其内容布局，后者以 block 流方式布局。同理，NavPanel 与 NavDiv 的主要差别也是布局方式，一个类 Panel，一个类 Div。
+
+一个场景面板相当于一个可选显示的活页。切换活页，相当于切换场景。在一个 “可选导航” 功能组内，一次只能展示一个活页，未被展示的连 Component 实体都不存在。设计界面时，一般要将 “选项构件” 与 “场景面板” 一一对应起来，以同名 `key` 作为对应依据，如上例中，点击 key 为 `"a"` 的按钮，将活页切到 key 为 `"a"` 的 GroundDiv 面板。
+
+#### <a name="nav_panel"></a>导航面板
+
+导航面板主要有两个功能，其一是把多个 “选项构件” 与 “场景面板” 集合起来，形成一个功能模组，其二是让各模组独立成段，便于用 “段路径” 标记位置（参见下一节介绍）。
+
+导航面板只能用 `NavPanel` 与 `NavDiv` 二者之一来构造，它为一个功能模组确定边界，比如 “选项构件” 与 “场景面板” 用 key 关联时，限在本级导航面板下查找直属的，同 key 值的 `GroundPanel` 或 `GroundDiv`。
+
+场景面板必须直接挂在导航面板下，选项构件则可挂在导航面板下任意级别，只需避免与同 key 值场景面板同处一层，因为这样有命名冲突。
+
+导航面板还可以指定替身，有时场景面板由 `$for` 指令自动生成时，使用一个子层的替身导航面板，才容易把界面描述出来。比如这个例子。
+
+<div $='.rewgt.ui_demo' src='md/code/2_5_2_a.txt' input-height='{190}'></div>
+
+在这个例子中，子层导航面板 `NavDiv` 是上一级 `NavPanel` 的替身，替身仅在场景面板切换时起作用，无其它特殊功能。
+
+导航面板用 `duals.checkedId` 表示当前选中哪个场景面板，其值为当前场景面板的 `key` 值。该双源属性是只读的，不可写，侦听它可感知场景面板何时被切换。选项构件的 `duals['data-checked']` 也常用作侦听，捕获状态变迁，构造单向数据流动的响应式系统。
+
+此外，导航面板还支持通过定义 `canNavigateTo(sKey)` 类方法，动态判断是否允许切换当前场景面板，详情请见 [API 手册](#4.4.2.!nav_panel)。
+
+#### “场景面板切换器” 与 “选项触发器” 的差异
+
+所有选项构件都既可用作 “场景面板切换器”，也可用作如上节介绍的 “选项触发器”，这两种应用主要差异有：
+
+1. 前者不重复触发，切换到某场景面板做一次就够了，第二次相同操作被忽略，而 “选项触发器” 通常可以反复点击，允许连续触发。
+
+2. 前者选项构件与 “导航面板” 及 “场景面板” 存在弱关联，点击选项构件时，系统会前向查找它所属的 “导航面板”，而且同一导航面板下多个选项构件是多选一关系，一个选中，其它自动取消选中。但 “选项触发器” 独立使用，其功能类似于附加了特定操作的按钮。
+
+Shadow Widget 为选项构件提供 `duals.recheckable` 与 `duals.isolated` 两个属性，来平衡两种应用的差异。即：设置 `recheckable='1'` 后选项构件允许连续触发，设置 `isolated='1'` 禁止选项构件前向查找，让构件孤立使用，就成为 “选项触发器” 了。
+
+#### 隔离选项构件
+
+比如，在如下 `page C` 按钮设置 `isolated='1'`，隔离后，点击该按钮将不再切换导航面板。
+
+<div $='.rewgt.ui_demo' src='md/code/2_5_2_b.txt' input-height='{220}'></div>
+
+反之，改设 `isolated=''`，该按钮恢复可切换功能。
+
+说明：
+1. `duals.isolated` 只影响场景面板切换，不影响其它动作响应。
+
+2. 一个选项构件如果使用了 `props.$trigger` 或 `props.popOption`，系统自动视它为 “选项触发器”，否则视为 “场景面板切换器”。
+
+3. 通常情况下，“场景面板切换器” 的 `isolated` 与 `recheckable` 均 “非真”，而对于 “选项触发器”，这两属性一般取 “真” 值。所以，一个选项构件的 `props.isolated` 与 `props.recheckable` 如果未指定，系统视它用作 “选项触发器” 还是 “场景面板切换器”，自动为 `duals.isolated` 与 `duals.recheckable` 设置合适的初值。如果不想让系统自动设置，明确传入 `props.isolated` 及 `props.recheckable` 即可。
+
+#### 选项构件适用性
+
+为表达不同的界面形态，宜选择合适的选项构件，非行内的可选择 `OptDiv, OptLi`，行内的选择 `OptSpan, OptA, OptImg, OptButton, OptInput`，还有 `OptOption` 要在 `Select` 下使用。
+
+由于选项构件已用 `data-checked` 表达是否选中，我们不必再用 `OptInput` 的 `checked` 属性，或 `OptOption` 的 `selected` 表达是否选中，一律改用 `data-checked`，相应的 `checked` 与 `selected` 请忽略不用。
+
+&nbsp;

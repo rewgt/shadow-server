@@ -1,0 +1,4 @@
+<div $=P key='p' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
+  <span $=OptButton key='btn' fire-type='onsite'
+        $trigger='["",{$set:duals.data.name},"html."]'>Click me</span>
+</div>

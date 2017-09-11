@@ -1,0 +1,91 @@
+3.4.4 分离驱动数据
+----------------
+
+&nbsp;
+
+#### 数据在构件生存期内的流动性
+
+一个构件在创建时（专指首次 render 之前），只有 `props.attr` 传入一种外部控制方式，首次 render 后，有 `props.attr, duals.attr, state.attr` 三种控制方式，而在卸载，即 `componentWillUnmount()` 被调后，构件自动从 W 树拆离，数据在构件中只是被保存，不再参与 “单向数据流” 驱动机制。
+
+上述过程中，一个构件挂入 W 树发生在首次 `render()` 调用之前，而 React Component 节点挂载，即 `componentDidMount()` 被调，发生成首次 `render()` 之后，所以，**首次 `render()` 调用时，构件尚未就绪**，此时，它的子节点还没定义，它自身也没纳入 React 内部的虚拟 DOM 树进行管理。只有 `componentDidMount()` 被调后，它自身及创建时指定的子节点构件才就绪，在 React 的虚拟 DOM 树及 W 树同时存在。
+
+对于被纳入 `duals.attr` 的 `props.attr` 属性而言，双源属性的初值决定传入的 `props.attr` 是否会触发一次 duals 属性赋值的 setter 调用。
+
+下面代码列举了给双源属性指定初值的常见方式：
+
+``` js
+  // ...
+  
+  getInitialState: function() {
+    var state = this._getInitialState(this);
+    
+    this.defineDual('dismissed');   // default value is undefined
+    this.defineDual('role',null,'button');   // default value is 'button'
+    this.defineDual('active',null,this.props.active); // default value is props.active
+    
+    state.bsStyle = 'info';
+    this.defineDual('bsStyle');     // default value is 'info'
+    
+    return state;
+  }, 
+```
+
+调用 `defineDual()` 注册双源属性时，如果未指定缺省值，系统自动取 `undefined`，如上面 `dismissed` 属性，当传入的 `props.attr` 值与 `duals.attr` 缺省值 “不恒等” 时，构件创建时将自动触发一次 `duals.attr` 的 setter 函数调用（首次 `render()` 时被调），反之，如果 “恒等”，如上面 `duals.active`，构件创建时不会触发相应的 setter 调用。
+
+为方便描述，我们把从 props 传入并在首次 `render()` 渲染时就起作的数据，称为构件的 **“初始化数据”**，而之后触发驱动状态变化的数据，称为 **“驱动数据”**。
+
+#### 从 idSetter 函数分离驱动数据
+
+让构件表现常规功能，我们通常在构件就绪时（即 `componentDidMount()` 被调时），给构件喂数据，开始启动 “单向数据流” 驱动。在 idSetter 函数中，编程如下：
+
+``` js
+01 idSetter[sPath] = function(value,oldValue) {
+02   if (value <= 2) {
+03     if (value == 1) {       // getInitialState
+04       // ...
+05     }
+06     else if (value == 2) {  // componentDidMount
+~~       this.duals.attr1 = value1;
+~~       this.duals.attr2 = value2;
+09     }
+10     else if (value == 0) {  // componentWillUnmount
+11       // ...
+12     }
+13     return;
+14   }
+15 };
+```
+
+Shadow Widget 提供 `utils.bindMountData(data)` 接口，用于构件就绪时自动插入若干 `this.duals.attr = value` 语句，相当于换一种方式书写上面 `07, 08` 行代码。
+
+比如：
+
+``` js
+01 idSetter[sPath] = function(value,oldValue) {
+02   // ...
+03 };
+04 
+~~ utils.bindMountData( {
+~~   sPath: { __attr__: ['attr1','attr2'],
+~~     attr1: value1,
+~~     attr2: value2,
+~~   },
+~~ });
+```
+
+调用 `utils.bindMountData(data)` 时，系统会遍历 `W.$idSetter` 下所有已定义的 idSetter 函数，从参数 `data` 找出相同 `key` 的数据项，在这个例子中 `data[sPath]` 对应于 `idSetter[sPath]`，系统会在 `idSetter[sPath]` 的 setter 函数捆绑特定处理，即，相当于在 `idSetter[sPath]` 函数被调后叠加如下语句：
+
+``` js
+if (value == 2) {  // componentDidMount
+  this.duals.attr1 = value1;
+  this.duals.attr2 = value2;
+}
+```
+
+数据项中 `__attr__` 固定用来表达对各个 `duals.attr` 赋值的顺序，有关 `bindMountData` 的接口规格，请参考 [API 手册](#4.2.3.!bind_mount_data)。
+
+产品中 `utils.bindMountData(data)` 通常只调一次，而且在常规初始化函数（包括 `main.$onLoad` 与 `main.$$onLoad`）之前调用，在诸多 `idSetter[sPath] = function(value,oldValue) { ... }` 定义后马上调用即可。
+
+把驱动数据游离出来，方便了调测，也方便通过给 W 树喂不同数据，来展示各式界面原型。甚至，还不只是调测，我们可将此机制带入发行版本，把游离的驱动数据，保存到独立的配置文件。
+
+&nbsp;

@@ -49,50 +49,50 @@ W.__debug__ = 1;
 
 #### 使用两个为调测服务的 API
 
-打开 `__debug__` 开发后，W 树中各个 W 节点（注意：不是 R 节点，参见 [W节点与R节点](#2.2.3.) ）将多出两个 API 可用于调测：
+打开 `__debug__` 开发后，W 树中各个节点（`comp.widget`）将多出两个 API 供调测：
 
 1. `widget.queryById(id)`   
-所有 W 节点在创建时，系统都给它分配一个唯一值序号，记录在 `widget.$id` 属性中，本 API 用于在 widget 节点下找到指定 id 号的 W 节点。例如：   
+所有 W 树中的节点在创建时，系统都给它分配一个唯一值序号，记录在 `widget.$id` 属性中，本 API 用于在 widget 节点下找到指定 id 号的节点。例如：   
 &nbsp;&nbsp;&nbsp; `console.log(W.body.$id);`   
 &nbsp;&nbsp;&nbsp; `wdgt = W.queryById(10);`   
 &nbsp;&nbsp;&nbsp; `comp.widget.queryById(12);`
 
 2. `widget.addShortcut(sApi,sApi2, ...)`   
-addShortcut 用于往 W 节点添加若干在 R 节点定义的类方法，例如：   
+`addShortcut` 用于往 W 树的指定节点添加若干 Component 类方法，例如：   
 &nbsp;&nbsp;&nbsp; `W.body.addShortcut('setChild','componentOf');`   
 &nbsp;&nbsp;&nbsp; `console.log(W.body.componentOf('top'));`
 
-调用 `addShortcut()` 后，诸如 `W.body.component.componentOf()` 可以简写为 `W.body.componentOf()`，书写调测脚本变方便了。
+调用 `addShortcut()` 后，诸如 `W.body.component.componentOf()` 可以简写为 `W.body.componentOf()`，书写调测脚本方便些。
 
 #### 使用 `W.$dataSrc`
 
-`W.$dataSrc` 用于给 R 节点附加数据源，系统导入转义标签会自动捆绑在 `W.$main` 定义的投影类，此时，如果 `W.$dataSrc` 也为相关节点定义了若干属性，这些属性也自动被添加。
+`W.$dataSrc` 用于给构件节点附加数据源，系统导入转义标签时，会自动捆绑在 `W.$main` 定义的投影类，此时，如果 `W.$dataSrc` 也为相关节点定义了若干属性，这些属性也自动被添加。
 
 举例来说，假设 `.body.top.p.btn` 是一个按纽，预定义如下代码：
 
 ``` js
-  var dataSrc = W.$dataSrc = {};
+var dataSrc = W.$dataSrc = {};
 
-  main['.body.top.p.btn'] = {
-    $onClick: function(event) {
-      console.log(this.duals.msg);
-    },
-  };
+main['.body.top.p.btn'] = {
+  $onClick: function(event) {
+    console.log(this.duals.msg);
+  },
+};
 
-  dataSrc['.body.top.p.btn'] = { 'dual-msg': 'Hello, world!' };
+dataSrc['.body.top.p.btn'] = { 'dual-msg': 'Hello, world!' };
 ```
 
 系统运行后，点击这个按钮，您将发现该节点的 `duals.msg` 值将正确被打印。
 
 `W.$dataSrc` 缺省值为 `undefined`，含义为 “不附加任何数据源”，我们须用赋值语句 `W.$dataSrc = {}` 启用它。而且，是否启用 `W.$dataSrc` 不依赖于 `W.__debug__` 取值，您既可以在调试或测试时用它，甚至可以在正式发行版中用它。不过 `W.$dataSrc` 在可视设计器中并不生效。
 
-被附加的属性数据等效于在转义标签中直接定义，因为附加数据可从界面定义剥离，很符合调测口味，所以，我们常用它构造自动化测试框架。
+被附加的属性数据等效于在转义标签中直接定义，在构件创建前处理。因为附加数据可从界面定义剥离，很符合调测口味，所以，我们常用它构造自动化测试框架。
 
 #### 启用 `__nobinding__` 开关
 
-如 ["idSetter预定义"](#3.4.4.) 一节介绍，使用 idSetter 函数与在 `W.$main` 定义投影类等效，当开发者只用前者 idSetter，而没用后者时，为了加快页面首次打开的速度，不妨启用 `__nobinding__` 开关。
+如 ["idSetter预定义"](#3.4.2.) 一节介绍，使用 idSetter 函数与在 `W.$main` 定义投影类等效，如果开发者只用 idSetter，而没用后者投影类时，为加快产品首页打开速度，不妨启用 `__nobinding__` 开关。
 
-按如下方式启用该开关：
+可按如下方式启用它：
 
 ``` html
 <script>
@@ -102,6 +102,6 @@ W.__nobinding__ = 1;
 
 这与启用 `W.__debug__` 类似，同样，在 React 根节点用 `__nobinding__` 属性也能启用它。
 
-`W.__nobinding__` 缺省取值为 "非真"，当它取真值时，表示系统导入转义标签时，将忽略捆绑 `W.$main` 中定义的投影类，所以，运行效率有所提高。
+`W.__nobinding__` 缺省取值为 "非真"，当它取真值时，表示系统导入转义标签时，将忽略捆绑 `W.$main` 中定义的投影类，所以，运行效率稍有提高。
 
 &nbsp;

@@ -1,0 +1,14 @@
+<div $=P key='p'>
+  <span $=Select key='sel' value='b'>
+    <span $=Option value='a'>Item A</span>
+    <span $=Option value='b'>Item B</span>
+    <span $=Option value='c'>Item C</span>
+  </span>
+  
+  <span $=Span>&nbsp; </span>
+  <span $=Select key='sel2' value='{["b","c"]}' multiple='1'>
+    <span $=Option value='a'>Item A</span>
+    <span $=Option value='b'>Item B</span>
+    <span $=Option value='c'>Item C</span>
+  </span>
+</div>

@@ -1,0 +1,96 @@
+3.4.1 jsx 与 json-x
+------------------
+
+&nbsp;
+
+用 json-x 描述界面与用 React 的 JSX 等效，如果当前编程环境不支持 babel 转译，比方只用 ES5 做开发，我们只能用 json-x 替代 JSX，书写稍显麻烦。
+
+前文 [“使用 json-x”](#1.5.2.) 已介绍 json-x 基础知识，本节补充介绍 jsx 与 json-x 的高级用法。
+
+#### 用 JSX 描述构件
+
+JSX 描述的是 React 原生 Element 对象，json-x 描述的是 Shadow Widget 构件的 Element 对象，这两种 Element 规格相同，只是后者隐含若干约束，包括：父子节点是有关联的，当 Element 实例化变成 Component 并挂入 W 树时，系统会添加 `comp.widget` 等配置。
+
+JSX 能正常描述构件的 Element，比如：
+
+``` js
+var t = utils.getWTC('*');
+var element = <t.P width={0.9999}>Hello, world!</t.P> ;
+```
+
+用 `comp.setChild()` 或 `utils.setChildren()` 安装用 JSX 描述的 Element 时，系统会自动处理相关的父子从属关系。
+
+#### json-x 中可以嵌套 JSX
+
+比如：
+
+``` bash
+01 var Btn__ = T.Button._createClass();
+02 
+03 var jsonX = [ ['P',{key:'txt'}],
+~~   <Btn__ style={{color:'red'}}>test</Btn__>,
+05   [Btn__,{'html.':test2}],
+~~   <br/>,
+~~   <span>It is second line.</span>,
+08 ];
+09 var element = utils.loadElement(jsonX);
+```
+
+上面 `04, 06, 07` 行都是 JSX 描述方式。
+
+说明：
+1. json-x 同时支持 `[Btn__,{'html.':test2}]` 与 `['Button',{'html.':test2}]` 描述方式。
+2. 如果 json-x 下用 JSX 描述的节点非 WTC 定义，这样的子节点（如上面 `06, 07` 行描述的节点）能正常显示，但不挂入 W 树。
+
+#### 获得 WTC 类
+
+WTC 实例经 [`WTC._createClass(defs)`](#4.4.2.!widget) 调用得到 React Class，如果未指定 `defs` 参数，表示创建非定制的 React Class，否则要捆绑指定的 `defs` 投影类。如果调用 `WTC._createClass(null)` 表示取 `T` 模块下该 WTC 的非定制 React Class，而且该 React Class 经过缓存，以免多次调用时反复创建。
+
+用 `WTC._createClass()` 逐个获取非定制 React Class 比较麻烦，我们不妨改用 `utils.getWTC()` 批量获取。比如：
+
+``` js
+  var t = utils.getWTC(['Panel','Button','usr.Submit']); // t.Panel, t.Button, t.Submit
+  var t = utils.getWTC('*');        // t.Panel, t.Span, ...
+  var usr = utils.getWTC('usr.*');  // usr.Submit
+  var t = utils.getWTC(['*','usr.Submit']);  // t.Panel, t.Span, ... t.Submit
+```
+
+用通配符 `'*'` 表示取 `T` 下直属的所有定义，用 `usr.*` 表示取 `T.usr` 下所有定义，其它类推。更详细用法请查阅 [API 手册](#4.2.3.!get_wtc)。
+
+#### 导入并捆绑投影类
+
+除了 [`utils.loadElement()`](#4.2.3.!load_element) 用于导入 json-x，系统还提供 [`utils.loadElementEx()`](#4.2.3.!load_element_ex) 用于导入 json-x 并尝试与在 `main` 定义的投影类做捆绑。
+
+举例来说，这么定义界面：
+
+``` html
+<div $=Panel key='top' height='{null}'>
+  <div $=P key='p'></div>
+</div>
+```
+
+我们在 `.body.top.p` 的 `P` 节点下，用 json-x 安装一个按钮 Button 子节点（key 为 `'btn'`），先定义按钮的投影类：
+
+``` js
+main['.body.top.p.btn'] = {
+  $onClick: function(event) {
+    alert('clicked');
+  },
+};
+```
+
+这个投影类只定义了 onClick 事件函数。之后调用 `utils.loadElementEx()`：
+
+``` js
+01 main.$onLoad.push( function() {
+02   var comp = W.W('.body.top.p').component;
+~~   var element = utils.loadElementEx('.body.top.p',['Button',{key:'btn','html.':'Click me'}]);
+04   comp.setChild(element);
+05 });
+```
+
+`utils.loadElementEx(sPrefix,jsonX,...)` 与 `utils.loadElement(jsonX,...)` 用法很接近，前者要额外用一个 `sPrefix` 参数来帮助定位 main 入口下的投影类定义，两者的其它参数及返回值格式是相同的，即：如果传入一个 json-x 数据，返回一个 Element，如果传入多个 json-x，则返回一个容纳了多个 Element 的数组。
+
+这个例子中，路径前缀 `sPrefix` 为 `'.body.top.p'`，叠加上导入按钮的 `'btn'` 尾路径，全路径就是 `'.body.top.p.btn'`，系统自动到 `main['.body.top.p.btn']` 取得投影定义，并将它捆绑到按钮构件。
+
+&nbsp;

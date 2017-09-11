@@ -1,0 +1,10 @@
+<div $=TempDiv key='temp'>
+  <div $=P key='p' dual-data='{{"width":200,"height":120,"resize":"none","readOnly":""}}'
+       $width='duals.data.width' $height='duals.data.height'>
+    <span $=Textarea $style='{width:"100%",height:"100%",resize:duals.data.resize}'
+       $read-only='duals.data.readOnly'></span>
+  </div>
+</div>
+
+<div $='//temp.p' $trigger='["",{$merge:{readOnly:"1"}}]'></div>
+<div $='//temp.p' $trigger='["",{$merge:{width:300,resize:"both"}}]'></div>

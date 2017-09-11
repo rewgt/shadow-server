@@ -3,11 +3,26 @@
 
 &nbsp;
 
-从本节起，开始介绍如何以 “创建工程的方式” 开发 Shadow Widget 程序。
+从本节起，开始介绍如何以 “创建工程的方式” 开发 Shadow Widget 程序，创建工程是搭建 Bable 转译环境所必须的环节。 
 
-前面 [“基础篇：在网页中编程”](#2.) 介绍的开发方式是：不必创建工程环境，在 html 页面引入 Shadow Widget 库文件，然后用转义标签描述界面，再用 ES5 定义投影类，即完成所有开发。
+前端开发分为构件（Widget）开发与界面（GUI）开发。后者只需简单技能，前者要用 ES6+ 封装 WTC 类，要求完整技能。本手册重点介绍如何封装 WTC，以及本体系深入些的知识，如何调试、测试、扩展界面库等。
 
-即将介绍的工程化开发，划分为两个层次，上层仍是前面介绍的 “转义标签描述界面 + ES5 定义投影类”，下层则用 ES6（或 ES7）编码，要搭建工程环境，借助 babel 代码转译，聚焦于底层 “构件模板类”（Widget Template Class，WTC）的开发。换一句话说，“上层开发” 使用现成的 WTC，“下层开发” 为了向上层提供 WTC，以及若干必要的 lib 库。
+#### 版本兼容性
+
+由于 React 从 V15.5.0 版本开始把 `React.createClass` 移出到 `create-react-class` 模块，这引入了如下不兼容性：
+
+1. Shadow Widget 库增加 `create-react-class` 依赖库   
+在 package.json 文件中增加 `"create-react-class": "^15.5.0"` 项目
+2. Shadow Widget 库内部改用 `require('create-react-class')` 获得 `React.createClass`   
+因涉及 `require` 导入，Babel 转译无法让 React 15.5.0 以后版本与之前兼容。
+3. **在网页文件导入 CDN 库时增加 `create-react-class`**   
+在导入 `react` 与 `react-dom` 库后，增加语句：`<script src='path/to/create-react-class.min.js'></script>`
+
+为顺应 React 升级，**Shadow Widget 用 v1.0.5 以前版本支持 React v15.4 以前版本，用 v1.1.0 以后版本支持 React v15.5 以后版本，而且，React v15.x 以前版本在 Shadow Widget 1.1.0 以后不再支持。**（说明：React 为了兼容，在 v16 推出前 `React.createClass` 仍可用，所以，Shadow Widget 1.0.5 以前版本仍实际支持 React v15.x 所有版本，只不过针对 React v15.5+ 有告警提示。）
+
+上面所列 3 个不兼容项，前两项已被 shadow-widget 发布件屏蔽（用户不必再关注），只有第 3 项需要用户在网页文件手工添加。
+
+后面举例，我们以 Shadow Widget v1.1.0 以后版本为准。
 
 #### 新建一个空白工程
 
@@ -31,16 +46,14 @@
 ``` bash
   npm install --save-dev babel-preset-es2015 babel-preset-react babelify
   npm install --save-dev watchify
-  npm install --save react@~15.4.0
-  npm install --save react-dom@~15.4.0
-  npm install --save shadow-widget
+  npm install --save react@^15.5.0
+  npm install --save react-dom@^15.5.0
+  npm install --save shadow-widget@^1.1.0
 ```
 
 其中，babelify 用于把 ES6 代码转译为 ES5，babel-preset-es2015 与 babel-preset-react 是转译必需的两个组件，watchify 封装了 browserify，能识别工程源码是否更改，若更改自动启动转译。babelify 与 watchify 只服务于开发过程，不打包到被开发软件的发行版本。
 
-Shadow Widget 支持 `React 0.14` 以后的版本，如果您想用 React 旧版本，上面命令中 `react@~15.4.0` 与 `react-dom@~15.4.0` 改为 `react@~0.14` 与 `react-dom@~0.14`。
-
-还有 3 个库（react、react-dom、shadow-widget）是当前工程所依赖的基础库，最终要打包到发行版本中。
+有 4 个库（react、react-dom、create-react-class、shadow-widget）是当前工程所依赖的基础库，最终要打包到发行版本中。
 
 4) 编写入口文件 index.js，在当前工程目录创建 index.js 文件，拷贝如下内容到这个文件：
 
@@ -183,8 +196,7 @@ else if (useWebpack) {
 <!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 
 <script>
-if (!window.W) { window.W = new Array(); W.$modules = [];}
-W.$modules.push( function(require,module,exports) {
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
 
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -204,6 +216,6 @@ var main = W.$main, utils = W.$utils, ex = W.$ex;
 
 之后，在浏览器中打开 `http://localhost:3000/sample_dev/`，看看是否正确显示 `"Hello, world!"` 信息。
 
-当然，您需事先启动 Shadow Widget 的本地 WebService 服务，这么操作：另起一个命令行终端，进入安装路径的 `shadow-server` 目录，运行 `npm start` 即可，参见基础篇里已介绍的 [简单示例](#1.4.) 一节。
+当然，您需事先启动 Shadow Widget 的本地 WebService 服务，可以这么操作：另启一个命令行终端，进入安装路径的 `shadow-server` 目录，运行 `npm start` 即可，参见前面已介绍的 [“简单示例”](#1.1.4.) 一节。
 
 &nbsp;

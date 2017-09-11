@@ -1,0 +1,91 @@
+1.7.1 可计算属性
+---------------
+
+&nbsp;
+
+可计算属性（Derivable property）用 `'$'` 前缀来标识，其值是一个可解释执行的 javascript 表达式字串。
+
+#### 一个简单例子
+
+如下定义界面：
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_1_a.txt' input-height='{80}'></div>
+
+我们在 `p` 节点定义 `duals.data`，然后在它的子节点（`desc`）设置可计算属性 `$value`，该属性提供一个 “可计算表达式”，表达式的运算结果将赋值给 `duals.value`。
+
+Shadow Widget 将 `'$'` 前缀的属性名视作可计算属性，除去数个系统保留的命名，凡遇此方式命名的都是可计算属性。与可计算属性对应的双源属性，如本例 `$value` 对应 `duals.value`，系统会自动注册。
+
+解析运行一个可计算表达式，需在调用空间下进行，本例中 **`$for=''` 用于开启一个调用空间（callspace）**，属于固定用法。如果不开启调用空间，可计算属性将无法被解释执行。
+
+#### 可计算属性自动更新
+
+上面程序运行中，如果 `p` 节点 `duals.data` 的值被改，`$value` 表达式将自动重新计算。
+
+比如我们在上面 `desc` 节点之后添加一个节点：
+
+``` html
+<span $=Span key='trig' $trigger='["//",{$set:{name:"George",lastName:"lee"}}]'></span>
+```
+
+新增的节点在创建时自动计算 `$trigger`，并用计算结果触发 `update()` 动作，让 `p` 节点的 `duals.data` 值获得更新。
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_1_b.txt' input-height='{110}'></div>
+
+说明：
+1. `$trigger` 也是可计算属性，它的常见用法是：构件初始化时该表达式自动计算，得到 “动作定义” 数据，然后触发 “动作定义”。更多用法见下一节 [“解析触发 trigger”](#1.7.2.)。
+2. 本例中 `$value='duals.data.name + " " + duals.data.lastName'` 表达式，让 `duals.value` 与数据源 `duals.data` 自动建立侦听关系，数据源若有变化，`$value` 表达式将自动触发再次计算。
+
+#### 调试可计算属性
+
+Shadow Widget 为可计算表达式提供一个与 `console.log()` 类似的函数用于调试：`ex.log()`。比如，这么修改上例中 `$value` 表达式：
+
+``` js
+$value='ex.log(duals.data.name), duals.data.name + " " + duals.data.lastName'
+```
+
+再跑这个例子，您将发现浏览器控制台先后打印 `"Wayne"` 与 `George` 两项信息，这证明 `$value` 表达式运算过两次。
+
+说明：可计算属性的脚本表达式要求是一个算式，而不是语句，“逗号” 在 javascript 中也是一种运算符，含义是：依次计算经它分割的各项，并返回最后一项计算值。所以，上面用 “逗号运算” 插入调试信息打印，并不影响计算结果。
+
+#### 可计算表达式中的属性引用
+
+上面已举例 “可计算表达式” 中使用类似 `duals.data` 的属性引用。除了 `duals.attr`，`props.attr` 与 `state.attr` 属性也能引用。不过，**只有对双源属性 `duals.attr` 的引用，才能在源数据变化时，自动触发表达式重计算。**
+
+`duals.attr`、`props.attr` 与 `state.attr` 在表达式中直接使用，均表示从当前调用空间（callspace）所在的节点读数据。调用空间可以有多层，在不同节点用 `$for=''` 标记就各自启用一层 callspace，每层 callspace 都挂靠到一个构件节点，当前调用空间（或者说最近调用空间）是指向上搜索能找到的第一个 callspace。
+
+由于这种向上搜索的定位特点，`duals.attr`、`props.attr`、`state.attr` 也可书写为 `duals(0).attr`、`props(0).attr`、`state(0).attr`，我们常用简写形式，不必将 `"(0)"` 也标出。
+
+若再向上定位一层 callspace，取它的相关属性，可写成：
+
+```
+  duals(-1).attr    props(-1).attr    state(-1).attr
+```
+
+往上再找一层，则是：
+
+```
+  duals(-2).attr    props(-2).attr    state(-2).attr
+```
+
+以此类推，用 `-3`、`-4` 等常数注明即可，取相应属性都先找到指定 callspace 所在节点。注意：这里层号 **要用常量**，而非用变量来标注，因为自动更新的 listen 机制在表达式编译时刻就生成了，用变量就无法建立侦听。
+
+#### 用 `sPath` 路径定位节点
+
+除上用 `0, -1, -2` 等数值定位节点外，Shadow Widget 还支持使用如下方式：
+
+```
+  duals(sPath).attr    props(sPath).attr    state(sPath).attr
+```
+
+含义为：先找当前 callspace（即 0 层 callspace）所在的节点，然后以它作参考基点，用 `sPath` 路径查找目标节点。`sPath` 通常用相对路径，不过绝对路径也可以。因侦听需要，与上述 `0, -1, -2` 等要用常量一样，`sPath` 也要求用字串常量。
+
+#### <a name="special_dual"></a>几个特殊的可计算属性
+
+1. `$html` 用来动态更新 `html.` 属性的值，比如：   
+` <span $=Span key='txt' $html='"Hello, " + duals.data.name'></span>`
+
+2. `$data` 相比于常规的可计算属性，差别仅在于：在一次界面刷新中，它比本节点其它可计算属性先被计算。我们常用 `$data` 集中表达入口数据，然后引用该数据（通常引用它的局部数据），形成若干延伸的可计算属性。因 `$data` 比其它表达式更早计算，这让延伸的属性更 **“及时”** 获得同步。
+
+3. `$trigger` 表达式的计算结果会赋给 `duals.trigger`，并随之尝试触发 trigger 动作。
+
+&nbsp;

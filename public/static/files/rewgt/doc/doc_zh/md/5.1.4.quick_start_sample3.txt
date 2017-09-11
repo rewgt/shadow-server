@@ -28,14 +28,13 @@
 将上述修改存盘，然后在 test1 工程目录下创建 `src/my_module.js` 文件，为该 JS 文件保存如下源码：
 
 ``` js
-if (!window.W) { window.W = new Array(); W.$modules = [];}
-W.$modules.push( function(require,module,exports) {
+if (!window.W) { window.W = new Array(); W.$modules = [];} W.$modules.push( function(require,module,exports) {
 
 var React = require('react');
 var ReactDOM = require('react-dom');
 
 var W = require('shadow-widget');
-var main = W.$main, utils = W.$utils, ex = W.$ex;
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
 
 main['.body.root.toolbar.btns.test'] = {
   $onClick: function(event) {

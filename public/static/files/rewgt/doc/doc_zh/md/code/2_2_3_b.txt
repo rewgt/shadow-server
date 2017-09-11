@@ -1,0 +1,7 @@
+<div $=TempDiv key='temp'>
+  <div $=P key='p'>
+    <span $=Span key='txt' sty__='font-weight:600'>It is an example.</span>
+  </div>
+</div>
+
+<div $='//temp.p' styles='{{"txt":{"color":"blue"}}}'></div>

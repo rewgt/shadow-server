@@ -1,0 +1,83 @@
+1.3.2 WTC 类定义
+-----------
+
+&nbsp;
+
+#### 创建一个 WTC 类的过程
+
+创建一个新的 WTC 类，要用到 ES6 的 `class` 语法，在浏览器还没广泛支持 ES6+ 语法之前，大家只能借助 Babel 之类的工具做翻译。先找一个合适的 WTC 基类，继承它定义新的 WTC 类。
+
+下面举一个简单例子，无关代码先注释掉。
+
+``` js
+01 class THighlightBtn_ extends T.Button_ {
+02   constructor(name,desc) {
+~~     super(name || 'HighlightBtn',desc);
+04     // setup this._statedProp, this._silentProp, this._defaultProp, etc
+05   }
+06   
+07   getDefaultProps() {
+~~     var props = super.getDefaultProps();
+09     // props.attr = value;
+10     return props;
+11   }
+12   
+13   getInitialState() {
+~~     var state = super.getInitialState();
+15     // init process, such as regist dual prop
+16     return state;
+17   }
+18   
+19   componentDidMount() {
+~~     super.componentDidMount();
+21     // initial process, such as regist listen, fetch ajax data, etc
+22   }
+23   
+24   $onMouseOver(event) {
+25     this.duals.style = {opacity:'0.6'};
+26   }
+27   
+28   $onMouseOut(event) {
+29     this.duals.style = {opacity:''};
+30   }
+31 }
+```
+
+在 WTC 类中可定义 `getInitialState, componentDidMount, componentWillUnmount` 等 React 内置的方法，类似于投影类定义，差别仅在于，在 WTC 中用 `super.method` 调用基类的同名函数，而投影类中，要用带 `'_'` 前缀的 “实例方法” 。定义事件函数（如上面 `$onMouseOver`）则与投影类中的要求一样，没什么特殊的。
+
+说明：
+1. `T.Button_` 是 `Button` 的 WTC 类定义，`T.Button` 则是该 WTC 类实例。其它 WTC 也同样在 `T` 中成对记录，如 `T.P_` 与 `T.P`，`T.Span_` 与 `T.Span` 等。
+2. 构建函数 `constructor(name,desc)` 中的 `name` 参数用来定位 `T` 模块下的该 WTC 类，如果有多段级，如 `T.bs.Button`，传入的 `name` 也要求是多段级，如 `'bs.Button'`。`desc` 参数只用于在可视化编辑器中辅助提示信息，通常缺省，不必指定。
+
+#### 与原生 React Class 定义的对比
+
+React 推荐这么定义一个类：
+
+``` js
+class SomeClass extends React.Component {
+  constructor(props) {
+    super(props);
+    // this.state = {...};
+  }
+  
+  componentDidMount() {
+    // ...
+  }
+
+  render() {
+    // ...
+  }
+}
+```
+
+定义的结果已是 React Class，而 WTC 类需经实例化，调用 `_createClass(defs)` 才得到 React Class。另外，经 WTC 生成的 React Class 已符合 Shadow Widget 的构件层（Widget Layer）接口要求，原生 React Class 提供的接口是元件层（Component Layer），要在 Component 之上增加特定接口定义才变成 Widget。
+
+不过，WTC 与原生 React Class 可以并用，由 WTC 生成的构件（Widget）能自动组装成 “W树”，而原生 React Class 生成的元件（Component）能被构件封装，作为匿名节点也纳入到 “W树” 中，细节将在 [“进阶篇：工程化开发”](#3.) 中介绍。
+
+#### 定义界面行为的途径
+
+Shadow Widget 将界面设计从其它部分独立出来，用转义标签描述，不再像原生 React 那样把 JSX 与 js 源码混写在一起。基于 Shadow Widget 做开发，主要面临两类任务，一是用构件组合出 GUI 样式，二是实现各个构件的行为定义。
+
+构件行为定义有 3 种途径：**投影类、WTC 类、idSetter 函数**。投影类在本手册完整介绍，后两者则在 “进阶篇” 完整介绍。
+
+&nbsp;

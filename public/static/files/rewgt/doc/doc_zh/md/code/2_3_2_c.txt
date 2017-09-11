@@ -1,0 +1,15 @@
+<div $=Panel key='row' klass='row-reverse'>
+  <div $=Panel key='col' width='{300}' height='{200}' klass='col-reverse'
+       $for='item in ["#eee","#ddd","#ccc","#bbb","#aaa","#999"]'>
+    <div $=Panel $key='"a" + index' width='{100}' height='{40}' 
+       margin='{4}' $style='{backgroundColor:item}'>
+    </div>
+  </div>
+  
+  <div $=Panel key='col2' width='{300}' height='{200}' klass='reverse-col'
+       $for='item in ["#eee","#ddd","#ccc","#bbb","#aaa","#999"]'>
+    <div $=Panel $key='"a" + index' width='{100}' height='{40}' 
+       margin='{4}' $style='{backgroundColor:item}'>
+    </div>
+  </div>
+</div>

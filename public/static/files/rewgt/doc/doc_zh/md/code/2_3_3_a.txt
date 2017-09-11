@@ -1,0 +1,6 @@
+<div $=GridPanel sizes='{[100,0.1,-1]}' cell-spacing='{8}'
+     $for='item in [0,1,2,3,4,5,6,7,8]'>
+  <div $=Panel $key='"a" + index' margin='{4}'
+     height='{40}' sty__='background:#ddd'>
+  </div>
+</div>

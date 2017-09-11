@@ -1,0 +1,5 @@
+<div $=Panel key='panel' klass='nowrap-default-wrap_reverse align_center-right-default'>
+  <div $=P key='p1' width='{80}' height='{30}' sty__='background:#f4f4f4'>text 1</div>
+  <div $=SplitDiv key='split' margin='{[6,0,6,0]}' height='{30}' sty__='background:blue'></div>
+  <div $=P key='p2' width='{100}' height='{30}' sty__='background:#f4f4f4'>text 2</div>
+</div>

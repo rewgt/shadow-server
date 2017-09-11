@@ -1,0 +1,13 @@
+<div $=P key='p' $for=''>
+  <span $=Input key='input' type='text' placeholder='Input your name'></span>
+  <span $=Br></span>
+  <span $=Span $html='"inputing: " + duals("input").value'></span>
+  
+  <span $=Br></span><span $=Br></span>
+  <span $=Label key='label'>
+    <span $=Input key='check' type='checkbox'></span>
+    <span $=Span>Checkbox</span>
+  </span>
+  <span $=Span>&nbsp;&nbsp;&nbsp; </span>
+  <span $=Span $html='"checking: " + ex.isTrue(duals("label.check").checked)'></span>
+</div>

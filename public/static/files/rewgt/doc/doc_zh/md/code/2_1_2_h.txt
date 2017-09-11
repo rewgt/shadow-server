@@ -1,0 +1,9 @@
+<div $=Panel key='panel' klass='nowrap-default-wrap_reverse' height='{160}'>
+  <div $=Panel klass='row-reverse' width='{150}' height='{100}' sty__='background-color:blue'>
+    <div $=Panel klass='col-reverse' width='{-1}'>
+      <div $=Panel height='{-1}'></div>
+      <div $=SplitDiv></div>
+    </div>
+    <div $=SplitDiv></div>
+  </div>
+</div>

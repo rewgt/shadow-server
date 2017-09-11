@@ -1,0 +1,65 @@
+1.7.2 解析触发 trigger
+------------------
+
+&nbsp;
+
+前面 [“trigger 触发器”](#1.6.4.) 一节已介绍 “动作定义” 可用 `utils.fireTrigger()` 发起，这属于 “编程触发”，本节介绍另一种触发方式：“解析触发”。
+
+#### 一个例子
+
+上一节有个例子已涉及 “解析触发”，如下：
+
+``` html
+01 <div $=P key='p' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
+02   <span $=Input key='desc' $value='duals.data.name + " " + duals.data.lastName'></span>
+~~   <span $=Span key='trig' $trigger='["//",{$set:{name:"George",lastName:"lee"}}]'></span>
+04 </div>
+```
+
+在 `trig` 节点，可计算属性 `$trigger` 定义一个脚本表达式，该表达式在 `$for=''` 开启的 callspace 空间下被解析运算，运算结果是 “动作定义”，“动作定义” 赋给当前节点的 `duals.trigger` 后，还自动触发。这一触发过程由脚本解释器（我们称为 **MJI 解释器**）解析 `$trigger` 表达式来驱动，所以是 “解析触发”。
+
+#### 指定 `fireType`
+
+Shadow Widget 支持在任意节点定义 `$trigger` 属性，`$trigger` 如何更新计算值，及如何影响触发动作，受传入的 `props.fireType` 值控制。`props.fireType` 支持如下选项：
+
+1. 取值 `'none'`，表示 `$trigger` 按常规可计算属性的方式进行更新，但不额外触发 “动作定义”。当它引用的源头 duals 属性变化后，它会自动更新，计算结果赋给 `duals.trigger`。
+
+2. 取值 `'auto'`，在上述 `'none'` 方式处理过程基础上，如果 `duals.trigger` 得到更新，系统还接着要触发 “动作定义”。
+
+3. 取值 `'onsite'`，表示 `$trigger` 表达式只在 “主动触发”（指选项构件被选中，或编程调用 `utils.fireTrigger()`）时，才重新计算，计算结果赋给 `duals.trigger`，若有更改（指 `duals.trigger` 有变化）就触发该 “动作定义”。而对于 “非主动触发”，`$trigger` 表达式保持静默，并不自动计算。
+
+说明：`fireType` 不是双源属性，它可以缺省，缺省时视作取 `'auto'` 值。另外，`fireType` 只与 `$trigger` 配合使用，如果未定义 `$trigger`，`props.fireType` 将自动忽略。
+
+下面演示 `fireType='onsite'` 的例子，点击 `Click me` 按钮看看会发生什么。
+
+<div $='.rewgt.ui_demo' src='md/code/1_7_2_a.txt' input-height='{110}'></div>
+
+当选项构件（如本例 `OptButton`）点击时，才主动触发 `$trigger` 脚本运算，并触发相应 “动作定义”，这里 “动作定义” 是修改按钮的 `duals['html.']` 值。
+
+#### 借助 `$trigger` 逆向同步数据
+
+借助 `$trigger` 表达式能灵活的实现各种复杂控制，比如，取得相关节点的 `props.attr` 或 `state.attr` 值，运用加减乘除、与或非等常规计算，组装字串，列表排序（`ex.order()`），列表重组（`ex.map()`）、列表过滤（`ex.filter()`）等。
+
+编程中，如果两个或多个节点之间存在数据引用的关系，比如下图中，`nodeE` 引用了在 `nodeC` 定义的数据。
+
+```
+    nodeA
+    +-- nodeB
+    |   +-- nodeC
+    +-- nodeD
+    |   +-- nodeE
+```
+
+因为 `nodeC` 与 `nodeE` 的生存期并不一致，两者可能交叠，但不包含，当存在 nodeE 时 nodeC 未必存在，nodeC 可能是动态安装的。所以，在 `nodeE` 的可计算表达式中，若引用 `nodeC` 中的 `duals.attr` 数据，就存在读取未初始化数据的风险。
+
+但如果我们把数据依赖关系优化一下，把 `nodeC` 中的被依赖数据挪到 `nodeE` 与 `nodeC` 的共同父节点 `nodeA` 上，让 `nodeE` 的可计算表达式，改引用 `nodeA` 的 `duals.attr`，这个风险便安全化解了。因为子节点生存期必然被父节点包含，只要 `nodeE` 存活，`nodeA` 必然存活，数据引用是安全的。
+
+我们已解决数据 “单向依赖” 的问题，现在，接着要解决数据同步的问题。`nodeA` 中的数据要经 `nodeE` 安装，然后供 `nodeE` 读取，可以这么做：
+
+1. 在 `nodeA` 设置供 `nodeE` 使用的特定 `duals.attr` ，赋给缺省值，当然，缺省值供 `nodeE` 处理是安全的。
+2. 在 `nodeC` 用 $trigger 表达式动态更新 `nodeA` 中 `duals.attr`，如 `["////",modifier,attr]`，实现逆向数据同步。
+3. 在 `nodeE` 引用（或侦听）`nodeA` 的 `duals.attr` 数据，当 `nodeA` 中源数据变化，自动触发相应处理。
+
+通过上述改造，经 `nodeA` 转接，我们实际做到了让 `nodeE` 安全的引用 `nodeC` 中的数据。这种方法我们称为：借助逆向数据同步实现的单向依赖机制，简称 **“逆向同步 & 单向依赖”**，它在 Shadow Widget 开发中有着广泛的应用。
+
+&nbsp;

@@ -1,0 +1,132 @@
+3.4.2 idSetter 预定义
+----------------
+
+&nbsp;
+
+#### 用 props 传递 idSetter 函数
+
+前面已介绍如何安装 idSetter 函数，即，先定义 `duals.id__` 的 setter 函数 `id__`，然后调用 `this.defineDual('id__',id__)` 注册该 setter 函数。为了让 idSetter 函数从 WTC 定义体分离出来，Shadow Widget 专门提供 `$id__` 属性，用于传入 idSetter，举例如下：
+
+``` js
+01 function id__(value,oldValue) {
+02   if (oldValue == 1) {  // init process
+03     console.log('in first render()');
+04   }
+05   
+06   if (value <= 2) {    // no need prepare render content
+07     if (value == 1) {  // init process
+08       // ...
+09     }
+10     else if (value == 2) {  // mount process
+11       // ...
+12     }
+13     else if (value == 0) {  // unmount process
+14       // ...
+15     }
+16     return;
+17   }
+18   
+19   console.log('in normal render()');
+20 }
+21 
+22 vat t = utils.getWTC('*');
+~~ var btn = <t.Button $id__={id__}>Test</t.Button> ;
+```
+
+构件创建时如果有 `props.$id__` 函数传入，会自动注册为 `duals.id__`，实质也是通过 `this.defineDual('id__',props.$id__)` 实现。
+
+从构件定义分离 idSetter 定义，好处很明显，其一，idSetter 是超强函数，它几乎等效于投影定义，我们不必规规矩矩的在 `main[sPatn]` 预定义投影类，只需设计一个函数，用 `props.$id__` 传入。其二，如果某功能由若干构件合力提供，这些构件的行为定义最好在同一地方编写，程序逻辑易维护，也方便特定公共变量在小范围共享。
+
+#### 在 idSetter 模块预定义 setter 函数
+
+属性 `props.$id__` 还可以传字串，用字串指示 setter 函数从哪儿找到。比如：
+
+``` js
+01 var idSetter = W.$idSetter;
+02 
+~~ idSetter['highlight-btn'] = function(value,oldValue) {
+04   // ...
+05 };
+06 
+07 vat t = utils.getWTC('*');
+~~ var btn = <t.Button $id__='highlight-btn'>Test</t.Button> ;
+```
+
+如果 `props.$id__` 传字串，系统固定从 `W.$idSetter` 模块（下面称 idSetter 模块）查找 idSetter 定义。因为转义标签中不能定义函数，我们改用 `props.$id__` 传字串，让 idSetter 定义也像投影定义那样从转义标签剥离，让 “界面设计与功能实现” 得以分离。
+
+上述界面如果改用转义标签描述，如下：
+
+``` html
+<span $=Button $id__='highlight-btn'>Test</span>
+```
+
+说明：
+1. 用 `$id__` 字串指向 idSetter 方便了产品开发，因为不必像 `main[sPath]` 指定投影类那样，要严格逐层给出 key 值，尤其对于在 markdown 文本中设计界面，方便太多了。另外，如果多个构件共用一个 idSetter 函数，给各构件 `props.$id__` 传相同字串即可。
+2. 在 idSetter 模块预定义 idSetter 函数时，如何命名各登记项（如上面 `"highlight-btn"`）由设计者自行决定，但要求避开厂商名前缀（比如 `".rewgt."`，因为 `rewgt` 是合法注册的厂商名称），参见 [“idSetter 保留路径”](#3.2.3.!idsetter)。
+
+如果拿不定主意该如何命名 idSetter 登记项，不妨取如下两种之一，或二者并用：
+1. 用类似 `".body.top"` 的绝对路径格式
+2. 用 `"sub_system.sub_module.subject"`，按子系统、子模块、科目等分若干级别，统一编排
+
+#### 与投影类等效的 idSetter 编程
+
+``` js
+01 var idSetter = W.$idSetter, t = utils.getWTC('*');
+02 var randColor = ['red','green','blue','black'];
+03 
+04 idSetter.topPanel = function(value,oldValue) {
+05   if (value <= 2) {
+~~     if (value == 1) {  // init process
+07       this.defineDual('color', function(value,oldValue) {
+08         this.duals.style = {color:value};
+09       });
+10       
+11       this.setEvent( {
+12         $onClick: function(event) {
+13           this.duals.color = randColor[Math.floor(Math.random() * 4)];
+14         },
+15       });
+16     }
+17     return;
+18   }
+19 };
+20 
+21 W.$onLoad.push( function() {
+22   var body = W.W('.body').component;
+23   body.setChild( <t.Panel key='top' $id__='topPanel'><t.P>Click me</t.P></t.Panel> );
+24 });
+```
+
+这个例子利用 idSetter 的 `value == 1` 条件段等效于 `getInitialState` 函数的特点，调用 `defineDual()` 注册双源属性，调用 `setEvent()` 安装事件函数。
+
+#### <a name="render"></a>定制 render 渲染
+
+idSetter 函数中，除了 `value <= 2` 条件段不是 `render()` 调用发起的，其它都是 `render()` 调用发起的，所以，在 idSetter 中的编程可以等效于在 `render()` 中编程。
+
+比如，我们把上面例子改造一下：
+
+``` js
+01 var randColor = ['red','green','blue','black'];
+02 
+03 idSetter.topPanel = function(value,oldValue) {
+04   if (value <= 2) {
+05     if (value == 1) {  // init process
+~~       this.newColor = '';
+07       
+08       this.setEvent( {
+09         $onClick: function(event) {
+~~           this.newColor = randColor[Math.floor(Math.random() * 4)];
+~~           this.reRender();   // trigger render()
+12         },
+13       });
+14     }
+15     return;
+16   }
+17   
+~~   this.duals.style = {color:this.newColor};
+19 };
+```
+
+上面第 `18` 行等效于在 `render()` 函数中编码，这里对自身 duals 属性赋值是即时生效的，参见前文 [“即时生效与延时生效”](#1.6.3.!delay_apply)。idSetter 函数总在 `render()` 调用的入口处被调用，当这行 `this.duals.style` 被改后，系统随即更新 `this.state.style`，接着，`render()` 的后续处理将此变动渲染到用户界面。
+
+&nbsp;

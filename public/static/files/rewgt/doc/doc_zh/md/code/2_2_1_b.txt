@@ -1,0 +1,8 @@
+<div $=P key='p'>
+  <span $=HiddenSpan key='hidden'>
+    <span $=Button key='btn'>Test</span>
+  </span>
+  <span $='//hidden.btn' sty__='color:red'></span>
+  <span $='//hidden.btn'>Test2</span>
+  <span $='//hidden.btn' sty__='font-weight:600'>Test3</span>
+</div>

@@ -1,0 +1,130 @@
+2.7.1 公共模块
+-------------
+
+&nbsp;
+
+前面章节在举例时，我们已涉及若干公共模块，也已用到 `utils` 与 `ex` 模块一些 API，本节将补充介绍若干重要接口。
+
+所有接口函数在 [“API 手册”](#4.) 有详细说明，如果编程需要，可随时查阅。
+
+#### 公共模块
+
+Shadow Widget 内置定义如下公共模块，均登记在 `W` 入口变量之下。
+
+``` js
+var W = require('shadow-widget');
+
+var main = W.$main;
+var utils = W.$utils;
+var ex = W.$ex;
+var T = W.$templates;
+var idSetter = W.$idSetter;
+```
+
+各模块的主要功能：
+
+1. `main`，注册初始化函数，也用来登记投影类，[参考这里](#4.1.)
+2. `utils`，各种通用 API，[参考这里](#4.2.)
+3. `ex`，可供脚本表达式调用的 API，[参考这里](#4.3.)
+4. `T`，内置的 WTC 类定义，[参考这里](#4.4.)
+5. `idSetter`，供登记各节点 `id__` 属性的 setter 函数，请参考 “进阶篇” 下相关章节
+
+#### 使用 `utils.jsonp` 与 `utils.ajax`
+
+`utils.jsonp` 函数用来支持 JSONP 调用协议，参见 <a target="_blank" href="https://en.wikipedia.org/wiki/JSONP">JSONP</a>，简单来说，JSONP 是指在 URL 指定 callback 参数，用来向服务端请求 JSON 数据的一种协议。该 API 格式为 `utils.jsonp(config)`，config 用来指定调用参数，重要参数项如下（完整格式请参考 [API 手册](#4.2.3.!jsonp)）：
+
+1. `config.url`，用来指定发送请求的 URL
+2. `config.data`，要附加到 URL 实现传递的参数，如 `{name:"wayne",age:"30"}`，会在发送请求的 URL 字串添加 `&name=wayne&age=30`。
+3. `config.callback`，请求结束时的回调函数，参数格式：`callback(jsonData)`，如果请求失败，`jsonData` 为 null。
+4. `config.notifyError`，请求失败时是否用 `callback(null)` 报告失败，缺省不报告（值为 `false`）。
+
+`utils.ajax` 用于 ajax 服务调用，它实现的功能与接口参数与 `utils.jsonp` 类似。`utils.ajax(config)` 主要参数格式如下（完整格式请参考 [API 手册](#4.2.3.!ajax)）：
+
+1. `config.type`，取值为 `'GET', 'POST', 'PUT', 'HEAD', 'DELETE'` 五者之一，缺省是 `'GET'`
+2. `config.url`，与 `utils.jsonp` 同名参数要求相同
+3. `config.dataType`，取值为 `'json', 'pre-json', 'text'` 三者之一，缺省未指定时，如果 URL 读取某 *.json 文件，自动取 `'json'`（即，把请求结果看作 json 数据），否则取 `'text'`（即，把结果看作字串）。 
+4. `config.data`，用于请求的附加参数，当 `type` 为 `POST` 或 `PUT` 时，以 json 格式、utf-8 字串上传，否则这些参数附加在发出请求的 URL 上。
+5. `config.success`，请求成功时的回调函数，回调格式 `success(data,statusText,xhr)`
+6. `config.error`，请求失败时的回调函数，回调格式 `error(xhr,statusText)`
+
+样例 demo17 给出了使用 `utils.ajax` 的例子，请自行参考。
+
+#### 使用 `ex.jsonp` 与 `ex.ajax`
+
+`ex.jsonp` 与 `ex.ajax` 分别对 `utils.jsonp` 与 `utils.ajax` 作封装，使之适合用在可计算表达式中。
+
+`ex.jsonp(config,initValue)` 的 `config` 参数格式与 `utils.jsonp(config)` 的 `config` 要求相同，只是 `config.callback` 回调函数是自动安装的，不必用参数传入。比如下面 `$user` 可计算属性：
+
+``` js
+    $user='ex.jsonp({url:"query/user.json"},{name:""})'
+```
+
+传入参数 `initValue` 用于设置 `state.user` 的缺省值，仅当 `state.user` 的值还未设置（即值为 `undefined`）时才用 `initValue` 赋值，也就是说，`initValue` 参数只在初次调用时使用一次，而且，给 `state.user` 赋值发生在 jsonp 请求返回之前。`initValue` 参数可以缺省，如果缺省，本例 `user` 属性初始值是 `undefined` 了。jsonp 请求是**异步**的，本表达式被计算并不立即得到请求结果，不死等请求返回，而是交由系统接管，当有结果数据返回时，系统自动给 `duals.user` 赋值。说明，`"duals.attr"` 与 `"$attr"` 可并存，`"duals.attr"` 还可被 listen，所以，上述 `$user` 得到异步结果后，能触发已侦听 `duals.user` 的函数。 
+
+&nbsp;
+
+`ex.ajax(config,initValue)` 也用于异步请求，`initValue` 参数的要求与 `ex.jsonp(config,initValue)` 的 `initValue` 参数相同。`config` 参数则与 `utils.ajax(config)` 的 `config` 要求相同，其中 `config.success` 与 `config.error` 回调函数也自动安装，不必用参数传入。`ex.ajax()` 计算结果的数据格式必须是 `{status:statusText, data:returnData}`，比如：
+
+``` js
+    $user='ex.ajax({url:"query/user.json"},{status:"",data:{name:""}})'
+```
+
+请求成功时，`user.data` 保存返回的数据 ，`user.status` 值为 `"success"`，失败时，`user.data` 值为 null，`user.status` 记录失败状态描述。
+
+样例 demo18 给出了使用 `ex.ajax` 的例子，请自行参考。
+
+#### 一次请求的数据被多个属性引用
+
+同一节点有多个属性引用 jsonp 或 ajax 请求结果时，宜用 `$data` 表达式获取数据，其它属性则引用 `duals.data` 中的局部数据。因为，每轮 render 更新时，`$data` 表达式总是先于其它可计算属性被执行的。比如：
+
+``` html
+  <div $=Div $$for='' 
+      $data='ex.ajax({url:"query/user.json"},{status:"",data:null})' 
+      $html='duals.data.data && ("name = " + duals.data.data.name)'>
+  </div>
+```
+
+上面 `duals.data` 的格式是 `{status:statusText, data:returnData}`，注意，`duals.data.data.name` 容易误写成 `duals.data.name`。因为 `duals.data.data` 可能取值 `null`，所以在 `$html` 表达式中，要用 `duals.data.data && expr` 的形式，保证取 `null` 值时其后表达式 `expr` 不被运算。
+
+#### 增删 class 定义
+
+Shadow Widget 将构件的 class 名分开用 `className` 与 `klass` 两个属性表达，`className` 是不变类名列表，只读的，在构件生存周期内不发生变化，`klass` 则是可变类名列表，前者标记当前构件是什么，描述构件的固定属性，后者描述构件的运行状态。前者从 `props.className` 读值，后者从 `duals.klass` 读写。
+
+utils 模块提供若干针对 `klass` 属性的 API：
+
+1. `setClass(comp,cls)`   
+对 `comp` 构件增删在 `cls` 指定的类，比如：`utils.setClass(comp,'-class_a +class_b')`
+
+2. `containKlass(sKlass,cls)`   
+如果 `sKlass` 存在任一 `cls` 则返回 `true`，比如：`utils.containKlass(comp.state.klass,'read-only')`，又如：`utils.containKlass(comp.state.klass,['active','read-only'])`
+
+3. `klassNames(s1,s2, ...)`   
+将参数所列各 klass 串接起来，比如：`utils.klassNames('A','','C')` 结果为 `'A C'`，组装中忽略 “非真值” 类名，又如：`utils.klassNames('A',['B','C'],{D:false,E:true})` 结果为 `"A B C E"`
+
+4. `clearKlass(sKlass,ctrlCls)`   
+从 `sKlass` 字串删除 `ctrlCls` 所列出的项目，比如：`utils.clearKlass(this.state.klass,{disabled:true, active:true})`
+
+5. `setupKlass(sKlass,ctrlCls, s1,s2, ...)`   
+这是 `klassNames(clearKlass(sKlass,ctrlCls), s1,s2, ...)` 的合写形式。
+
+我们通常为某 WTC 定义一个状态集，把 “编程受控的类” 定义到这个集合中，比如：
+
+``` js
+var all_klass = { active:true, disabled:true, 
+  'default-large-small':true, 'large-small-default':true, 'small-default-large':true,
+};
+```
+
+然后，状态变化时驱动 `duals.klass` 更新，比如：
+
+``` js
+var sActive = this.state.active && 'active';
+var sDisable = this.state.disabled && 'disabled';
+var sKlass = utils.klassNames( utils.clearKlass(this.duals.klass,all_klass), 
+  sActive, sDisable, sFontSize
+);
+
+this.duals.klass = sKlass;
+```
+
+&nbsp;

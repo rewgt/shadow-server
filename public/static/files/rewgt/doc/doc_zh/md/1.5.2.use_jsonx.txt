@@ -1,0 +1,152 @@
+1.5.2 使用 json-x
+------------
+
+&nbsp;
+
+#### json-x 描述方式
+
+原生 React 用 JSX 描述 GUI，Shadow Widget 常改用 [“转义标签”](#1.2.) 与 json-x 对等的实现 JSX 功能。转义标签适用于在 `*.html` 网页文件中定义 GUI，而 json-x 适合在 javascript 中，描述 GUI 片断后动态组装。
+
+一个 json-x 例子：
+
+> `['P',{'html.':'Hello, world!'}]`
+
+等效于 JSX：
+
+> `<P>Hello, world!</P>`
+
+json-x 用数组表达一个节点，格式为 `[type,props]`，这里 `type` 指示 React class，可以是以下 3 种：
+1. 登记在 T 模块下的 WTC 类实例，如：`P, Span` 等，首字母大写
+2. HTML 原生标签，如 `table, div, input` 等，首字母小写
+3. 用户自定义的 React Class
+
+第一种是最常见，用它描述出来的 UI 片断可挂入 W 树。后两种情况不常用，后文 [“表达常规 React 节点”](#1.5.2.!normal_node) 有举例。
+
+#### 描述多层节点
+
+如果一个节点定义了若干个子节点，则用一个数组表示，数组首个成员为父节点，其后各项为子节点，比如：
+
+> `[ ['P',{}], ['Span',{'html.':'Hello, '}], ['Span',{'html.':'world!'}] ]`
+
+等效于 JSX：
+
+> `<P><Span>Hello, </Span><Span>world!</Span></P>`
+
+说明：
+1. 当 `[type,props]` 的 props 无属性定义时，可省略不写，比如 `['P',{}]` 简写成 `['P']`
+2. 如果在子节点位置传入 string 值，而非 `[type,props]` 格式，系统会自动将它自动转成文本节点（成为 `Span` 或 `P` 节点），比如上例改成这样是等效的：`[ ['P'], 'Hello, ', 'world!' ]`
+
+因为 json-x 用直白的 javascript 数据（array 类型）表达的节点，array 数据可转化为 JSON 字串，也能从 JSON 字串读回，我们因此称为 json-x 描述法。json-x 能以文本流方式在网络传输，相比 “转义标签” 的描述方式，json-x 表达方式更严格，使用更灵活，常用于传递片断 UI 定义。
+
+如果用 ES5 开发 GUI，由于缺少 JSX 转译支持，我们常用 json-x 替代  JSX。
+
+#### 表达静态节点
+
+在转义标签中，使用的非转义标签就是 “静态节点”，参见 [“静态节点”](#1.2.3.)，比如：
+
+``` html
+  <div $=P><span>text1</span><span>text2</span></div>
+```
+
+改用 json-x 表达就是：
+
+``` js
+  [ ['P',{}], ['',{html:['<span>text1</span>','<span>text2</span>']}] ]
+```
+
+一个 json-x 节点如果 WTC 类名为空字串，表示它是静态节点，然后在 `html` 属性列出各个子节点的 `innerHTML` 值。
+
+#### <a name="normal_node"></a>表达常规 React 节点
+
+表达常规 React 节点与表达 WTC 节点类似，也是 `[type,props]`，仅 `type` 不同，比如下面 3 条语句，第一条创建 WTC 节点，后两条创建常规 React 节点。
+
+``` js
+  var jsonX1 = [['P',{key:'txt'}],'How are you?'];    // type is 'P'
+  var jsonX2 = [['p',{key:'txt'}],'How are you?'];    // type is 'p'
+  var jsonX3 = [[MyClass,{key:'txt'}],'How are you?'];  // MyClass is React Class
+```
+
+只有 WTC 节点才能挂到 W 树中，**非 WTC 节点无法挂到 W 树，所以其下不能定义 WTC 子节点**。比如上面 `jsonX2` 描述的 `p` 节点，其下不能定义 `Span` 子节点，但定义 `span` 子节点是可以的。举例来说，下面用法是错误的：
+
+``` js
+  var jsonX2 = [['p',{key:'txt'}],'How are you?', ['Span',{key:'sub','html.':'example'}]];
+```
+
+这个 jsonX2 用于界面输出时，系统会报错。
+
+#### 把 json-x 转成 React Element
+
+调用 `utils.loadElement(jsonX)` 可将 json-x 数据转化为 Element，比如：
+
+``` js
+  var jsonX = ['P',{'html.':'Hello, world!'}];
+  var ele = utils.loadElement(jsonX);
+```
+
+转换所得的 Element，可用于动态组装构件子成员。比如在 `comp.setChild()` 函数中使用。
+
+说明：json-x 是平白数据，它与 JSX 不同，JSX 直接描述 React Element 节点，但 json-x 要经 `utils.loadElement(jsonX)` 转换才成为 React Element 节点。
+
+#### 用 `setChild` 动态组装 W 树
+
+上一节我们举了个例子：用 `setChild()` 安装以 JSX 描述的节点，现在把它改用 json-x 描述，参见样例 demo7。
+
+``` js
+01 main.$onLoad.push( function() {
+02   var topComp = W.W('.body.top').component;
+03   var jsonX = ['P',{key:'p','html.':'Hello, world!'}];
+~~   topComp.setChild( utils.loadElement(jsonX) );
+05 });
+```
+
+#### 一次导入多个 json-x
+
+`utils.loadElement()` 带 1 个或多个参数，如果只带一个参数，结果返回单个 React Element，如果传入多个参数（N个），结果返回一个长度为 N 的数组，数组内容依次是各个输入 json-x 的转换结果。如果转换不成功，相应项的值设为 `null`。
+
+比如：
+
+``` js
+  var ele = utils.loadElement(['P']);
+  var b = utils.loadElement(['P'],['Ul',{key:'a'}]);
+  assert(b.length == 2);
+```
+
+#### 在 json-x 中传递事件函数
+
+json-x 中还允许传递事件函数。比如：
+
+``` js
+01 main['.body.top.p'] = {
+02   componentDidMount: function() {
+03     this._componentDidMount(this);
+04     
+~~     var jsonX = ['Button',{key:'btn','html.':'Click me',$onClick:onClick}];
+06     this.setChild( utils.loadElement(jsonX) );
+07     
+08     function onClick(event) {
+09       alert('clicked: ' + this.duals.keyid);
+10     }
+11   },
+12 };
+```
+
+创建一个构件（`comp`）时，如果从 props 传入的事件函数尚未 `bind`，系统会自动将事件函数 `bind` 到当前构件 `comp`。所以，上例点击 `Click me` 按钮，弹窗显示 `"clicked: btn"`。如果我们事先 `bind` 事件函数，并从 props 传入，该事件函数中的 `this` 则是事件 `bind` 的值。比如：
+
+``` js
+01 main['.body.top.p'] = {
+02   componentDidMount: function() {
+03     this._componentDidMount(this);
+04     
+~~     var onClick = ( function(event) {
+~~       alert('clicked: ' + this.duals.keyid);
+~~     }).bind(this);
+08     
+09     var jsonX = ['Button',{key:'btn','html.':'Click me',$onClick:onClick}];
+10     this.setChild( utils.loadElement(jsonX) );
+11   },
+12 };
+```
+
+这时点击按钮，弹窗将显示 `"clicked: p"`。
+
+&nbsp;

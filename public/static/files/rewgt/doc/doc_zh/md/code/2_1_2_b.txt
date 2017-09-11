@@ -1,0 +1,6 @@
+<div $=Panel key='panel'>
+  <div $=P key='p' sty__='background:red; color:white'>Hello, world!</div>
+  <div $=Div key='div' sty__='background:blue; color:white'>
+    <div $=P key='p' sty__='background:green'>Hello, world!</div>
+  </div>
+</div>

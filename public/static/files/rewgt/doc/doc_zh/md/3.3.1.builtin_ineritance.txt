@@ -5,7 +5,7 @@
 
 #### 内置 WTC 继承图
 
-Shadow Widget 内置构件分为 Panel 类、Div 类、P 类、Span 类共 4 种，参见基础篇 [“内置构件列表”](#2.1.6.) 。
+Shadow Widget 内置构件分为 Panel 类、Div 类、P 类、Span 类共 4 种，参见基础篇 [“内置构件列表”](#2.1.5.) 。
 
 这些 WTC 类定义的继承关系如下图所示：
 
@@ -56,20 +56,23 @@ Shadow Widget 内置构件分为 Panel 类、Div 类、P 类、Span 类共 4 种
 
 `Widget` 是所有 WTC 的基类，视作抽像类，除了它不在转义标签中使用外，其它均可用在转义标签中。我们新定义一个 WTC，经常从上图选一个最近似的内置构件作为基类，继承旧特性，再扩展若干新特性。
 
-#### 以 `'_' ` 为前缀的特殊类方法
+#### 几种获得 React Class 的途径
 
-在投影类中可调用两种类方法：“实例方法” 与 “类方法”，两者以 `'_'` 前缀区分，带此前缀的是实例方法，否则是常规类方法。“实例方法” 在调用时要求将 this 在首参数传入，“类方法” 则以 bind 规则处理 `this` 变量。
+在 React 体系下，定义用户界面先要有 React Class，得到 React Class 有下面几种途径：
 
-比如，对于 “类方法”，`comp.method(arg1,arg2)` 调用时，如果该 methond 没被 bind 到其它对象，this 就是 comp，而 “实例方法” 则要求这么调用 `comp._method(comp,arg1,arg2)`。前面章节已在多处举介绍了类似 `this._componentDidMount(this)` 的应用，这里，我们正式给 投影类中以 `'_'` 为前缀的方法一个统一叫法：“实例方法”。 当投影定义覆盖底层 WTC 中定义的同名函数时，底层函数要求可被调回，所以，原有常规类方法就自动转化为 “实例方法” 供调用。
+1. 从现有 WTC（如前面列出）继承，新定义一个 WTC   
+如何继承实现，请参考 [“WTC 类定义”](#1.3.2.)，假定 WTC 为 `HighlightBtn_`，获得 React Class 过程如下：   
+&nbsp; `var HighlightBtn__ = new HighlightBtn_();`   
+&nbsp; `var BtnCls = HighlightBtn__._createClass();`
 
-在 WTC 及投影类定义中，以 `'_'` 为前缀的函数名被保留，一方面，为了支持上述 “实例方法”，另一方面，WTC 中还定义若干以 `'_'` 为前缀的函数，用于支持可视化设计、调试、测试等。比如 Widget 类中定义了如下方法：
+2. 将现有 WTC 与在 `main[sPath]` 定义的投影类捆绑   
+转义标签已标识构件的 WTC 与路径 `sPath`，系统在初始导入时自动捆绑投影定义，生成 React Class。
 
-```
-    _extend, _createClass, _getGroupOpt, _getSchema
-```
+3. 调用 `_createClass` 让现有 WTC 捆绑指定投影类   
+如：`var BtnCls = T.Button._createClass(defs);`
 
-调用这些方法有两种途径，其一是在 WTC 实例上调用，如 `W.$templates.Panel._extend(defs)`，其二是，在 R 节点取回 WTC 实例再调用，如 `comp._._getGroupOpt(comp)`，这里 `comp._` 是本节点在投影定义时所引用的 WTC 实例。
+其中，第 3 种可视为第 1 种的特例，不传 `defs` 参数调用 `_createClass` 表示只用 WTC 原始定义，不必经投影类 `defs` 定制。
 
-当您新定义WTC 类或投影类时，应避开以 `'_'` 前缀命名函数。
+第 2 种途径必须借助 `main` 与 `T` 模块， 分别从中查找投影定义与 WTC 实例，这意味着这两类全局资源有命名要被占用。许多时候，尤其提供中间件 lib 库时，我们不希望 `T` 命名空间被污染，应改用第 1 种或第 2 种方式得到 React Class。
 
 &nbsp;

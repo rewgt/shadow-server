@@ -1,0 +1,74 @@
+1.5.3 虚节点
+---------
+
+#### `'tagName.'` 属性
+
+Shadow Widget 所有构件都定义 `props['tagName.']` 属性，它用来指示渲染输出的标签名，比如，`Div` 的 `'tagName.'` 值为 `'div'`，`P` 的 `'tagName.'` 为 `'p'`，`Span` 的 `'tagName.'` 为 `'span'`。
+
+编程中，我们常通过分析父节点 `'tagName.'` 值，来分析当前节点挂在哪类节点下，有时，我们还结合 `duals.role` 属性做分析。
+
+#### 更改 `'tagName.'` 的值
+
+构件的 `props['tagName.']` 值会转存为 `state['tagName.']`，然后由转存后的变量决定实际渲染输出的标签名。
+
+定义 WTC 类（或投影类）时，我们一般不去修改 `state['tagName.']`，特殊情况下，比如，我们继承的基类是输出 `<ul>`，希望在继承类改渲染成 `<ol>`，这么写代码：
+
+``` js
+01   // ...
+02   getInitialState() {
+03     var state = super.getInitialState();
+~~     state['tagName.'] = 'ol';
+05     return state;
+06   }
+07   // ...
+```
+
+#### 虚节点
+
+如果把构件的 `state['tagName.']` 值改为空字串，这个构件就成为 “虚节点” 了。与虚节点相对的概念是 “实节点”，本手册前面介绍的构件都是实节点（有实际的 DOM 节点输出）。虚节点也是 React Component 节点，只是不渲染实际的 DOM 节点。
+
+虚节点之下通常要挂一个实节点，这样，**在虚节点上定义事件函数，会自动叠加到其下的实节点上**。
+
+比如定义如下界面，用 `VirtualSpan` 包裹 `Button` 按钮：
+
+``` html
+<div $=P key='p'>
+  <span $=VirtualSpan key='vir'>
+    <span $=Button>Test</span>
+  </span>
+</div>
+```
+
+`VirtualSpan` 是 Shadow Widget 内置的一种虚节点，用来挂行内构件，另一内置虚节点 `VirtualDiv` 下挂非行内构件。
+
+这里虚节点定义两个事件函数：
+
+``` js
+01 main['.body.top.p.vir'] = {
+~~   $onMouseOver: function(event) {
+03     this.duals.style = {opacity: '0.5'};
+04   },
+05   
+~~   $onMouseOut: function(event) {
+07     this.duals.style = {opacity: '1'};
+08   },
+09 };
+```
+
+参见样例 demo8，程序运行后，在虚节点定义事件函数将自动附加到其下实节点上。
+
+说明：
+1. 如果实节点也定义同名事件函数，该事件触发时，实节点的函数先运行，虚节点上的事件函数接着被调用。
+2. 对虚节点的 `duals.style` 赋值能自动作用到其下实节点，但对其它 duals 属性赋值不支持延伸传递。
+3. 在虚节点上调用 `comp.getHtmlNode()`，系统尝试返回其下实节点的真实 DOM 节点。
+4. 多个虚节点可以嵌套使用。
+5. 被虚节点直接包裹的实节点只能固定一个，即，虚节点下若有实子节点，实子节点 “有且只能有一个”。
+
+#### 挂载与卸载事件钩子
+
+虚节点是实节点的 “帽子”，让同一实节点戴不同规格的帽子，或者让同一种帽子分给不同实节点去戴，这个机制让编程变灵活了。
+
+虚节点除了用来定义事件函数，还常用来定义通用的挂载或卸载事件钩子，在虚节点的 `componentDidMount()` 驱动 “挂载时处理”，在 `componentWillUnmount` 驱动 “卸载时处理”。比如：挂载时自动执行 `document.addEventListener('mousedown')`，注册 Event 侦听，最后在卸载时自动执行 `document.removeEventListener('mousedown')`，删除 Event 侦听。
+
+&nbsp;
+

@@ -10,6 +10,25 @@
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo15</title>
 
+<style>
+.ctrl-page {
+  margin: 0px 4px;
+  padding: 2px 4px;
+  border: 1px solid #bbb;
+  border-width: 1px 1px 0px 1px;
+  background-color: #ddd;
+  color: gray;
+  font-size: 15px;
+  cursor: default;
+}
+.ctrl-page[data-checked="1"] {
+  color: #a00;
+}
+.ground-area {
+  border: 2px solid #ddd;
+}
+</style>
+
 </head>
 <body>
 
@@ -17,10 +36,38 @@
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
 <div $=BodyPanel key='body'>
   <div $=Panel key='top'>
-    <div $=P key='p' width='{0.9999}'>
-      <span $=Input type='text' key='input' value='' dual-data='' placeholder='Input text and press Enter' sty__='width:220px'></span>
-      <span $=Br></span>
-      <span $=Textarea key='output' value='' readonly='readonly' sty__='width:60%; height:120px'></span>
+    <div $=P key='toolbar' width='{0.9999}'>
+      <span $=Button key='t1'>jump to "#/a"</span>
+      <span $=Button key='t2'>jump to "#/b"</span>
+      <span $=Button key='t3'>jump to "#/c"</span>
+      <span $=Button key='t4'>jump to "#/b/item1"</span>
+      <span $=Button key='t5'>jump to "#/b/item2"</span>
+      <span $=Button key='t6'>jump to "#/b/item3"</span>
+    </div>
+    
+    <div $=NavPanel key='nav' width='{0.9999}' height='{200}'>
+      <div $=P key='p' width='{0.9999}' height='{30}' margin='{0}' padding='{[8,0,0,0]}'>
+        <span $=OptSpan klass='ctrl-page' name='page' key='a' data-checked='1'>page A</span>
+        <span $=OptSpan klass='ctrl-page' name='page' key='b'>page B</span>
+        <span $=OptSpan klass='ctrl-page' name='page' key='c'>page C</span>
+      </div>
+      
+      <div $=GroundDiv klass='ground-area' key='a' height='{170}' border-width='{2}'>It is page A</div>
+      <div $=GroundPanel klass='ground-area' key='b' height='{170}' border-width='{2}'>
+        <div $=NavPanel key='nav'>
+          <div $=Panel key='list' width='{100}'>
+            <div $=Ul key='ul'>
+              <div $=OptLi key='item1' data-checked='1'>item 1</div>
+              <div $=OptLi key='item2'>item 2</div>
+              <div $=OptLi key='item3'>item 3</div>
+            </div>
+          </div>
+          <div $=GroundDiv key='item1' width='{-1}' height='{0.9999}'>Content of item 1</div>
+          <div $=GroundDiv key='item2' width='{-1}' height='{0.9999}'>Content of item 2</div>
+          <div $=GroundDiv key='item3' width='{-1}' height='{0.9999}'>Content of item 3</div>
+        </div>
+      </div>
+      <div $=GroundDiv klass='ground-area' key='c' height='{170}' border-width='{2}'>It is page C</div>
     </div>
   </div>
 </div>
@@ -36,28 +83,54 @@ var ReactDOM = require('react-dom');
 var W = require('shadow-widget');
 var main = W.$main, utils = W.$utils, ex = W.$ex;
 
-main['.body.top.p.input'] = {
-  $onChange: function(event) {
-    this.duals.value = event.target.value;
-  },
+window.onhashchange = function() {
+  var sHash = window.location.hash;
+  sHash = sHash? sHash.slice(1): '';
   
-  $onKeyPress: function(event) {
-    if (event.charCode == 13) {   // press Enter
-      var s = this.duals.value;
-      this.duals.value = '';      // reset input string
-      if (s) this.duals.data = [s,ex.time()]; // force trigger changing by ex.time()
-    }
+  if (sHash) {
+    utils.gotoHash(decodeURIComponent(sHash), function(sRetHash) {
+      if (sRetHash) console.log('Jump successful:',sRetHash);
+    });
+  }
+};
+
+function jumpToHash(sHash) {
+  window.open(sHash,'_self');
+}
+
+main['.body.top.toolbar.t1'] = {
+  $onClick: function(event) {
+    jumpToHash('#/a');
   },
 };
 
-main['.body.top.p.output'] = {
-  onData: function(value,oldValue) {
-    this.duals.value += '[' + (new Date()).toLocaleTimeString() + '] ' + value[0] + '\n';
+main['.body.top.toolbar.t2'] = {
+  $onClick: function(event) {
+    jumpToHash('#/b');
   },
-  
-  componentDidMount: function() {
-    this._componentDidMount(this);
-    this.componentOf('//input').listen('data',this);
+};
+
+main['.body.top.toolbar.t3'] = {
+  $onClick: function(event) {
+    jumpToHash('#/c');
+  },
+};
+
+main['.body.top.toolbar.t4'] = {
+  $onClick: function(event) {
+    jumpToHash('#/b/item1');
+  },
+};
+
+main['.body.top.toolbar.t5'] = {
+  $onClick: function(event) {
+    jumpToHash('#/b/item2');
+  },
+};
+
+main['.body.top.toolbar.t6'] = {
+  $onClick: function(event) {
+    jumpToHash('#/b/item3');
   },
 };
 
@@ -67,6 +140,7 @@ main['.body.top.p.output'] = {
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

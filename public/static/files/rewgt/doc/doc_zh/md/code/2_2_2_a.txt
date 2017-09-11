@@ -1,0 +1,13 @@
+<div $=Div key='div'>
+  <div $=TempDiv key='temp'>
+    <div $=Ul key='ul' $for='item in duals.data.list'>
+      <div $=Li $key='"a" + index' $html='item'
+           $klass='index===duals(-1).data.active? "hljs-hint": ""'>
+      </div>
+    </div>
+  </div>
+  
+  <div $='//temp.ul' dual-data='{{"list":["item 1","item 2","item 3"],"active":0}}'></div>
+  <div $=P>-------------</div>
+  <div $='//temp.ul' dual-data='{{"list":["item A","item B","item C"],"active":1}}'></div>
+</div>

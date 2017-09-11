@@ -1,0 +1,78 @@
+2.1.5 内置构件列表
+-----------------------
+
+&nbsp;
+
+#### 构件的分类
+
+按不同的分类标准，Shadow Widget 中的构件有多种分法，首先，若按构件定义是否内置于 `shadow-widget` 的 lib 库，有 “内置构件” 与 “扩展构件” 之分。
+
+对于 “内置构件”，若按布局差异划分，有 “Panel 类”、“Div 类”、“P 类”、“Span 类” 四种，如前面 4 节介绍。
+
+若按 WTC 命名与原生标签的差异来区分，“内置构件” 还有 “内置原生” 与 “内置非原生” 区分。内置原生的 WTC 在 `T` 模块下登记的名称，能从原生标签直接推导，比如：'T.Div' 对应于 `div`。对这类构件，Shadow Widget 已尽量维持原生功能，少作变动，所以，它们通常不需额外学习，简单推导就知道该怎么用了。剩下 “内置非原生”，如 `Panel, ScenePage, MarkedDiv` 等，则是本手册要介绍的重点。
+
+“内置非原生” 若按功能再分，还有 “面板”、“场景页”、“可选导航”、“Markdown 构件” 等类别，后面章节我们将陆续介绍。 
+
+#### <a name="org_widget"></a>内置原生构件
+
+Div 类构件：
+> `Div  Article  Section  Header  Footer  Aside  Nav  Main`
+
+P 类构件：
+> `P  Noscript  Fieldset  Details  Ul  Ol  Li  Dl  Dd  Dt  Figure  Figcaption`  
+> `Menu  Menuitem Address  Form  Iframe  Blockquote  Table  Caption`  
+> `Col  Colgroup  Td  Tbody  Thead  Tfoot  Th  Tr  Hgroup`  
+> `H1  H2  H3  H4  H5  H6  Hr  Pre`
+
+Span 类构件：
+> `Span  Br  A  Q  Abbr  Audio  Source  Track  Bdi  Bdo  Data  Mark  Wbr`  
+> `Button  Textarea  Progress  Img  Video  Canvas  Picture  Map  Area  Time`  
+> `Output  Input Keygen  Label  Legend  Sub  Sup  Select  Datalist  Optgroup`  
+> `Option  B  I  S  U  Ins  Del  Code  Var  Summary  Em  Strong  Big  Small`  
+> `Dfn  Samp  Kdb  Cite  Dialog  Meter  Embed  Object  Param  Ruby  Rp  Rt`
+
+#### <a name="widget_type"></a>内置非原生构件
+
+将所有 “内置非原生” 归入 Panel、Div、P、Span 四类，列表如下。
+
+1. Panel 类构件   
+[`BodyPanel`](#2.3.1.) &nbsp; [`Panel`](#2.3.2.) &nbsp; [`GridPanel`](#2.3.3.!grid) &nbsp; [`TablePanel`](#2.3.3.!table) &nbsp; [`NavPanel`](#2.5.2.!nav_panel) &nbsp; [`GroundPanel`](#2.5.2.!ground) &nbsp; [`TempPanel`](#2.2.2.) &nbsp; [`ScenePage`](#2.4.3.)
+
+2. Div 类构件   
+[`HiddenDiv`](#2.2.1.!hidden) &nbsp; [`SplitDiv`](#2.1.2.!split) &nbsp; [`MarkedDiv`](#2.6.2.) &nbsp; [`MarkedTable`](#2.6.3.) &nbsp; [`NavDiv`](#2.5.2.!nav_panel) &nbsp; [`GroundDiv`](#2.5.2.!ground) &nbsp; [`OptDiv`](#2.5.1.) &nbsp; [`TempDiv`](#2.2.2.) &nbsp; [`RefDiv`](#1.5.5.)
+
+3. P 类构件   
+[`Div2`](#2.1.2.!div2) &nbsp; [`VirtualDiv`](#1.5.3.) &nbsp; [`OptLi`](#2.5.1.) &nbsp; [`TableRow`](#2.3.3.!table)
+
+4. Span 类构件   
+[`HiddenSpan`](#2.2.1.!hidden) &nbsp; [`VirtualSpan`](#1.5.3.) &nbsp; [`OptSpan`](#2.5.1.) &nbsp; [`OptA`](#2.5.1.) &nbsp; [`OptImg`](#2.5.1.) &nbsp; [`OptButton`](#2.5.1.) &nbsp; [`OptInput`](#2.5.1.) &nbsp; [`OptOption`](#2.5.1.) &nbsp; [`TempSpan`](#2.2.2.) &nbsp; [`RefSpan`](#1.5.5.)
+
+对于内置原生与非原生，我们都划归这 4 类，明确列出了。这方便大家在书写转义标签时，该用 `<div $=WTC>`，还是 `<pre $=WTC>`，还是 `<span $=WTC>` 能有清晰的概念。
+
+#### 按功能细分
+
+“内置非原生” 构件按功能划分：
+
+1. 面板   
+`BodyPanel  Panel   GridPanel  TablePanel/TableRow`
+
+2. 模板与引用   
+`TempPanel  TempDiv  TempSpan  RefDiv  RefSpan`
+
+3. 场景页   
+`ScenePage`
+
+4. 可选导航   
+`NavPanel  NavDiv  GroundPanel  GroundDiv`   
+`OptSpan  OptA  OptImg  OptButton  OptInput  OptOption  OptDiv  OptLi`
+
+5. Markdown 构件   
+`MarkedDiv MarkedTable`
+
+6. 虚节点   
+`VirtualDiv  VirtualSpan`
+
+7. 其它   
+`Div2  SplitDiv HiddenDiv  HiddenSpan`
+
+&nbsp;

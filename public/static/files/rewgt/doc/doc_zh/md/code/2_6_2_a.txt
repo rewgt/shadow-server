@@ -1,0 +1,9 @@
+<div $=NavPanel>
+  <div $=Panel key='panel' width='{200}' height='{50}' sty__='background:#eee'></div>
+  <pre $=MarkedDiv key='marked' width='{0.9999}'>------
+
+<pre $='./panel' width='{100}'></pre>
+
+这个面板是通过 “块引用” 导入的。
+</pre>
+</div>

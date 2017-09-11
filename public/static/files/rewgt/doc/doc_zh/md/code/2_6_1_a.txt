@@ -1,0 +1,10 @@
+<pre $=MarkedDiv key='marked' width='{0.9999}'>### 嵌入描述界面的转义标签
+
+<div $=P key='p' width='{0.9999}'>
+  <span $=Button key='test1'>test 1</span>
+  <span $=Button key='test2'>test 2</span>
+</div>
+
+如上在 markdown 文本中定义了 **两个按钮** 界面。
+
+</pre>

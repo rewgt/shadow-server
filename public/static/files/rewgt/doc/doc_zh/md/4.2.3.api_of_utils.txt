@@ -20,12 +20,7 @@
 > - [`shouldUpdate`](#4.2.3.!should_update)
 
 > class 分析
-> - [`classNameOf`](#4.2.3.!class_name_of)
-> - [`hasClass`](#4.2.3.!has_class)
-> - [`addClass`](#4.2.3.!add_class)
-> - [`removeClass`](#4.2.3.!remove_class)
 > - [`setClass`](#4.2.3.!set_class)
-> - [`mergeClass`](#4.2.3.!merge_class)
 > - [`klassNames`](#4.2.3.!klass_names)
 > - [`clearKlass`](#4.2.3.!clear_klass)
 > - [`setupKlass`](#4.2.3.!setup_klass)
@@ -112,7 +107,7 @@
 
 ##### <a name="widget_num"></a>`widgetNum()`
 
-> 用于查询曾挂入 W 树的 R 节点总数。
+> 用于查询曾挂入 W 树的节点总数。
 
 ##### <a name="base64_encode"></a>`Base64.encode(input)`
 
@@ -136,32 +131,6 @@
 
 > 如果想改变这种缺省处理方式，只需自定义一个同规格函数，替换 `utils.shouldUpdate` 旧值即可。
 
-##### <a name="class_name_of"></a>`classNameOf(comp)`
-
-> 用于返回 `comp.props.className` 与 `comp.duals.klass` 合并后的 class 定义。
-
-##### <a name="has_class"></a>`hasClass(comp,cls)`
-
-> 用于判断 `cls` 是否在 `comp` 节点的 class 定义（className 与 klass 总和）中存在，参数 `cls` 的格式可以有如下几种：
-
-```
-    ['class_a','class_b']
-    'class_a'
-    'class_a class_b'
-```
-
-> 只要 `cls` 中有任一 class 存在，本函数即返回 `true`。
-
-##### <a name="add_class"></a>`addClass(comp,cls)`
-
-> 为 `comp` 添加 `cls` 定义，`cls` 格式与 `utils.hasClass()` 的同名参数相同。如果修改成功，就返回 `true`，未作修改时（可能想添加的 class 早己存在）返回 `false`。
-
-##### <a name="remove_class"></a>`removeClass(comp,cls)`
-
-> 为 `comp` 移除 `cls` 定义，`cls` 格式与 `utils.hasClass()` 的同名参数相同。如果修改成功，就返回 `true`，未作修改时（可能想移除的 class 不存在）返回 `false`。
-
-> 定义在 `comp.props.className` 中的 class 不可移除，若要移除本函数将 throw 一个 Error。 
-
 ##### <a name="set_class"></a>`setClass(comp,cls)`
 
 > 为 `comp` 设置 `cls` 定义，参数 `cls` 的格式可以有如下几种：
@@ -175,14 +144,6 @@
 > 其中各 class 单项用前缀 `'+'` 表示添加，用 `'-'` 前缀表示删除，如果前缀 `'+'` 或 `'-'` 均未使用也表示添加（与前缀 `'+'` 同义）。未在 `cls` 参数指明的原有 class 项将维持不变。
 
 > 如果修改成功，本函数返回 `true`，未作修改返回 `false`。
-
-##### <a name="merge_class"></a>`mergeClass(comp,cls)`
-
-> 为 `comp` 合并 `cls` 定义，`cls` 格式与 `utils.hasClass()` 的同名参数相同。如果修改成功，就返回 `true`，未作修改返回 `false`。
-
-> 注意：`mergeClass` 合并 `cls`，与 `addClass` 添加 `cls` 有差异。前者合并会删除同族其它 class 定义，比如 `default-large-small, large-small-default, small-default-large` 这 3 者同属一族，三者中添加任意一个，剩下两个将从原定义中移除。`S1, S2, S3, S4, S5, S6` 用于控制字号大小，这 6 项也属于同一族。但 `addClass` 只管添加尚不存在 class 定义，不分析是否有同族 class 定义存在。
-
-> 判断两个 class 是否为同族，依据两点，其一，命名若用 `'-'` 连接，依次将首段转移到末段判断两者是否同名，其二，作为系统内置的特例，`S1, S2, S3, S4, S5, S6` 这 6 项视作同族。
 
 ##### <a name="klass_names"></a>`klassNames(s1,s2, ...)`
 
@@ -310,7 +271,7 @@
 
 ##### <a name="load_element_ex"></a>`loadElementEx(sPrefix,jsonX, ...)`
 
-> 与 `loadElement()` 类似，也读入以 json-x 格式描述的界面，转化成 React Element 返回，但转化时尝试从 main 模块找到相应投影定义并捆绑。`sPrefix` 用作路径前缀，它与 json-x 描述各节点的 key 值串接，形成绝对路径，用于从 main 模块查找投影定义。本函数其它参数格式，以及返回类型与 `loadElement(jsonX, ...)` 的要求相同。
+> 与 `loadElement()` 类似，也读入以 json-x 格式描述的界面，转化成 React Element 返回，但转化时尝试从 main 入口找到相应投影定义并捆绑。`sPrefix` 用作路径前缀，它与 json-x 描述各节点的 key 值串接，形成绝对路径，用于从 main 入口查找投影定义。本函数其它参数格式，以及返回类型与 `loadElement(jsonX, ...)` 的要求相同。
 
 ##### <a name="set_vendor_lib"></a>`setVendorLib(sName,callback)`
 

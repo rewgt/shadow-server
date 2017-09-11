@@ -19,7 +19,7 @@
 </svg>
 ```
 
-它的实现机理很简单，在常规的 svg 图片定义基础上，往 `<g>` 标签添 `_widget` 属性定义，`_widget` 是一个 JSON 字串，将该字串 parse 为数据 `_widget` 后，`_widget.name` 指示构件名称，`_widget.widget` 是 [json-x 格式](#2.7.1.) 的节点定义。
+它的实现机理很简单，在常规的 svg 图片定义基础上，往 `<g>` 标签添 `_widget` 属性定义，`_widget` 是一个 JSON 字串，将该字串 parse 为数据 `_widget` 后，`_widget.name` 指示构件名称，`_widget.widget` 是 [json-x 格式](#1.5.2.) 的节点定义。
 
 把这种带 `_widget` 配置定义的 svg 保存到资源文件目录下，存为后缀为 ".json.svg" 的文件，比如把上面源码存为 `"middleware/output/shared/Span.json.svg"`，一份样板文件的设计就完成了。仿照上面 Span 构件的源码，大家可以自行定义各种样板文件。
 

@@ -1,0 +1,110 @@
+1.5.1 组织 W 树
+-----------
+
+&nbsp;
+
+前面 “几个概念” 一节已介绍 [什么是 W 树](#1.1.2.!w_tree)，本节介绍如何组织 W 树。
+
+#### `body` 节点
+
+使用 Shadow Widget 开发的一个网页程序，都提供一个供 React 编程的入口节点，这个节点既由 `ReactDOM.render(rootElement,node)` 作为根节点渲染而来，也作为 Shadow Widget 的根节点（即 `body` 节点）来使用。
+
+`body` 节点是 W 树的根节点，固定用 `BodyPanel` 类创建，如下是 html 文件中，用转义标签描述出来的根节点。
+
+``` html
+<!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+<div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
+<div $=BodyPanel key='body'>
+</div>
+</div>
+<!-- END OF CONTAINER, DO NOT CHANGE THIS LINE. -->
+```
+
+我们既可以用转义标签描述 W 树的所有节点，也可以只描述部分节点，然后用 `comp.setChild()` 接口动态安装其它节点。`body` 节点必须由转义标签定义，所以，在 `*.html` 文件中，如上用转义标签描述 GUI 的代码，至少都要预先定义好 key 为 `'body'` 的 BodyPanel 节点。
+
+#### Widget 层封装
+
+React 库在虚拟 DOM 层面提供接口，提供的是 Component 层封装，Shadow Widget 则在 Component 基础上，封装出 Widget 层接口，语句 `var W = require('shadow-widget')` 导入的正是 Widget 层的 “总根节点”。Shadow Widget 所有构件都在这个 `W` 变量中记录，知道某构件的绝对路径 `sPath` 后，就能用 `W.W(sPath)` 获得该构件实例。
+
+Shadow Widget 中，所有构件都是 “构件类” 的实例，连 “总根节点” 也是，在概念上，总根节点是 “`body` 节点” 的父节点，即：`W.W('.body').parent === W` 判断是成立的。“构件类” 提供若干通用函数（如 `getPath`）与若干属性（如 `parent`），后文随即介绍。
+
+#### 为什么设计 W 树？
+
+React 的 Component 层封装着眼于通用的虚拟节点，不对它的上下层环境作假设，而 Shadow Widget 的 Widget 层封装，是假定一个节点应用于它的上下层环境，它与它的父节点、子节点存在强关联。尤其将上层节点 props 属性中可变的，剥离到 duals 属性后，剩下 props 在生存期内不变，这些不变量构成稳定的约束条件，当一个节点处于稳定环境下，编程自然要结合环境要素展开。所以，**Widget 封装是 Component 结合了上下层环境要素的封装，而 W 树为节点索引提供了便利手段**。
+
+举一个例子来说明，一个 “列表项”（`<li>` 节点）在 “菜单” 下是菜单项，在 “导航栏” 里是导航项，这两种情况下 “列表项” 的功能与外观都很接近，设计时，我们很容易为该 “列表项” 设计一个类，然后由该类自己识别它所处的环境，来决定如何提供功能，如何表现外观。
+
+W 树中各节点的从属关系由 Shadow Widget 系统自动组织的，具体而言：
+
+1. 对于转义标签，标签的上下级包含关系就是节点上下级关系
+2. 对于动态安装的节点，调用 API 时已隐含节点从属关系，比如 `comp.setChild()` 表明要在 `comp` 节点安装子节点。
+
+W 树中的节点还是自动维护的，待挂入的节点在 `componentDidMount()` 触发时自动挂入，而当树中节点在 `componentWillUnmount()` 触发时，即自动从 W 树剥离。节点的 `comp.isHooked` 属性值指示它是否还挂在 W 树中，若为 `true` 表示该节点还在 W 树中。
+
+在 React 库的内部也维护一个节点树，是 Component 树，而 W 树是 Widget 树，两者所记录的节点关系并非一一对应，前者表达节点全集，后者只记录经 WTC 类封装的节点。换一句话说，所有 Widget 节点都是 Component 节点，并不是每个 Component 都往 W 树上挂。另外，前者 Component 树的操作接口未开放，后者 Widget 树则是公开的。
+
+#### Component 节点与真实 DOM 节点
+
+调用 `comp.getHtmlNode()` 可从 Component 节点获取真实的 DOM 节点，调用这个 API 并非总能成功，如果获取失败将返回 `null` 值。如果一个 Component 尚未挂载，或者已经缷载，提取它的 DOM 节点必然失败。
+
+得到真实 DOM 节点（`node`）后，用 `utils.keyOfNode(node)` 可查询该 Component 节点的 key 值。
+
+#### 构件类接口
+
+W 树中的节点，即上文所提 “Widget 节点”，都是 “构件实例”，是 “构件类” 的实例化对象。针对 W 树的操作接口在 “构件类” 中定义，包括如下类方法：
+
+1. `getPath()`，取当前 “构件实例” 的绝对路径   
+这个函数常用来调试，比如：`console.log('widget path:', comp.widget.getPath())`
+
+2. `W(sPath)`，以当前节点为参照，取 `sPath` 指示的 “构件实例”   
+如果 `sPath` 首字符是 `'.'`，表示按绝对路径找节点，否则以当前节点为参考，在它的子节点中查找。比如，`W.W('.body').W('top.p')` 先在 “总根节点” 取 `'.body'` 节点，得到 body 节点后，用 `'top.p'` 再取其下节点。
+
+还有如下成员定义：
+
+1. `component`，取 Component 实例，若想从 Component 实例取回 “构件实例”，用 `comp.widget`
+
+2. `parent`，取父 “构件实例”，如果父节点不存在，返回 `null`
+
+3. `$id`，当前 “构件实例” 的 ID 号，是一个整数值，所有 “构件实例” 的 ID 号都是不同的
+
+除了上述成员，“构件实例” 还用子节点的 key 值，直接索引子级 “构件实例”，key 值所指也是成员。比如：`W.body` 是 “总根节点” 下 key 为 `'body'` 的节点，`W.body.top` 是 body 节点下 key 为 `'top'` 的节点。如果子节点的 key 值是由系统自动分配的整数值，同样也直接索引，如 `W.body.top[2]`。
+
+#### 用 `setChild` 动态组装 W 树
+
+调用  `comp.setChild()` 可以安装 W 树节点，动态组装 W 树还有其它方法，我们以后再介绍，因为 `setChild` 用法很直接，编程中也较常用，本节先介绍。
+
+比如这个例子：
+
+``` js
+01 var t = utils.getWTC('*');
+02 
+03 main.$onLoad.push( function() {
+04   var topComp = W.W('.body.top').component;
+05   var jsx = <t.P key='p'>Hello, world!</t.P> ;
+~~   topComp.setChild(jsx);
+07 });
+```
+
+本例先找到 `.body.top` 的 Component 节点，然后调用 `setChild()` 安装子节点。调用 `setChild` 时可传入一个或多个 React Element 定义，传多个 Element 表示安装多个节点。
+
+调用 `t = utils.getWTC('*')` 可获得内置于 `T` 的所有 React Class，不能直接用 `T.P`，那是 WTC 类实例，而非 React Class。参数 `'*'` 表示提取直属于 `T` 的所有 React Class，得到一个合集 `t`，所得 `t.Panel, t.P, t.Span` 等都是 React Class，能在 JSX 表达式中直接使用。
+
+#### <a name="set_child"></a>setChild 参数规格
+
+`comp.setChild()` 不仅用于增加节点，还用于替换节点、删除节点。它传递变长参数，如果最后一个参数是函数，表示回调函数 callback，成功设置子节点后，该回调函数 `callback(changed)` 自动被调用，回调函数的参数 `changed` 表示设置是否成功（`true` 或 `false`）。
+
+变长参数中，除了回调函数，还支持如下项目：
+1. 参数若是 React Element，表示将该 Element 设为子节点，其 key 值决定新增还是替换，如果已存在该 key 值的旧节点，是替换，否则，在尾部追加该子节点。
+2. 参数若是 `'-'` 作前缀的字串，表示删除指定 key 的子节点，比如 `"-btn"` 表示删除 key 为 `"btn"` 的节点。
+3. 参数若用 `'+'` 作前缀指示某子节点的 key，其后再跟 element 或 element 列表，表示在指定 key 子节点之前插入指定节点。比如：`comp.setChild("+btn",element)` 表示在 `"btn"` 子节点之前插入一个节点，`comp.setChild("+btn",[element1,element2])` 则插入两个节点。
+
+一次 setChild 调用，可以操作多个节点，比如增两个节点，删一个节点。但一次操作的多个节点之间不能有依赖关系，比如先删子节点，再在删除位置插入一个节点。如果有依赖关系，应该借助 callback 回调，在完成第一次操作后再做第二次 `setChild()` 操作。比如：
+
+``` js
+comp.setChild('+btn', element, function(changed) {
+  if (changed)  // success insert element before 'btn' node
+    comp.setChild('-btn');  // then remove 'btn' node
+});
+```
+
+&nbsp;

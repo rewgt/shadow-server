@@ -1,0 +1,76 @@
+2.6.2 MarkedDiv
+-------------
+
+&nbsp;
+
+#### 用转义标签描述 MarkedDiv
+
+`MarkedDiv` 继承自 `Div`，在转义标签中，我们宜用 `<pre>` 表达，而不是 `<div>`，比如：`"<pre $=MarkedDiv>## Hello</pre>"`，因为 Markdown 文本格式较宽泛，`pre` 标签适合用来表达源代码。
+
+另外，在转义标签中书写 Markdown 文本，请注意保持文本原样，不必为了排版美观，在行首添加空格。行首空格对 Markdown 来说有语法含义，比如，下面界面定义存在误用：
+
+``` html
+  <div $=Panel>
+    <pre $=MarkedDiv>
+       Hello, world!
+    </pre>
+  </div>
+```
+
+Markdown 文本的行首连续 4 个空格表示启用代码段，所以，上面转义标签应改成：
+
+``` html
+  <div $=Panel>
+    <pre $=MarkedDiv>
+Hello, world!
+</pre>
+  </div>
+```
+
+#### 动态更新 MarkedDiv 的内容
+
+运行中若想修改 markdown 文本，对它的双源属性 `duals['html.']` 赋值即可，比如：
+
+``` js
+comp.duals['html.'] = 'ABC\n===';
+```
+
+#### 插入 “块引用”
+
+Markdown 文本中，可用 `<pre $=".path.to.ref"></pre>` 方式引用外部构件，比如：
+
+<div $='.rewgt.ui_demo' src='md/code/2_6_2_a.txt' input-height='{190}'></div>
+
+这种 “块引用” 本质是构件拷贝，引用路径既可以是相对路径，也可以是绝对路径，像上面 “相对段路径” 方式较为常用。块引用时，还可传入要替换的属性项，比如上面 `width` 属性。
+
+块引用的转义标签也宜用 `<pre>` 表达，虽然多数情况下用 `<div>` 也可以，但 `<pre>` 适用面更广。
+
+说明：在 Markdown 文本中定义的 UI 构件，以及用 “块引用” 导入的构件，都要求是 “非行内构件”，Panel 类、Div 类、P 类均可，不能是 Span 类构件。这些构件在 Markdown 文本流中表现为一种 “段落”，与其它 Markdown 文本段（静态节点）一起，由它们所属的 MarkedDiv 节点按 block 流方式布局，即：依序排列各段。
+
+在 Markdown 文本中无论用转义标签定义界面，还是用 “块引用” 导入界面，都与 Markdown 之外的界面设计等效。在 Markdown 文本定义的界面甚至可以是 `MarkedDiv` 或 `MarkedTable`，允许层层嵌套，不限深度。这些特性让 Shadow Widget 的 Markdown 功能变得非常强大。
+
+#### <a name="nodes"></a>`duals.nodes` 属性
+
+在 Markdown 文本中定义的 UI 构件，能自动记录到 MarkedDiv 的 `duals.nodes` 属性。
+
+如下例子。
+
+<div $='.rewgt.ui_demo' src='md/code/2_6_2_b.txt' input-height='{220}'></div>
+
+双源属性 `duals.nodes` 是 array 数组，对于 `MarkedDiv`，`duals.nodes` 是一维数组，对于 `MarkedTable`，`duals.nodes` 是二维数据，即：表格行是一维，表格列是另一维，比如 `nodes[0][1]` 指示 `rows[0]` 行 `cols[1]` 列的单元格。无论一维还是二维数组，其组成单元的格式均为 `[key,element]`，记录相应节点的 `key` 值与 `Element` 值。
+
+如果 Markdown 中定义的构件给出 `key` 值，如上面 `"first"` 与 `"next"` 两节点，系统还按 `duals.nodes[key] = element` 额外做记录。本例演示的便是分别取 `"first"` 与 `"next"` 节点，改用列表 `Li` 列出。
+
+我们常用 `$for` 循环遍历 `duals.nodes`，以此重新组装在 Markdown 中定义的各个构件。将上面例子稍作修改：
+
+<div $='.rewgt.ui_demo' src='md/code/2_6_2_c.txt' input-height='{220}'></div>
+
+这种遍历 `duals.nodes` 重组节点的方法，对用户自行扩展具有特定显示效果的构件很有用。因为在 Shadow Widget 可视编辑器中，修改 Markdown 文本很容易，我们还需将渲染特殊效果的配置过程隐藏起来，否则，用 Markdown 定义构件较繁琐，不易读也不易维护。
+
+#### 使用 `props.noShow`
+
+上面例子演示了用 Markdown 定义构件，构件成集，成为一种数据源，驱动特定 UI 界面生成。用来定义数据源的 MarkedDiv，用 `style.display='none'` 来避免它显示到界面。我们还可以换一种做法，设置 MarkedDiv 传入值 `props.noShow='1'`，让 MarkedDiv 的子节点定义在解析记录到 `duals.nodes` 后自动清空，这也同等达到让 MarkedDiv 不在界面显示的目的。
+
+对比这两种方法，采用 `props.noShow='1'` 的处理更彻底些，因为与 `duals.nodes` 无关的节点，比如静态文本，都丢弃了，性能稍高。
+
+&nbsp;

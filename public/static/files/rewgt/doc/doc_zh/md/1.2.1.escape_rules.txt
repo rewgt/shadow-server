@@ -1,0 +1,78 @@
+1.2.1 转义标签的规则
+-----------------------
+
+&nbsp;
+
+#### 转义标签的规则
+
+在 Shadow Widget 中，转义标签用来替换 react 的 JSX 描述方式，以符合原生 HTML 标签规格的形式直接描述 DOM 片断。
+
+- 规则1：只允许在 `span` 与 `div` 两种标签内用 `$=Tag` 的形式表达转义，比如：   
+&nbsp;&nbsp;&nbsp; `<div $=P><span $=Span></span></div>`   
+说明：后面还会介绍一种用 `pre` 替代 `div` 的情形，所以，实际支持 `span, div, pre` 三种标签。
+
+- 规则2：`span` 标签中的转义，只针对行内标签（inline tag），`div` 与 `pre` 转义则只针对非行内标签（none-inline tag）。下面是错误用法：   
+&nbsp;&nbsp;&nbsp; `<span $=Div></span>`   
+类似的，`<div $=Span></div>` 也是错误用法，行内与非行内这两类标签不能错误指向。
+
+- 规则3：转义标签下的常规子节点与其文本子节点，只能二选一，如果两者同时使用，文本子节点将被忽略。比如：   
+&nbsp;&nbsp;&nbsp; `<span $=Span>example <span $=Span>text</span></span>`   
+显示为 `"text"`，而非 `"example text"`。
+
+#### 转义标签中的属性定义
+
+在转义标签中定义的属性，如下面的 `title, data-state, height`，将以 `props.attr` 的方式传递给 React 系统来创建 Component。
+
+<div $='.rewgt.ui_demo' src='md/code/1_2_1_a.txt' input-height='{50}'></div>
+
+本例支持在线演示，大家试着将上面 `height='{40}'` 改成 `height='{100}'`，再点 Apply 按钮让修改生效，看看会发生什么？
+
+这里属性 `$` 用来指示转义的目标 Tag，转义标签中的属性值若以 `'{'` 开头且以 `'}'` 结尾，表示它的正文（指掐去头尾花括号后的字串）是 JSON 数据，如上面 `height` 属性传递值为 `40`，是 number 类型，而非字串。 请注意，传递的 JSON 字串要求严格合规，否则系统调用 `JSON.parse()` 会报错。
+
+转义标签中的属性值要么是字串，要么是用字串表达的 JSON 值，`$=P` 是 `$='P'` 的简写，所有现代浏览器都支持这种简写形式。
+
+上面转义标签与如下语句等效：
+
+``` js
+  React.createElement('p',{title:'demo','data-state':'OK',height:40},'Hello world!');
+```
+
+转义标签中使用的属性名如果用 `"-"` 连接，为遵守 React 使用约定，其命名要调整成驼峰方式（camelCased），比如：`border-width` 要调整成 `borderWidth`，但 `"data-"` 开头与 `"aria-"` 开头的例外，如：`data-state` 仍维持 `data-state` 属性名。
+
+驼峰 camelCased 属性命名，以及  `data-*` 与 `aria-*` 的例外形式，属于 React 的 JSX 书写要求，Shadow Widget 转义标签继承了这两项规则。
+
+#### 转义标签中的属性要显式赋值
+
+HTML 标签中允许类似如下 `disabled` 简写的属性定义：
+
+``` html
+  <button disabled>test</button>
+```
+
+转义标签要求显式给出所有属性值，省掉等号赋值的属性定义方式不再支持，所以，上面 `disabled` 属性要写成如下形式：
+
+``` html
+  <span $=Button disabled='1'>test</span>
+```
+
+#### 如何表达源码内容？
+
+HTML 标签 `<pre>` 专用于表达源代码，不妨这么书写转义标签：
+
+``` html
+<div $=Pre>// Coding here ...
+var jsx = <p>Hello world!</p> ;
+</div>
+```
+
+这里显然有问题，`<div>` 并不适合描述源码内容，应改成如下形式：
+
+``` html
+<pre $=Pre>// Coding here ...
+var jsx = <p>Hello world!</p> ;
+</pre>
+```
+
+所以，转义标签 `<div $=XX>` 与 `<pre $=XX>` 都能表达非行内标签，只是后者专用来描述内容为某种 “源码” 的情形。
+
+&nbsp;

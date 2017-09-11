@@ -1,0 +1,3 @@
+<div $=Div key='div' width='{300}' height='{100}' sty__='position:relative'>
+  <div $=P key='p' left='{30}' top='{30}'sty__='position:absolute'>Hello, world!</div>
+</div>

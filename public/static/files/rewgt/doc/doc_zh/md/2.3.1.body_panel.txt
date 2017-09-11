@@ -1,0 +1,61 @@
+2.3.1 根节点面板
+----------------
+
+&nbsp;
+
+W 树的首个节点要求用 `BodyPanel` 创建，而且 `BodyPanel` 只能用作 W 树的首节点。
+
+####  `BodyPanel` 的布局
+
+`BodyPanel` 用作 “可 flex 布局的面板” 的父节点，其下要求能摆放 `Panel, GridPanel, TablePanel` 三种面板（或其它继承自这三者的 WTC）。另外，`BodyPanel` 还是 W 树的实根节点，用作绝对定位的入口，任意 Panel 类、Div 类、P 类构件都改用绝对定位方式，只须将 `style.position` 设为 `"absolute"` 即可。
+
+`BodyPanel` 对其内容的布局管理是如下两者合集：
+1. 对 “可 flex 布局的面板”（Panel, GridPanel, TablePanel）提供 `block` 流布局
+2. 对其它构件（限非行内构件）按绝对定位方式布局
+
+说明：
+1. 面板 `Panel` 与 `GridPanel` 对内容均按 flex 方式布局，其中 `GridPanel` 按指定列宽排列各子项，只是看起来像表格。
+2. `TablePanel` 用 `<table>` 标签包装，因其内容（即各单元格）可以是面板，我们不妨把它也看成一种特殊的，“可 flex 布局”  的面板。
+3. 行内构件不能直接挂到 `BodyPanel` 节点。
+
+#### 侦听 `innerSize`
+
+`BodyPanel` 的 `duals.innerSize` 指示当前页面的宽高，取值格式为 `[width,height]`，记录宽高的像素值，其值来源于 `window.innerWidth` 与 `window.innerHeight`。
+
+侦听 `duals.innerSize` 可感知当前窗口何时被拉伸（或收缩），比如：
+
+``` js
+01 main.$onLoad.push( function() {
+02   bodyComp = W.W('.body').component;
+~~   bodyComp.listen('innerSize', function(value,oldValue) {
+04     var width = value[0], height = value[1];
+05     console.log('width = ' + width + 'px, height = ' + height + 'px');
+06   });
+07 });
+```
+
+说明：`duals.innerSize` 的值由系统自动设置，它是只读的，对它赋值系统将报错。
+
+#### 全动态组装 W 树
+
+Shadow Widget 要求当前页面的 html 文件，用转义标签至少要定义一个节点（即根节点面板），如果只定义这一个节点，当前用户界面需完全依赖动态组装。
+
+举例说明：
+
+``` js
+01 main.$onLoad.push( function() {
+02   bodyComp = W.W('.body').component;
+03   var jsonX = [  ['Panel',{key:'top',height:0.9999,klass:'auto-hidden-visible'}],
+04     ['P',{key:'p','html.':'Hello, world!'}]
+05   ];
+06   var ele = utils.loadElement(jsonX);
+07   
+~~   bodyComp.setChild(ele, function(changed) {
+09     // continue to do something ...
+10   });
+11 });
+```
+
+动态组装一般用 `setChild()` 函数（参见 [“组织 W 树”](#1.5.1.!set_child)），不过，我们一般只在首次生成界面时调用 `setChild()`，运行中界面动态变化由双源属性自主驱动。
+
+&nbsp;

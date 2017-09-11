@@ -9,19 +9,15 @@
 <meta property="pinp:template" page="Nav" content="/app/files/rewgt/web/templates/Nav">
 <meta property="pinp:template" page="Md" content="/app/files/rewgt/web/hint_marked.html">
 <title>shadow-widget demo18</title>
+
 </head>
 <body>
 
 <!-- BEGIN OF CONTAINER, DO NOT CHANGE THIS LINE. -->
 <div id="react-container" style="visibility:hidden; position:absolute; left:0px; top:0px">
-<div $=BodyPanel key='body'>
-  <div $=Panel key='top'>
-    <div $=P key='toolbar'>
-      <span $=Button key='test'>Test</span>
-    </div>
-    <div $=Div key='msg' padding='{[0,6]}' sty__='display:none'>
-      <div $=P>Hello, world!</div>
-    </div>
+<div $=BodyPanel key='body'> 
+  <div $=Panel key='top' height='{null}'>
+    <div $=P key='p' $$for='' $data='ex.ajax({url:"query/user.json"},{status:"",data:null})' $html='duals.data.data && ("name = " + duals.data.data.name + ", age = " + duals.data.data.age)'></div>
   </div>
 </div>
 </div>
@@ -34,20 +30,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var W = require('shadow-widget');
-var main = W.$main, utils = W.$utils, ex = W.$ex;
-
-var popOption = { width:0.7, height:200,
-  bodyStyle: {display:'block', backgroundColor:'#eee'},
-};
-
-main['.body.top.toolbar.test'] = {
-  $onClick: function(event) {
-    var ele = this.elementOf('.body.top.msg');
-    utils.popWin.showWindow(ele,popOption, function() {
-      console.log('popup window has shown, opened =',popOption.opened);
-    });
-  },
-};
+var main = W.$main, utils = W.$utils, ex = W.$ex, T = W.$templates;
 
 });
 </script>
@@ -55,6 +38,7 @@ main['.body.top.toolbar.test'] = {
 <link rel="stylesheet" shared="true" href="/app/files/rewgt/web/css/sw_base.css" />
 <script src="/app/files/rewgt/web/js/react.min.js"></script>
 <script src="/app/files/rewgt/web/js/react-dom.min.js"></script>
+<script src="/app/files/rewgt/web/js/create-react-class.min.js"></script>
 <script src="/app/files/rewgt/web/js/shadow-widget.min.js"></script>
 
 </body>

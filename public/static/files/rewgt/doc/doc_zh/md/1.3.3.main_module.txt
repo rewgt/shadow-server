@@ -1,0 +1,65 @@
+1.3.3 main 入口
+---------
+
+&nbsp;
+
+前面 [“准备 JS 编码工作环境”](#1.3.1.!prepare_env) 已涉及 `W.$main` 若干功能，本节进一步介绍在 `main` 入口（专指 `W.$main` 入口模块）都能干些什么。
+
+请注意，本手册所提 “main 入口” 与 “MAIN 模块”，是两个不同概念。
+
+#### main 入口的功能
+
+main 作为入口模块，主要提供两方面功能：
+
+1. 预设构件的行为定义，比如用 `main['.body.top.p.btn'] = {...}` 登记投影类
+2. 定义初始化处理函数，比如在 `main.$onLoad` 登记初始化函数
+
+在概念上我们所说 “MAIN 模块”，特指用 ES5 规格编程代码集合，用 ES6+ 编码的不算。当 WTC 封装者在 ES6 环境编程时，他面对两类代码，其一是 WTC 类定义，这部分可以认为是中间件代码，可共享的，其二是，直接为当前 GUI 程序服务的代码。前者自然必须用 ES6+ 开发，而后者，既可以用 ES6+，也可以用 ES5，若用 ES6+，相当于把该在 “MAIN 模块” 编写的代码挪到底层去做。
+
+另外，用 ES6+ 开发的中间件，经 Babel 转译以 CDN 版本方式发布时，也通常将翻译后的 ES5 代码包装成 “MAIN 模块”。
+
+#### onLoad 回调及初始化顺序
+
+`W.$main` 提供 `isReady` 与 `inRunning` 两个变量标识当前运行状态，另外还提供 `$onLoad` 初始化列表以便 react 首次 render 输出后供依次回调。下面举例说明：
+
+``` js
+main['.body.top.p.btn'] = {
+  getInitialState: function() {
+    console.log('in getInitialState()');
+    return this._getInitialState(this);
+  },
+  
+  render: function() {
+    console.log('in render()');
+    return this._render(this);
+  },
+  
+  $onClick: function(event) {
+    alert('clicked!');
+  },
+};
+
+console.log('main state 1:','isReady='+main.isReady,'inRunning='+main.inRunning);
+main.$onLoad.push( function() {
+  console.log('react system has loaded!');
+  console.log('main state 2:','isReady='+main.isReady,'inRunning='+main.inRunning);
+  setTimeout( function() {
+    console.log('main state 3:','isReady='+main.isReady,'inRunning='+main.inRunning);
+  },0);
+});
+```
+
+代码中 `main.isReady` 指示 React 的首次 render 是否完成，取值为 `true` 表示已完成首次渲染，初始界面已可见。`main.$onLoad` 登记了待初始化调用的函数列表（array 类型），当 `main.isReady` 置 `true` 后，这些初始化函数依次被调用，之后 `main.inRunning` 才置为 `true`。
+
+可从 demo4 找到上面源码，在浏览器中运行本例，控制台输出如下信息：
+
+```
+main state 1: isReady=false inRunning=false
+in getInitialState()
+in render()
+react system has loaded!
+main state 2: isReady=true inRunning=false
+main state 3: isReady=true inRunning=true
+```
+
+&nbsp;

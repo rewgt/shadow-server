@@ -1,0 +1,3 @@
+<div $=P key='p' $for='' dual-data='{{"name":"Wayne","lastName":"Chan"}}'>
+  <span $=Input key='desc' $value='duals.data.name + " " + duals.data.lastName'></span>
+</div>

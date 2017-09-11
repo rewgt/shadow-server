@@ -1,0 +1,7 @@
+<div $=Panel key='panel'>
+  <div $=P key='p' sty__='background:red; color:white'>Hello, world!</div>
+  <div $=Div2 key='div' height='{36}' klass='large-small-default' sty__='background:#f4f4f4'>
+    <span $=Button key='btn1'>Test 1</span>
+    <span $=Button key='btn2'>Test 2</span>
+  </div>
+</div>

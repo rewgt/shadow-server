@@ -1,0 +1,102 @@
+2.6.1 MD 语法
+-------------
+
+&nbsp;
+
+#### Markdown 技术
+
+有关 Markdown 应用，Shadow Widget 内置提供 `MarkedDiv` 与 `MarkedTable` 两个最基础的 WTC 类定义，所有凡支持 Markdown 的扩展 WTC 都应从这两个基类开始继承。借助 `MarkedDiv` 与 `MarkedTable` 的基础能力，我们不仅能用 markdown 表达简易的文档化内容，还让转义标签无缝嵌入，支持任意形态的 UI 设计。
+
+本系统采用 John Gruber 的 [Markdown 语法规则](http://daringfireball.net/projects/markdown/syntax)，该 MD 语法已全盘继承，为增强功能，我们还做了少量功能扩展。
+
+Shadow Widget 已将 [chjj/marked](https://github.com/chjj/marked) 的 markdown 解析器内置安装在 `utils.marked`，可按如下方式调用：
+
+``` js
+var s = utils.marked("## Sample");
+console.log(s);  // it will print: <h2 id="sample">Sample</h2>
+```
+
+#### 优化与扩展 Markdown 语法
+
+1）缩进方式的改进
+
+常规 markdown 语法都支持用 `>` 表达当前段落缩进一级。比如：
+
+```
+ > 这一段缩进一个级别。
+
+ > > 这一段缩进两个级别。
+```
+
+这样的 markdown 文本在独立的 `*.txt` 或 `*.md` 文件中书写没问题，但如果挪到 html 网页文件中，字母 `'>'` 会保存为转义格式 `"&gt;"`。所以，Shadow Widget 在读入 markdown 文本时，增加了对行首 `"&gt;"` 的缩进兼容处理。
+
+另外，markdown 内置支持 `<tag>` 标签，尤其我们大量的将转标签内嵌到 markdown 文本，用 `>` 表示缩进有损语法严谨。因此，我们引入 `"::"` 表示法，拿它替换 `'>'`。比如：
+
+```
+ :: 这一段缩进一个级别。
+
+ :: :: 这一段缩进两个级别。
+```
+
+&nbsp;
+
+2）支持源码块语法高亮
+
+内置的 markdown 解析器未直接支持源码块针对不同编程语言的高亮显示，需引入 [`highlight.js`](https://github.com/isagalaev/highlight.js) 模块，在 HTML 网页文件添加如下代码：
+
+``` html
+<link rel="stylesheet" href="/path/to/styles/default.css">
+<script src="/path/to/highlight.pack.js"></script>
+```
+
+`default.css` 与 `highlight.pack.js` 是 `highlight.js` 项目对外发布的两个文件，在 `shadow-server` 项目的 `public/static/files/rewgt/js/hljs/` 目录下能找到。
+
+然后启动系统，Shadow Widget 就支持源码块的高亮功能了。是否将 `highlight.js` 引入网页是可选的，由开发者自行决定。
+
+&nbsp;
+
+3）源码块的高亮行与行号显示支持
+
+Shadow Widget 扩展了 markdown 中源码块的处理规则，用行首数字表达行号，行首 `"~~"` 表示高亮行。比如下面代码：
+
+```
+ 01 var t = utils.getWTC('*');
+ 02 
+ 03 main.$onLoad.push( function() {
+ 04   var topComp = W.W('.body.top').component;
+ 05   var jsx = <t.P key='p'>Hello, world!</t.P> ;
+ ~~   topComp.setChild(jsx);
+ 07 });
+```
+
+将渲染成如下样式：
+
+![line number](md/res/line_block.png)
+
+说明：
+1. 行首数字至少要有两位，如 `"01", "001"` 是正确写法，若写成 `"0", "1"` 将被忽略
+2. 行首 `"~~"` 也至少有两个字符，多于两个的连续 `"~"` 字串也是可以的
+3. 行首数字与行首 `"~~"` 选其一，或者两者共用都可以
+
+#### 在 markdown 文本中书写转义标签
+
+Markdown 语法支持 `<tag>` 标签，转义标签符合 HTML 标签书写规格，自然能嵌入到 markdown 文本中。
+
+举例如下：
+
+<div $='.rewgt.ui_demo' src='md/code/2_6_1_a.txt' input-height='{230}'></div>
+
+这里 MarkedDiv 中的 markdown 文本，解析成 HTML 标签后，生成节点树如下：
+
+```
+  marked                 // MarkedDiv
+  +-- markdown paragraph
+  +-- p                  // P
+  |   +-- test1          // Button
+  |   +-- test2          // Button
+  +-- markdown paragraph
+```
+
+上面由 Markdown 文本解析生成的节点中，除了由转义标签定义的节点（`"p", "p.test1", "p.test2"`），剩下的是 [“静态节点”](#1.2.3.)，如上两处 `"markdown paragraph"` 都是静态节点。
+
+&nbsp;

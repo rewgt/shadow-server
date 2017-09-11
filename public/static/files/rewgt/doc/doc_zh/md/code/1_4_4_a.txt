@@ -1,0 +1,5 @@
+<div $=P key='p'>
+  <span $=Input type='text' key='input' placeholder='Input your name' value='wayne'></span>
+  <span $=Br></span>
+  <span $=Span key='hint'>Hello, wayne!</span>
+</div>

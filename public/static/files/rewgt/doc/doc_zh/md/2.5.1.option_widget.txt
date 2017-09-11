@@ -1,0 +1,109 @@
+2.5.1 选项构件
+---------------
+
+&nbsp;
+
+选项构件是一类构件，当它被选时能自动触发预定义动作。选项构件提供两大功能，其一是提供 “选项触发器”，将在本节介绍，其二是用作 “场景面板切换器”，将在下一节介绍。
+
+#### 选项构件
+
+Shadow Widget 内置用作 “选项构件” 的有：
+
+``` js
+  OptSpan OptA OptImg OptButton OptInput OptOption OptDiv OptLi
+```
+
+这些构件名都以 "Opt" 前缀标示，OptSpan 对应于 Span，OptButton 对应 Button，其它类推。
+
+所有选项构件都自动定义 `duals['data-checked']` 属性，用来表示构件是否被 “选中”，最直接的 “选中” 是通过鼠标点击，其它 “选中” 方式还有编程触发与脚本表达式触发。构件选中后， `duals['data-checked']` 属性值将从空字串变为 `'1'`。
+
+借助 `data-checked` 标记，我们可以让构件在选中前后，用 CSS 表达两者界面的差异，比如，这么定义 `my-btn` 类：
+
+``` html
+01 <style>
+02 .my-btn {
+03   color: #222;
+04 }
+05 
+~~ .my-btn[data-checked="1"] {
+06   color: red;
+07 }
+08 </style>
+```
+
+然后定义界面：
+
+``` html
+01 <div $=P>
+~~   <span $=OptButton klass='my-btn'>Test</span>
+03 </div>
+```
+
+点此按钮让选项构件被选中，其上文字 `"Test"` 随即变为红色字体。
+
+#### 选项构件的 onsite 触发方式 
+
+前面 [“trigger 触发器”](#1.6.4.) 已介绍用 `utils.fireTrigger()` 触发指定动作，以及，在 [“解析触发 trigger”](#1.7.2.) 介绍用 `$trigger` 脚本表达式触发，对于选项构件，动作定义与触发方式更丰富，因为选项构件的设计本意就是 “选中并激发”。
+
+比如下面例子。
+
+<div $='.rewgt.ui_demo' src='md/code/2_5_1_a.txt' input-height='{100}'></div>
+
+我们用 `fire-type='onsite'` 指定 `$trigger` 表达式的触发类型，`onsite` 含义只在主动触发时才执行指定的动作，主动触发包括：
+
+1. 选项构件被 “选中”
+2. 以编程方式（即 `utils.fireTrigger()`）发起
+
+点击本例的 `"Click me"` 按钮，可发现按钮上文字变成一串数字了。
+
+接着试验一下删除 `fire-type='onsite'` 属性定义，是不是不点击，按钮上文字也自动变数字？因为 `fire-type` 缺省取 `auto` 值，含义为：当 `$trigger` 表达式有更新便重新运算，运算结果是新的 “动作” 定义，动作定义若有变化就立即触发新 “动作”。使用 `auto` 方式也意味着选项构件的触发条件是 `$trigger` 表达式重算，而不是 “选中” 操作（如鼠标点击）。
+
+#### 禁止反复触发
+
+有时我们希望一个选项构件在 “选中” 之后，不要连续重复再被 “选中”，不妨指定 `recheckable=''` 让系统先检查构件的 `duals['data-checked']` 值，若已选中，就忽略再次 “选中”，禁止连续触发。反之，如果指定 `recheckable='1'` 则允许连续触发。
+
+上面例子允许连续触发，下面例子则禁止。
+
+<div $='.rewgt.ui_demo' src='md/code/2_5_1_b.txt' input-height='{100}'></div>
+
+#### 用选项构件 “选中” 触发浮层弹窗
+
+在前面 [“浮层窗口”](#2.4.2.) 一节，我们已介绍用 `utils.popWin.showWindow()` 函数调用弹出弹窗，现在我们改用选项构件的 “选中操作” 实现浮窗弹出。
+
+<div $='.rewgt.ui_demo' src='md/code/2_5_1_c.txt' input-height='{230}'></div>
+
+只需将 `popOption` 定义移到选项构件，即支持用 “选中操作” 触发弹窗，其中 `popOption.path` 指示弹窗要引用的内容节点，用相对路径或绝对路径均可，有关 `popOption` 的其它格式请参考前文 [“弹窗配置”](#2.4.2.!pop_option)。
+
+说明：用 `utils.popWin.showWindow(element,popOption,callback)` 弹出弹窗，传入参数 `popOption` 与在选项构件定义的 `duals.popOption` 格式要求相同。只是前者已用 `element` 参数指示内容节点，后者必须用 `popOption.path` 动态查找。
+
+#### 用 `$trigger` 触发浮层弹窗
+
+在 [“trigger 触发器”](#1.6.4.) 一节我们已介绍一种 “动作定义”：`[sPath,modifier,attr]`，即：对指定 duals 属性发起 `update` 更新。接下来我们再介绍两种 “动作定义”：弹出浮窗、选中选项构件。
+
+trigger 动作定义：
+
+1. `[sPath,modifier,attr]`，更新 `sPath` 目标节点的 `attr` 双源属性的值
+2. `{$trigger:sPath, ...}`，让指定的选项构件弹出浮窗
+3. `sPath`，模拟某选项构件（由 `sPath` 指示）被 “选中”
+
+用 `$trigger` 触发弹窗，如下面例子中 `Show hello2` 按钮。
+
+<div $='.rewgt.ui_demo' src='md/code/2_5_1_d.txt' input-height='{260}'></div>
+
+其中 `$trigger:sPath` 指示由哪个选项构件实施弹窗操作，能弹出浮窗的构件必须定义 `popOption` 属性，这里 `$trigger` 指向 `"//btn"` 节点。如果本次弹出想更换 `popOption`  某项配置，在这个动作定义中指明即可，比如这里的 `width:0.5`，指示弹窗不要太宽。
+
+模拟指定选项构件被选，只需指出目标节点的路径，比如下面 `Show hello3` 按钮。
+
+<div $='.rewgt.ui_demo' src='md/code/2_5_1_e.txt' input-height='{300}'></div>
+
+说明：上述 3 种 “动作定义” 在 `$trigger` 表达式中可以同时使用，因为是多个 “动作”，表达式计算结果要用 array 数组表达，比如：
+
+``` js
+  $trigger='[ "path1",{$trigger:"path2"},["path3",{$set:value}] ]'
+```
+
+#### 禁止界面操作
+
+所有选项构件都自动定义 `duals.disabled` 属性，其值若为 “真”，该构件将不响应在界面发起 “选中” 操作。
+
+&nbsp;

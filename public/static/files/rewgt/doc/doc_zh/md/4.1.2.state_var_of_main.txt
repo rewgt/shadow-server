@@ -10,7 +10,7 @@
 
 &nbsp;
 
-main 模块下定义了 4 个状态变量：
+main 入口模块下定义了 4 个状态变量：
 
 1. <a name="is_start"></a>`isStart`，是否已启动界面初始化   
 如果 `main.isStart` 从缺省的 false 切换到 true 时，表示系统即将开始导入 W 树。

@@ -1,66 +1,27 @@
-3.3.2 如何新定义构件类
-----------------------
+3.3.2 深度定制 WTC
+--------------------
 
 &nbsp;
 
-#### 创建一个 WTC 的过程
+[“WTC 类定义”](#1.3.2.) 一节已介绍 WTC 类如何定义，下面我们继续讲解 WTC 定义的高级用法。
 
-新建一个 WTC 类，先要找一个合适的 WTC 基类，继承它定义新的 WTC 类，然后再把新定义 WTC 类及其类实例登记到 T 模块。
+#### 超静态函数
 
-下面举一个简单例子，一些常用的语句用注释标出，随后有解释。
+WTC 类定义中，有一种以 `'_'` 字符为前缀的类方法，称为 “超静态函数”（[参见前文](#1.3.1.!super_static)）。比如 `_createClass, _getGroupOpt, _getSchema` 等，它们有特殊用途，常用来支持可视化设计、调试、测试等。
+
+超静态函数是 “实例化成 React Class 之前的原始函数”，构件（`comp`）对应的 WTC 实例已自动安装到 `comp._`，所以，通常要这么调用超静态函数：
 
 ``` js
-var React = require('react');
-var ReactDOM = require('react-dom');
-var W = require('shadow-widget');
-
-var T = W.$templates, utils = W.$utils, ex = W.$ex;
-
-class THighlightBtn_ extends T.Button_ {
-  constructor(name,desc) {
-    super(name || 'HighlightBtn',desc);
-    // this._statedProp.push(...);
-    // this._silentProp.push(...);
-    // this._defaultProp.attr = value;
-  }
-
-  getDefaultProps() {
-    var props = super.getDefaultProps();
-    // props.attr = value;
-    return props;
-  }
-
-  getInitialState() {
-    var state = super.getInitialState();
-
-    // this.defineDual('attr', function(value,oldValue) {
-    //   ...
-    // },initValue);
-
-    return state;
-  }
-
-  componentDidMount() {
-    super.componentDidMount();
-    // initial process, such as regist listen, fetch ajax data, etc
-  }
-
-  $onMouseOver(event) {
-    this.duals.style = {opacity:'0.6'};
-  }
-
-  $onMouseOut(event) {
-    this.duals.style = {opacity:''};
-  }
-}
-
-T.HighlightBtn_ = THighlightBtn_;
-T.HighlightBtn = new THighlightBtn_();
+comp._._method(comp,arg1,arg2, ...)
 ```
 
-定义 `getInitialState, componentDidMount, componentWillUnmount` 等 React 内置的方法，类似于投影类定义，差别仅在于，在 WTC 中用 `super.method` 调用基类的同名函数，而投影类定义中，要用带 `'_'` 前缀的 “实例方法” 的方式。这些类方法均可缺省，缺省时自动采用基类的同名函数。定义事件函数与投影类中的要求一样，没什么特殊的。
+几个内置的超静态函数功能如下：
 
-新定义的 WTC 类定义及其实例（用 `new` 创建一个）一般要求登记到 T 模块，如上例最后两行代码，登记后，转义标签才可按 `<span $=HighlightBtn>test</span>` 的方式引用。
+1. `_createClass(defs)`，创建 React Class
+2. `_getGroupOpt(self)`，查询本类构件的可视化编辑工具的配置信息，参见后文 [“扩展可视编辑插件”](#5.3.4.)
+3. `_getSchema(self,iLevel)`，查询本类构件各 props 属性的类型信息，参见后文 [“可视化编辑的扩展”](#3.6.3.)
+
+说明：新定义 WTC 类或投影类时，应避免使用 `'_'` 前缀命名函数。
 
 #### 服务于产品开发的内置属性
 
@@ -77,7 +38,7 @@ T.HighlightBtn = new THighlightBtn_();
 
 其中，`_className` 指示当前 WTC 类名，`_classDesc` 是附加描述，这两者用在可视化编辑界面，提示用户选中的构件是什么。如上例，通常我们简单调一下 `super(name || 'HighlightBtn',desc)` 即可，转由基类的 constructor 用 `name` 与 `desc` 参数设置 `_className` 与 `_classDesc`。`_className` 用于指示该类定义在 T 模块下的位置，比如 WTC 类实例是 `T.usr.Submit`，应这么调用基类的 constructor 函数：`super(name || 'usr.Submit',desc)` 。
 
-`_statedProp` 是 array 数组，列出若干个界面设计时 “可记忆状态值” 的属性，比如 width 指示构件宽度，在可视化界面设计中，用鼠标拖拉能改变它的宽度，设计态的宽度值被记忆，存盘时使用该值。
+`_statedProp` 是 array 数组，列出若干个界面设计时 “可记忆状态值” 的属性，比如 width 指示构件宽度，在可视化界面设计中，用鼠标拖拉能改变它的宽度，设计态的宽度值将被记忆，存盘时使用该值。
 
 `_silentProp` 也是 array 数组，列出若干个不必导出保存的属性，比如 `className` 属性在构件创建时自动设置，不必导出存盘，还有一些内部使用的属性（通常以点号为后缀，如 `"keyid."`）也不必导出保存。
 
@@ -87,44 +48,77 @@ T.HighlightBtn = new THighlightBtn_();
 
 以上 6 种属性均服务于产品开发阶段，自定义 WTC 类时通常不需额外处理，因为基类的 constructor 函数已替你处理。
 
-#### 用 `_createClass()` 创建 React class 类
+#### 使用 `W.__design__`
 
-Shadow Widget 一般要求用户在 T 模块注册 WTC，如上面举例 `T.HighlightBtn_` 与 `T.HighlightBtn`，其中 `T.HighlightBtn_` 是 WTC 类定义，`T.HighlightBtn` 是 WTC 类实例。注册到 `T.HighlightBtn`，便于转义标签能以 `<span $=HighlightBtn>` 方式引用。还有一种方式是不往 T 模块注册，把它转化为 React class，只在 JSX 中使用。
+在可视化设计界面，从右侧拖动一个构件模板到主设计界面，即可创建一个构件，在主设计界面点击某构件，可选中它，然后在 property 属性页在线修改该构件的各项属性，如果双击主设计界面中的构件，通常能弹出内容编辑窗口，让你能快速编辑相关构件的关键属性。
 
-WTC 与 React class 都用 javascript 的 class 语法进行定义，比如 React class：
+总之，开发中的软件在可视化设计界面中的表现，与真实运行大不一样，真实运行时，在界面点一个按钮，将触发构件的 onClick 事件，但在可视化界面不触发 onClick，改成选择被点击的构件。也就是说，我们在定义 WTC 类时，要区分界面设计与正式运行两种应用场景。
+
+设计态下应专注于设计应用程序的界面，而非它的动作表现。**在设计态下，程序界面不挂载任何投影类定义**，构件单击与双击的含义变了（变成选择构件与编辑属性），对于特定构件，界面表现形式也变，比如 TablePanel，为方便设计态下选择全表或某一行，界面会多显示一个控制条。
+
+Shadow Widget 提供变量 `W.__design__`，标记当前是否处于 “可视化设计” 状态，自行定义 WTC 类时，大家不妨多用这个变量做判断，区分设计态与非设计态，为 “可视化设计” 过程提供特殊支持。
+
+#### 内控事件函数
+
+在 Shadow Widget 中，常规事件函数以 `'$'` 作前缀，内控事件函数以 `'$$'` 作前缀，同一构件中，若同时定义这两种事件函数，系统将自动选用内控事件函数。
+
+举例来说：
 
 ``` js
-class HighlightBtn2 extends React.Component {
-  constructor(props) {
-    // ...
+class THighlightBtn_ extends T.Button_ {
+  // ...
+
+  $$onClick(event) {
+    // do something ...
+    if (this.$onClick) this.$onClick(event);
   }
 
-  componentDidMount() {
-    // ...
-  }
-
-  render() {
+  $onClick(event) {
     // ...
   }
 }
 ```
 
-新定义一个 WTC 类必须从已有 WTC 继承，如前面举例的 `HighlightBtn` 从 `T.Button_` 继承，另外，WTC 比 React class 多一层抽象，将 WTC 用作 React class 要做一次转换，比如：
+在这段代码中，`$$onClick` 函数接管构件的点击操作，它在处理过程中，还分析是否定义了 `this.$onClick`，若有定义，接着调用 `$onClick` 函数。
+
+投影类不支持定义内控事件函数，它只在 WTC 类中定义，也不能通过 props 属性传递进来使用，常规事件函数（如 `$onClick`) 是可以用 props 传递的。
+
+我们将设计态与运行态纳入 WTC 设计，甚至有时还把调试态（`W.__debug__`）也纳入设计，编程将变得很复杂。内控事件函数提供了一个额外抓手，帮你玩转这一切，通常我们用内控事件函数管理所有运行状态，当它被调用时，识别当前 `W.__design__` 与 `W.__debug__` 的值，然后针对不同情况，作出不同处理。
+
+#### 改变双源 setter 的继承顺序
+
+如前文 [“双源 setter 的继承性”](#1.4.5.) 介绍，对同名双源属性定义 setter 回调时，通过 `defineDual(attr,setter)` 注册的多个 setter 函数具继承性。具体而言，对该 `duals.attr` 赋值时，先注册的 setter 先调用，后注册的后调用。
+
+特定情况下，我们希望多个 setter 调用顺序可控，就像常规类继承中，用 `super.method()` 调用基类方法那样，调用基类函数可在任意位置进行。
+
+请按如下方式定义双源属性：
 
 ``` js
-var Btn = T.HighlightBtn._createClass();
-var jsx = <Btn>test1</Btn>;
-
-var AlertBtn = T.HighlightBtn._createClass( {
-  $onClick: function(event) {
-    alert('clicked');
-  },
-});
-var jsx2 = <AlertBtn>test2</AlertBtn>;
+01 var base = {};
+02 this.defineDual(sAttr, function(value,oldValue) {
+03   // ...
+~~   base.setter(value,oldValue);
+05   // ...
+06 },undefined,base);
 ```
 
-经 `WTC._createClass()` 做一次捆绑，WTC 才转化为 React class，也就是说，WTC 是 React class 类的类，捆绑过程其实是实例化过程。`_createClass(defs)` 可带一个参数，该参数要符投影类定义规格，另外 `_createClass` 在所有 WTC 的共有基类 `T.Widget_` 中定义，所有 WTC 实例都可调用它实施捆绑。
+这里 `defineDual(attr,setter,initValue,base)` 时传入 `base` 参数，是为了取得上层 setter 函数，第 `04` 行 `base.setter(value,oldValue)` 调用上层 setter 函数。上层 setter 调不调用，在哪个位置调用都是编程可控的。
 
-因为绑定某个具体的投影定义，生成的 React class 就具备特定功能，所以，这种捆绑也称 **"定制化捆绑"**。定义一个 WTC 后，借助定制化捆绑机制，该 WTC 不往 T 模块注册也同样支持常规编程，这么做的好处是，避免污染全局 T 模块空间。
+请注意，凡使用 `base` 参数取回上级 setter 函数，对该 `duals.attr` 赋值将不会自动触发底层的 setter 函数调用，底层 setter 必须由上层 setter 用 `base.setter(value,oldValue)` 主动调起。如果 `this.defineDual(attr,setter,initValue,base)` 注册时，还没有底层 setter 函数，系统将自动生成一个，生成 setter 实际执行 `this.state[attr] = value`。
+
+#### 一次注册多个双源 setter 函数
+
+比如下面例子，两个双源属性共用一个 setter 函数。
+
+``` js
+this.defineDual([sAttr1,sAttr2], function(value,oldValue,attr) {
+  if (attr == sAttr1) {
+    // ...
+  }
+  // ...
+});
+```
+
+定义 setter 回调函数时，可指定第 3 个参数 `attr`，用来取回被定义的双源属性名。
 
 &nbsp;

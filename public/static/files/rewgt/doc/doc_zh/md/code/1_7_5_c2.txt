@@ -1,0 +1,5 @@
+<div $=P key='p' $$for='item in duals.data' dual-data='{["item1","item2","item3"]}'>
+  <span $=Span $key='"a" + index' $html='"data[" + index + "] = "'></span>
+  <span $=Span $key='"b" + index' $html='item'></span>
+  <span $=Br $key='"c" + index'></span>
+</div>

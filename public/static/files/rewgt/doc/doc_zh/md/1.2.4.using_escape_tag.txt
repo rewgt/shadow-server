@@ -1,0 +1,59 @@
+1.2.4 网页中的转义标签
+-----------------------
+
+&nbsp;
+
+前面几节介绍了 Shadow Widget 转义标签的书写规则，本节补充介绍转义标签在网页中使用的若干特色。
+
+#### 内置 WTC 类定义
+
+Shadow Widget 内置定义了一系列 WTC 类，分为如下 4 类：
+
+1. Span 类构件   
+所有行内构件都属于 Span 类，如 `Span, Button, Input, Textarea, A, Img, Select, Option` 等。
+
+2. P 类构件   
+段落类构件，如 `P, Li, Table, H1, H2, Pre, Form, Fieldset, Iframe` 等均属此类。
+
+3. Div 类构件   
+分区类构件，与 HTML 的 `<div>` 对应，表达可容纳若干 P 类构件的构件。比如 `Div, Article, Section` 等，一个 `Div` 可包含一个或多个 `P` 段落，但 `Div` 不能直接包含 Span 类构件，只能先包含 P 构件，再由 P 构件包含 Span 构件。
+
+4. Panel 类构件   
+面板类构件常用作布局，尤其是 flex 布局，根节点（即 `body` 节点）下通常放置面板构件，然后再用 `Panel` 构件将其它构件包含进来。
+
+这 4 类构件中，Panel 类所处层次最高，我们用它装 Div 类与 P 类构件，其次是 Div 类，Div 类构件可装 P 类（及 Div 类自身），再其次是 P 类构件，可用它装 Span 类（及 P 类自身）。Shadow Widget 对构件搭建层次的要求与原生 HTML 严格得多，不能跨越规格装子构件，比如，Panel 类与 Div 类都不能直接装 Span 类构件。
+
+各类构件如何使用？有什么约束？细节内容将在另一本手册 [“2. 基础篇：在网页中编程”](#2.) 介绍。这里我们只挑几项重要知识先行介绍，因为本手册在介绍基本概念时，就要运用一些构件了。本手册举例时，尽量只选最常见构件，比如上面构件分类时，对各类构件做出举例，举例列出的都是常见构件。
+
+#### 转义标签中限用 WTC 构件
+
+在 `<div $=WTC>`，或 `<pre $=WTC>`，或 `<span $=WTC>` 的书写方式中，**由 `$` 指向的标签只能是 WTC 类**。当我们用转义标签定义用户界面时，由 `$=WTC` 指示的各类节点最终会被串接成一颗 W 树，如果 `$` 属性指向非 WTC 节点，无法串接成树，系统会报错。
+
+#### 转义标签中常见属性
+
+1. `width, height` 属性   
+非行内 WTC 类（指 Panel 类、Div 类、P 类构件），都用 `width` 与 `height` 指定构件的宽高，常见格式与含义如下：   
+&nbsp;&nbsp; 取值 `0`  表示 `'0%'`   
+&nbsp;&nbsp; 取值 `0.5`  表示 `'50%'`   
+&nbsp;&nbsp; 取值 `0.9999`  表示 `'100%'`   
+&nbsp;&nbsp; 取值 `1`  表示 `'1px'`   
+&nbsp;&nbsp; 取值 `400`  表示 `'400px'`   
+&nbsp;&nbsp; 取值 `null`  表示不设置，通常由该构件某项 class 的 css 定义来决定。
+
+2. `borderWidth, margin, padding` 属性   
+非行内 WTC 类都用到这几个属性，常见格式与含义如下：   
+&nbsp;&nbsp; 取值 `0`  表示 `'0 0 0 0'`   
+&nbsp;&nbsp; 取值 `1`  表示 `'1px 1px 1px 1px'`   
+&nbsp;&nbsp; 取值 `[0,1,2,3]`  表示 `'0 1px 2px 3px'`   
+&nbsp;&nbsp; 取值 `[null,null,null,null]`  表示不设置，通常由该构件某项 class 的 css 定义来决定。
+
+3. `value` 属性   
+提供文本输入或多选项选择的构件有此属性，如 `Input, TextArea, Select` 等，均已封装 `onChange` 事件同步，即，界面输入结果已自动同步到 `state.value`。
+
+4. `checked, selected` 属性   
+其值要求用 `''` 表示非真，用 `'1'` 表示真。提供选项的构件有此属性，如 `Input, Option`，也对 `onChange` 值同步做了封装。   
+用字串表达 bool 属性值是 Shadow Widget 的惯常用法，这主要考虑字串属性在转义标签中书写更方便，比如，`disabled, readOnly` 等属性，都用空串表示非真（即 `false`），用 `'1'` 表示真（即 `true`）。
+
+扼要介绍上述用法，是为了方便后续章节用代码举例，关于这些知识的系统化介绍，还请阅读 “基础篇” 手册。
+
+&nbsp;

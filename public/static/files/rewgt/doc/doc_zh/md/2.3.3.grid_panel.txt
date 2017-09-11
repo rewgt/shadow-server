@@ -1,0 +1,36 @@
+2.3.3 类表格面板
+-----------------
+
+&nbsp;
+
+#### <a name="grid"></a>GridPanel 面板
+
+GridPanel 构件使用 `duals.sizes` 指示主轴上 N 个元素如何分割，以横向布局为例，当 sizes 取值 `[100, 0.1, -1]` 时，表示每行分 3 列，第 1 列占 100 像素宽，第 2 列占 10% 宽，第 3 列占剩余宽度，存在多行时，每行都按此法处理，也即，每行同一列都按预定的宽度进行布局。如果是纵向布局，同理类推。
+
+程序运行中，可执行类似 `comp.duals.sizes = [100,120,-1]` 的语句调整各列宽度。
+
+`duals.sizes` 数组中各数值要求的格式与 `width` 或 `height` 属性相同，即：取值大于 1 时表示像素，大于 0 且小于 1 表示百分比，负值表示剩余宽高的百分比。
+
+<div $='.rewgt.ui_demo' src='md/code/2_3_3_a.txt' input-height='{130}'></div>
+
+同一行各构件应指定相同高度，否则 GridPanel 内容布局看起来可能会乱。
+
+GridPanel 提供 `duals.cellSpacing` 属性指示各列之间空隙，它缺省取 `0` 值，如果所有列使用某固定 `margin` 值，`cellSpacing` 应取左 `margin` 与右 `margin` 之和，比如这个例子，`margin` 取值 `4`，`cellSpacing` 取值 `8`，如果小于 `8`，将导致一行摆不下指定列数。
+
+说明：
+1. GridPanel 中的单元格一般用 `Panel`，不过改用其它 Panel 类、Div 类或 P 类构件也是可以的。
+2. 单元格不宜通过 `$if, $elif, $else` 指令生成，因为如果条件不成立，React 将它渲染为注释节点，虽不在界面显示，但在 GridPanel 中仍占去一个单元格。
+
+#### <a name="table"></a>TablePanel 面板与 TableRow 表格行
+
+TablePanel 描述的表格构件，包含 3 个层次，TablePanel 是顶部第 1 层（相当于 `<table>` 标签），TableRow 是中间第 2 层，一个 TableRow 表示一行（相当于 `<tr>` 标签），还有充当表格单元的（相当于 `<td>` 标签）构件，属于第 3 层，各种非行内构件均可用作表格单元。
+
+<div $='.rewgt.ui_demo' src='md/code/2_3_3_b.txt' input-height='{230}'></div>
+
+TablePanel 与 TableRow 要配套使用，TableRow 之下各节点自动纳入到各个单元格。单元格可传递 `tdStyle, colSpan, rowSpan` 三个特殊属性，`tdStyle` 用来定义当前 `<td>` 标签的 `style` ，如上面首行第 3 列用 `tdStyle` 指定字体颜色。`colSpan` 与 `rowSpan` 用于合并单元格，其含义与 `<td>` 标签的 `colspan`、`rowspan` 相同。这里 `tdStyle` 要求传递 `object` 数据（不能是字串），动态赋值如 `comp.duals.tdStyle = {color:'blue'}`，与给 `duals.style` 赋值一样具有合并效果，即：新 css 属性值覆盖旧值，未被覆盖的保留原值。
+
+说明：
+1. 为避免 TablePanel 布局产生不确定性，建议在首行定义各个列宽，若需指定行高，建议在首列指定行高，其它单元格的宽与高宜赋 `null` 值。
+2. 可在 TablePanel 的 `klass` 指定不同的 hover 特性，如：突显整行 `row_hover-col-default` 或突显单元格 `col-default-row_hover` 。
+
+&nbsp;
