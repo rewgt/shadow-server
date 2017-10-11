@@ -14,7 +14,7 @@ var templateNames = null;  // [[fileName,sTitle],...]
 var pagesLastNode  = document.querySelector('#pages-last');
 var btnExpandNode  = document.querySelector('#btn-expand');
 var tempListNode   = document.querySelector('#temp-list');
-var dragFromNode   = document.querySelector('#drag-from-res');
+var dragFromNode   = document.querySelector('#drag-from-res span');
 var sampleHtmlNode = document.querySelector('#sample-file');
 var headTagsNode   = document.querySelector('#head-tags');
 var fileNameNode   = document.querySelector('#file-name');
@@ -155,11 +155,7 @@ window.removeHistoryHtml = function(event) {
   sFile = pNode && pNode.getAttribute('fname');
   if (!sFile) return;
   
-  if (!projPageInfo || !projPageInfo.currProj) return;
-  var currPrjUrl = projPageInfo.currProj;
-  if (currPrjUrl.slice(-1) != '/') currPrjUrl += '/';
-  
-  postAsynRequest(currPrjUrl + '$utils?cmd=del_history',{source:sFile}, function(err,sInfo) {
+  postAsynRequest('/rewgt/$utils?cmd=del_history',{source:sFile}, function(err,sInfo) {
     if (err) {
       if (sInfo)
         alert('Failed: ' + sInfo);
@@ -347,10 +343,8 @@ window.addEventListener('message', function(msg) {
   if (msg instanceof Object && msg) {
     if (msg.method == 'init') { // msg.param: [taskId,inValue,bCss,innerPrjNum,fromHome]
       var data = msg.param[1], fromHome = msg.param[4];
-      if (!fromHome) {          // not come from homepage
-        dragFromNode.style.visibility = 'visible';
-        dragFromNode.style.height = '';
-      }
+      if (!fromHome)            // not come from homepage
+        dragFromNode.style.display = 'inline';
       
       if (Array.isArray(data)) {
         projectList = data;
@@ -404,8 +398,8 @@ p {
 <div style='margin-left:8px; display:none'>
   <h4 class='sub-title'>Select history template</h4>
   <div id='temp-list'></div>
-  <div id='drag-from-res' style='visibility:hidden; height:0px'>
-    <h4 class='sub-title'>Or, copy from exist file <span style='font-weight:400'>(drag &amp; drop *.html file from resource area)</span></h4>
+  <div id='drag-from-res'>
+    <h4 class='sub-title'>Or, copy from exist file <span style='font-weight:400; display:none'>(drag &amp; drop *.html file from resource area)</span></h4>
     <p><input id='sample-file' type='text' style='width:360px'></p>
   </div>
   <h4 class='sub-title'>Title <span style='font-weight:400; color:#888'>(input title, or describe &lt;title&gt;, &lt;meta&gt;, &lt;link&gt;)</span></h4>

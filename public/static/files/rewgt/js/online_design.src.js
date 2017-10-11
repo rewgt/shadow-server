@@ -1183,6 +1183,12 @@ function joinOriginTool_(bTools,sWdgtPath) {
   return bTools;
 }
 
+function htmlEditable_(node) {
+  if (node.children.length > 0 && node.getAttribute('data-html.opt') !== 'edit')
+    return false;
+  return true;
+}
+
 function wdgtSelectChange(bPath) {
   function resetOldTemp() {
     var canHide = !!rootNode.hideTemplate;
@@ -1312,7 +1318,7 @@ function wdgtSelectChange(bPath) {
             noExpr = (editFlag == 0? targCanEditFlag(bPath,true) > 0: true);
           var b = rootNode.widgetSchema(sWdgtPath,true,noExpr);
           if (b) {  // b is [cmdId,dSchema,dOpt,attrs,canEditHtmlTxt]
-            canEditTxt = currSelectedWdgt && currSelectedWdgt.children.length == 0 && b[4];
+            canEditTxt = b[4] && htmlEditable_(currSelectedWdgt);
             rightPageDiv.setPropEditor(b[0],b[1],b[2],b[3]);
           }
         }
@@ -2085,7 +2091,6 @@ function initCreator() {
   document.body.appendChild(topPanel);
   leftPanel = document.createElement('div');
   leftPanel.setAttribute('style','position:absolute; left:0px; top:0px; width:' + LEFT_PANEL_WIDTH + 'px; height:100%; background:#e8e8e8 url(' + creator.appBase() + '/res/ruler_left.png) no-repeat fixed ' + (LEFT_PANEL_WIDTH - 14) + 'px ' + (TOP_PANEL_HEIGHT + mainFrameOffsetY) + 'px; z-index:3020;');
-  document.body.appendChild(leftPanel);
   rightPanel = document.createElement('div');
   rightPanel.setAttribute('style','position:absolute; right:0px; top:0px; width:' + RIGHT_PANEL_WIDTH + 'px; height:100%; background-color:#e8e8e8; z-index:3020; overflow:hidden;');
   document.body.appendChild(rightPanel);
@@ -2151,7 +2156,7 @@ function initCreator() {
   
   rulerLeft = document.createElement('div');
   var iPosY = TOP_PANEL_HEIGHT + (HALF_OF_CENTER_Y - 10) + mainFrameOffsetY;
-  rulerLeft.setAttribute('style','position:absolute; left:' + (LEFT_PANEL_WIDTH - 11) + 'px; top:' + iPosY + 'px; width:9px; height:18px; border:1px solid #aaa; background-color:rgba(192,192,192,0.7); cursor:ns-resize;');
+  rulerLeft.setAttribute('style','position:absolute; left:' + (LEFT_PANEL_WIDTH - 10) + 'px; top:' + iPosY + 'px; width:9px; height:18px; border:1px solid #aaa; background-color:rgba(192,192,192,0.7); cursor:ns-resize;');
   rulerLeft.setAttribute('title','Drag to move y-axis');
   leftPanel.appendChild(rulerLeft);
   var rulerLeftY = 0, rulerLeftCanDrag = false, rulerLeftDraged = false, rulerLeftOpId = 0;
@@ -2267,7 +2272,7 @@ function initCreator() {
   childInfo.setAttribute('style','width:100%; height:60px; margin:3px 0px 2px 0px; line-height:1.2; background-color:#f4f4f4; overflow-y:auto; border-radius:3px;');
   secondTd.appendChild(childInfo);
   var selectInfo = document.createElement('div');
-  selectInfo.setAttribute('style','width:100%; height:28px; overflow:hidden;');
+  selectInfo.setAttribute('style','width:100%; height:28px; overflow:hidden; font-size:15px; line-height:18px;');
   secondTd.appendChild(selectInfo);
   var ruleInfo = document.createElement('div');
   ruleInfo.setAttribute('style','width:100%; height:20px;');
@@ -2275,7 +2280,7 @@ function initCreator() {
   secondTd.appendChild(ruleInfo);
   selectInfoBtn = document.createElement('img');
   selectInfoBtn.setAttribute('draggable','true');
-  selectInfoBtn.setAttribute('style','display:none; position:relative; left:0px; top:3px; width:16px; height:16px; border:1px solid #e8e8e8; margin:0px 6px 0px 0px;');
+  selectInfoBtn.setAttribute('style','display:none; width:16px; height:16px; border:1px solid #e8e8e8; margin:0px 6px 0px 0px;');
   selectInfoBtn.setAttribute('src',creator.appBase()+'/res/empty.png');
   selectInfo.appendChild(selectInfoBtn);
   selectInfoName = document.createElement('span');
@@ -2285,7 +2290,7 @@ function initCreator() {
   selectInfoSpan.setAttribute('style','padding:2px 10px 2px 0px; color:#444;');
   selectInfo.appendChild(selectInfoSpan);
   var selectInfoChild = document.createElement('img');
-  selectInfoChild.setAttribute('style','display:none; position:relative; left:0px; top:2px; width:16px; height:16px;');
+  selectInfoChild.setAttribute('style','display:none; position:relative; top:-1px; width:16px; height:16px;');
   selectInfoChild.setAttribute('src',creator.appBase()+'/res/insert.png');
   selectInfo.appendChild(selectInfoChild);
   topPageTool = document.createElement('div');
@@ -2698,7 +2703,7 @@ function initCreator() {
   
   var firstShowPages_ = true;
   topPanel.listChildren = function(sPath) {
-    var s = '', b = ['','#a00',-1,[],[]];
+    var s = '', b = ['','#c00',-1,[],[]];
     if (rootNode.listChildren)
       b = rootNode.listChildren(sPath);  // if sPath is '', list root items
     
@@ -2757,7 +2762,7 @@ function initCreator() {
   
   rulerTop = document.createElement('div');
   var iPosX = LEFT_PANEL_WIDTH + (HALF_OF_CENTER_X - 10) + mainFrameOffsetX;
-  rulerTop.setAttribute('style','position:absolute; left:' + iPosX + 'px; top:' + (TOP_PANEL_HEIGHT - 11) + 'px; width:18px; height:9px; border:1px solid #aaa; background-color:rgba(192,192,192,0.7); cursor:ew-resize;');
+  rulerTop.setAttribute('style','position:absolute; left:' + iPosX + 'px; top:' + (TOP_PANEL_HEIGHT - 10) + 'px; width:18px; height:9px; border:1px solid #aaa; background-color:rgba(192,192,192,0.7); cursor:ew-resize;');
   rulerTop.setAttribute('title','Drag to move x-axis');
   topPanel.appendChild(rulerTop);
   var rulerTopX = 0, rulerTopCanDrag = false, rulerTopDraged = false, rulerTopOpId = 0;
@@ -2822,7 +2827,7 @@ function initCreator() {
   var sPosX = ( mainFrameWidth?
     'left:' + (LEFT_PANEL_WIDTH + mainFrameWidth - 20 + mainFrameOffsetX) + 'px':
     'left:' + (window.innerWidth - RIGHT_PANEL_WIDTH - 20) + 'px');
-  rulerRight.setAttribute('style','position:absolute; ' + sPosX + '; top:' + (TOP_PANEL_HEIGHT - 11) + 'px; width:18px; height:9px; border:1px solid #aaa; background-color:rgba(192,192,255,0.7); cursor:ew-resize;');
+  rulerRight.setAttribute('style','position:absolute; ' + sPosX + '; top:' + (TOP_PANEL_HEIGHT - 10) + 'px; width:18px; height:9px; border:1px solid #aaa; background-color:rgba(192,192,255,0.7); cursor:ew-resize;');
   rulerRight.setAttribute('title','Drag to resize width');
   topPanel.appendChild(rulerRight);
   var rulerRightX = 0, rulerRightCanDrag = false, rulerRightDraged = false, rulerRightOpId = 0;
@@ -2888,10 +2893,10 @@ function initCreator() {
   // step 5: add pages in right panel
   //---------------------------------
   rightPageList = document.createElement('div');
-  rightPageList.setAttribute('style','position:relative; left:2%; top:0px; width:96%; height:60px; margin:4px 0px 0px 0px; line-height:1; background-color:#f4f4f4; overflow-y:auto; border-radius:3px;');
+  rightPageList.setAttribute('style','position:relative; left:2%; top:0px; width:96%; height:60px; margin:4px 0px 0px 0px; line-height:1.1; font-size:13px; font-weight:300; background-color:#f4f4f4; overflow-y:auto; border-radius:3px;');
   rightPanel.appendChild(rightPageList);
   rightPageDiv = document.createElement('div');
-  rightPageDiv.setAttribute('style','width:100%; height:' + (window.innerHeight - 64) + 'px;');
+  rightPageDiv.setAttribute('style','width:100%; height:' + Math.max(20,window.innerHeight-64) + 'px;');
   rightPanel.appendChild(rightPageDiv);
   righPanelMask = document.createElement('div');
   righPanelMask.setAttribute('style','display:none; position:absolute; left:0px; top:0px; width:100%; height:100%; z-index:3020;');
@@ -2931,7 +2936,7 @@ function initCreator() {
       page.style.display = page.getAttribute('name') == name? 'block': 'none';
     }
     for (var i=0,btn; btn=rightPageList.children[i]; i++) {
-      btn.style.color = btn.getAttribute('name') == name? '#a00': '';
+      btn.style.color = btn.getAttribute('name') == name? '#c00': '';
     }
   };
   rightPageDiv.rmvPage = function(name) {
@@ -2986,9 +2991,6 @@ function initCreator() {
     }
   }
   
-  if (bPage.length >= 20)  // too many pages, enlarge list area
-    rightPageList.style.height = '96px';
-  
   var appBasePath = location__('./').pathname;
   if (appBasePath[0] != '/') appBasePath = '/' + appBasePath; // avoid bug of IE10
   var listResUrl = creator.appBase()+'/list_resource.html?base=' + encodeURIComponent(appBasePath);
@@ -3034,6 +3036,11 @@ function initCreator() {
             if (!sFirstPg) sFirstPg = item[0];
             rightPageDiv.addPage(item[0]+'',listResUrl + '&url=' + encodeURIComponent(item[1]+'') + sRepoInfo);
           });
+          
+          if (rightPageDiv.children.length >= (d.lotResource || 14)) { // too many pages, enlarge list area
+            rightPageList.style.height = '96px';
+            rightPageDiv.style.height = Math.max(20,window.innerHeight - 100) + 'px';
+          }
         }
       }
       catch(e) {}
@@ -3165,8 +3172,10 @@ function initCreator() {
   document.body.appendChild(instantDiv);
   
   haloFrame = document.createElement('div');
-  haloFrame.setAttribute('style','display:none; position:absolute; z-index:3010; pointer-events:none; border:1px dotted red;');
+  haloFrame.setAttribute('style','display:none; position:absolute; z-index:3020; pointer-events:none; border:1px dotted red;'); // 3010 --> 3020
   document.body.appendChild(haloFrame);
+  document.body.appendChild(leftPanel);  // leftPanel cover haloFrame
+  
   var b = [ ['Drag to move, double click to relay',creator.appBase()+'/res/move.png','move',true],    // draggable = true
     ['Drag to insert, double click to relay',creator.appBase()+'/res/copy.png','copy',true],
     ['Drag to link, double click to relay',creator.appBase()+'/res/linker.png','linker',true],
@@ -3179,7 +3188,7 @@ function initCreator() {
   ];
   floatButtons = document.createElement('div');
   floatButtons.setAttribute('name','float-btn');
-  floatButtons.setAttribute('style','position:absolute; visibility:hidden; left:0px; top:-26px; width:' + (b.length * FLOAT_BUTTON_WIDTH + 2) + 'px; height:22px; border:1px solid #ddd; background-color:#f0f0f0; overflow:hidden; pointer-events:auto;');
+  floatButtons.setAttribute('style','position:absolute; visibility:hidden; padding:0 2px; line-height:15px; left:0px; top:-26px; width:' + (b.length * FLOAT_BUTTON_WIDTH + 2) + 'px; height:22px; border:1px solid #ddd; background-color:#f0f0f0; overflow:hidden; pointer-events:auto;');
   haloFrame.appendChild(floatButtons);
   b.forEach( function(item) {
     var sTitle = item[0], sUrl = item[1], sName = item[2], draggable = item[3];
@@ -3303,7 +3312,7 @@ function initCreator() {
       }
     }
     else if (sName == 'edit_txt' && rootNode.popDesigner) {
-      if (currSelectedWdgt && currSelectedWdgt.parentNode && currSelectedWdgt.children.length == 0) {
+      if (currSelectedWdgt && currSelectedWdgt.parentNode && htmlEditable_(currSelectedWdgt)) {
         var b = getWidgetPath(currSelectedWdgt);
         if (b) {
           sWdgtPath = b[0];
@@ -3467,7 +3476,7 @@ function initCreator() {
   haloFrame2.setAttribute('style','display:none; position:absolute; z-index:3010; pointer-events:none; border:1px solid red;');
   document.body.appendChild(haloFrame2);
   var floatKeyName = document.createElement('div');
-  floatKeyName.setAttribute('style','position:absolute; left:0px; top:-24px; width:100px; height:22px; color:#a00;');
+  floatKeyName.setAttribute('style','position:absolute; left:0px; top:-24px; width:100px; height:22px; color:#c00;');
   haloFrame2.appendChild(floatKeyName);
   haloFrame2Ins = document.createElement('img');
   haloFrame2Ins.setAttribute('style','display:none; position:absolute; right:0px; bottom:0px; width:16px; height:16px;');
@@ -3822,6 +3831,8 @@ function initCreator() {
     mainMenuArea.hideMenu();
     
     var targ = event.target;
+    if (targ.nodeName == 'SELECT') return; // avoid select widget, since chrome dropdown for choosing
+    
     if (event.shiftKey) {
       var wdgtNode = null, sKey = '';
       if (currRootPageType == 'ScenePage' && currRootPageKeyid) {

@@ -44,6 +44,12 @@
 
 ![popup button](md/res/popup_btn.png)
 
+#### 在选中位置快速复制
+
+比如选中上面新建的 P 构件，然后拖动浮动工具条上的 Drag to insert 按钮 ![insert](md/res/copy_btn.png) 到  “构件路径提示栏”，新复制的构件就插入到当前选中的位置了。
+
+我们不需要刚复制的 P 构件，选中它，点击左边栏 Remove widget 按钮 ![delete button](md/res/delete_btn.png) 即可删除。
+
 #### 编辑 `"html."` 文本定义
 
 接下来我们用鼠标点击 “Paragraph” 文本，Span 构件将被选中（它在 P 构件的下层），再点击 Edit text content 浮动按钮 ![edit text](md/res/edit_txt.png)，在弹出的编辑框中，我们将文本改成 `"Hello world!"`。点击弹窗之外的区域，弹窗将自动关闭，同时修改内容立即生效。

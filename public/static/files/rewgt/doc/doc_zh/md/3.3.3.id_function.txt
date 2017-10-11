@@ -79,7 +79,7 @@ this.duals.id__ = utils.identicalId();
 
 说明：在上面 `02` 行与 `07` 行的条件段，都能编写初始化代码，但这两者有差别。后者（`value == 1` 条件段）先执行，相当于在 `getInitialState()` 函数的末尾编码，而 `oldValue == 1` 条件发生于首次 `render()` 调用时，这时，本节点所有双源属性已定义（包括调用 `defineDual()` 注册的，以及系统自动注册的），而且传入的 `props.attr` 均已赋值给同名双源属性，比如 `props.width` 已赋给 `duals.width`。换一句话，`value == 1` 条件段通常只用来注册回调函数（如追加 duals 属性定义、调用 `setEvent()` 等），**`oldValue == 1` 条件段是所有 duals 属性已预备之后的初始化**。
 
-正因为 `oldValue == 1` 条件段得到执行时，duals 属性刚准备好，这儿也是最早可以侦听自身 duals 属性的位置，所以该段常用来编写 `this.listen(sAttr,func)` 语句，[一次性安装子节点](#3.4.3.!once_child) 也在此处。
+正因为 `oldValue == 1` 条件段得到执行时，全部 duals 属性刚准备好，这儿常用作最早可侦听自身 duals 属性的位置，在此编写 `this.listen(sAttr,func)` 语句。当然，如果用 `this.defineDual(attr)` 显式注册 `duals.attr`，将 `this.listen(attr,func)` 语句再提前，放到 `value == 1` 条件段也未尝不可。另外，`oldValue == 1` 条件段还用于一次性安装子节点，[参见后文](#3.4.3.!once_child) 。
 
 #### idSetter 函数
 

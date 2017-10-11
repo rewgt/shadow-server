@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width='90' height='60' viewport='0 0 90 60' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+<g _widget='{"name":"Style","widget":["MarkedDiv",{"width":0.9999,"minHeight":10,"$$for":"","$style":"{backgroundColor:&#39;#e8e8e8&#39;,display:(ex.__design__()?&#39;block&#39;:&#39;none&#39;)}","html.":"&lt;pre $=Style&gt;\n.red-font {\n  color: red;\n}\n&lt;/pre&gt;"}]}' stroke='#222' stroke-width='1'>
+  <text x='50%' y='50%' dy='0.3em' font-size='14' text-anchor='middle'>Style</text>
+</g>
+</svg>

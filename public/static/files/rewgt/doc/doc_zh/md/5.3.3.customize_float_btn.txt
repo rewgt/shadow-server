@@ -104,7 +104,7 @@ A) `name`，工具集唯一 ID
 B) `opt`，选中后，其下级成员是否可编辑，有 3 种选择：
 
 1. `"mono/all"`，所有子级成员均可编辑，包括：增、删、改，可计算属性也可修改
-2. `"mono/some"`，允许可视编辑器修改子成员属性（可计算属性除外），不能删除子成员
+2. `"mono/some"`，允许可视编辑器修改子成员属性（可计算属性除外），不能增删子成员
 3. `"mono/none"`，可视编辑器不能增、删子成员，也不能修改子成员的属性
 
 C) `tools`，用数组 `[toolConfig, ...]` 定义各项操作，其中 `toolConfig` 中各属性含义如下：
@@ -120,7 +120,11 @@ C) `tools`，用数组 `[toolConfig, ...]` 定义各项操作，其中 `toolConf
 9. `onlyScene`，仅 ScenePage 下的构件选中时，才显示本浮动按钮。
 10. `left, top, width, height`，指定弹窗位置与大小，`left` 与 `top` 指定弹窗的左上角位置，既可以是像素值（值大于 1）也可以是百分比（取值0~0.9999），如果 `left` 或 `top` 缺省未定义，表示自动居中。`width` 与 `height` 指定弹窗的宽高，既可以是像素值（值大于 1）也可以是百分比（取值0~0.9999），如果未指定，宽与高自动取 `100%`。
 
-说明：当一个构件用 `'data-group.optid'` 属性指示从 `TOOL.json` 查找扩展工具时，从上述 `opt` 项（值为 `"mono/all"` 或 `"mono/some"` 或 `"mono/none"`）可提取 `editable` 配置值（ `"all"` 或 `"some"` 或 `"none"`），这时，该构件本配置的原定义（即  `WTC._getGroupOpt().editable`）将被覆盖。
+说明：
+
+1. 当一个构件用 `'data-group.optid'` 属性指示从 `TOOL.json` 查找扩展工具时，从上述 `opt` 项（值为 `"mono/all"` 或 `"mono/some"` 或 `"mono/none"`）可提取 `editable` 配置值（ `"all"` 或 `"some"` 或 `"none"`），这时，该构件本配置的原定义（即  `WTC._getGroupOpt().editable`）将被覆盖。
+
+2. 当一个构件支持 `duals['html.']` 属性（即 [`WTC._htmlText`](#3.3.2.!special) 为 true），并且它没有子节点定义时，系统自动提供用于编辑 `'html.'` 属性的浮动按钮 ![Edit](md/res/edit_txt.png)，若有子节点，则缺省不提供此项编辑。在特定情况下，比如由程序动态生成子节点，编辑 `'html.'` 的浮动按钮也是需要的，用 `props['data-html.opt']='edit'` 额外指示，可视设计器也会为它提供 `'html.'`  编辑器。
 
 #### 编辑器弹窗与主设计界面的通信机制
 

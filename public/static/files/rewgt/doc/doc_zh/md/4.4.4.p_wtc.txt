@@ -6,6 +6,7 @@
 > P 类构件：
 > - [`Div2`](#4.4.4.!div2)
 > - [`VirtualDiv`](#4.4.4.!virtual_div)
+> - [`Style`](#4.4.4.!style)
 > - [`P`](#4.4.4.!p)
 > - [`OptLi`](#4.4.4.!opt_li)
 > - [`Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr`](#4.4.4.!col)
@@ -34,6 +35,18 @@
 > - `padding: [null,null,null,null]`
 > - `borderWidth: [null,null,null,null]`
 > - `'tagName.': ''`
+
+##### <a name="style"></a>`Style`
+
+> 本类继承自 [`Div2`](#4.4.4.!div2) ，用来描述 `<style>` 节点。
+
+> **`getDefaultProps()` 新增属性：**
+> - `left: null`
+> - `top: null`
+> - `margin: [null,null,null,null]`
+> - `padding: [null,null,null,null]`
+> - `borderWidth: [null,null,null,null]`
+> - `'tagName.': 'style'`
 
 ##### <a name="p"></a>`P`
 

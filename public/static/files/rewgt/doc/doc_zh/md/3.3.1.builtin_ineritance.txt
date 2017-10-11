@@ -25,6 +25,7 @@ Shadow Widget 内置构件分为 Panel 类、Div 类、P 类、Span 类共 4 种
     |   |   +-- Div2
     |   |   |   +-- VirtualDiv
     |   |   |   |   +-- Col/Colgroup/Td/Tbody/Thead/Tfoot/Th/Tr
+    |   |   |   +-- Style
     |   |   +-- HiddenDiv
     |   |   +-- Article/Section/Header/Footer/Aside/Nav/Main
     |   |   +-- MarkedDiv

@@ -80,6 +80,7 @@ main.pluginServices['$utils'] = [function(req,res,sCateProj,sServPath) { // sCat
       res.json( { cacheSize: config.cacheSize, 
         backupHTML: config.backupHTML,
         resourcePages: config.resourcePages,
+        lotResource: config.lotResource || 0,
       });
       return;
     }

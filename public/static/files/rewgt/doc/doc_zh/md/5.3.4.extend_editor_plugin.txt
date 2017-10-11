@@ -120,9 +120,9 @@ Shadow Widget 支持这种需求，但要求将属性命名成 `"segment1.segmen
 
 如果可视化编辑要依赖显示在设计区的构件提供的功能（如定义 ondrop 事件、ondblclick 事件等），只能在 WTC 类定义时由 `_getGroupOpt()` 返回工具集定义，在相应的 `toolConfig.get` 与 `toolConfig.set` 函数进行读写定制。不妨研究一下系统内置构件 MarkedDiv 如何实现 markdown 文本定制编辑的，源码请见 `template.js` 中的 TMarkedDiv_ 类定义。MarkedDiv 还预定义 `props['noSaveChild.']` 值为 `true`，用来标记它的子成员不必存盘，因为都是动态生成，`"noSaveChild."` 参数在自定义扩展时比较有用。
 
-#### 两份开源项目供参考
+#### 几个可供参考的开源项目
 
-本章粗略的介绍了自定义弹窗编辑器如何实现，实践中大家还需阅读 shadow-widget 工程中相关源码。Shadow Widget 官方还有 <a target="_blank" href="https://github.com/rewgt/shadow-book">shadow-book</a> 与 <a target="_blank" href="https://github.com/rewgt/shadow-slide">shadow-slide</a> 两个开源项目，可供大家对照着学习、借鉴。
+本章粗略的介绍了自定义弹窗编辑器如何实现，实践中大家还需阅读 shadow-widget 工程中相关源码。Shadow Widget 官方还有 <a target="_blank" href="https://github.com/rewgt/shadow-book">shadow-book</a> ，<a target="_blank" href="https://github.com/rewgt/shadow-slide">shadow-slide</a> ，<a target="_blank" href="https://github.com/rewgt/shadow-bootstrap">shadow-bootstrap</a> 三个开源项目，可供大家对照着学习、借鉴。
 
 shadow-book 工程体量很小，它在资源页中封装两个样板 `book_summary` 与 `book_content`，可用来学习样板文件如何编制。shadow-slide 提供类 PPT 编辑器，有许多定制的构件与弹窗编辑器，适合用来深入学习。
 

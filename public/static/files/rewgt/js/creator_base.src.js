@@ -548,7 +548,7 @@ main.$$onLoad.push( function(callback) {
     setTimeout( function() {
       if (typeof containNode_.instantShow == 'function')
         utils.instantShow = containNode_.instantShow;  // overwrite old function
-    },300);
+    },1000);
   }
   
   containNode_.closeModal = function(callback) {
@@ -2080,9 +2080,9 @@ main.$$onLoad.push( function(callback) {
       return doCallback();
     }
     
-    if (currNode && currNode.children.length == 0) {
+    if (currNode) { // && currNode.children.length == 0
       var dProp = comp.props['link.props'];
-      if (dProp) { // is linker
+      if (dProp) {  // is linker
         var lnkCls = RefDiv__, lnkPath = comp.props['data-unit.path'];
         if (!lnkPath) {
           lnkPath = comp.props['data-span.path'];

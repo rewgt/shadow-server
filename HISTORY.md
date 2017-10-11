@@ -7,6 +7,14 @@ v1.1.0 / 2017-09-11
     - 优化：React.createClass 在 react v15.5 以后版本改用 create-react-class，本系统随之升级
     - 优化：重构用户手册，Shadow Widget 原理介绍与 UI 构件介绍分开到两本手册
 
+  * v1.1.1 / 2017-10-11
+    - 优化：为避免专利问题，把内置的 React 依赖库升级到采用 MIT 协议的 15.6.2 版本
+    - 改错：侦听 NavPanel 或 NavDiv 的 duals.checkedId 未起作用
+    - 改错：构件在 unmount 时，有 unlisten 函数不存在的报错
+    - 优化：增加 T.Style 定义
+    - 改错：shadow-server 提供的 page/default.html 中，引入 create-react-class.min.js 位置有误
+    - 改错：特定情况下传入 props.$onClick 函数，导致无限递归
+
 v1.0.0 / 2017-05-31
 ============
 

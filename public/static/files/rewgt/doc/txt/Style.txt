@@ -1,0 +1,9 @@
+Style
+4.4.4.!style
+[ props ]
+  left: null
+  top: null
+  margin: [null,null,null,null]
+  padding: [null,null,null,null]
+  borderWidth: [null,null,null,null]
+  'tagName.': 'style'
