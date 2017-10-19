@@ -15,6 +15,10 @@ v1.1.0 / 2017-09-11
     - 改错：shadow-server 提供的 page/default.html 中，引入 create-react-class.min.js 位置有误
     - 改错：特定情况下传入 props.$onClick 函数，导致无限递归
 
+  * v1.1.2 / 2017-10-19
+    - 优化：增加 utils.update(comp,attr,modifier) 函数
+    - 优化：增加 utils.waitAll(comp1,attr1, ... callback,waitCount) 函数
+
 v1.0.0 / 2017-05-31
 ============
 

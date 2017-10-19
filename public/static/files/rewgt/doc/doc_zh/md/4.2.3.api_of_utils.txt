@@ -39,6 +39,8 @@
 > - [`loadElementEx`](#4.2.3.!load_element_ex)
 > - [`setVendorLib`](#4.2.3.!set_vendor_lib)
 > - [`bindMountData`](#4.2.3.!bind_mount_data)
+> - [`update`](#4.2.3.!update)
+> - [`waitAll`](#4.2.3.!wait_all)
 > - [`fireTrigger`](#4.2.3.!fire_trigger)
 > - [`isUnderBody`](#4.2.3.!is_under_body)
 
@@ -291,6 +293,16 @@
 > 调用本函数时，系统将遍历 `W.$idSetter` 下的 idSetter 函数定义，找出所有可捆绑数据的项目，然后重新定义各项 `W.$idSetter[sKey]`。所以，请注意，本函数通常只调用一次，而且要在任何初始化函数（如 `W.$$onLoad` 与 `W.$onLoad`）运行之前调用。
 
 > 调用函数可以方便的为多个节点自动设置若干 `duals.attr` 初值，所以它常用作测试，不过，非调测目的用它也是可以的。
+
+##### <a name="update"></a>`update(comp,attr,modifer)`
+
+> 等效于运行 `comp.duals[attr] = ex.update(comp.state[attr],modifer)`，本函数返回值是 `ex.update()` 调用的结果值。
+
+##### <a name="wait_all"></a>`waitAll(comp1,attr1,comp2,attr2, ... , callback,waitCount)`
+
+> 等待 `comp1.duals[attr1], comp2.duals[attr2]` 等属性更改都触发后，回调函数 `callback(value1,value2,...)` 自动调用，`waitCount` 为触发限次，它可以缺省，缺省时视作值 `1`，即，有过 1 次 callback 回调，系统就自行终止下一轮触发等待，如果 `waitCount` 取 `0` 值，表示永久等待触发，允许 callback 被无限次回调。
+
+> 本函数带变长参数，`comp` 与 `attr` 要成对传入。`utils.waitAll(comp,attr,callback)` 常用来对 `comp.duals[attr]` 做一次性侦听，触发后系统会自动移除本侦听项。如果参数传入多对 `comp.duals[attr]`，表示要等待所有被侦听 duals 属性值都有更新后，才触发 callback 回调。
 
 ##### <a name="fire_trigger"></a>`fireTrigger(comp,data)`
 
