@@ -37,7 +37,8 @@ npm start
 [shadow-slide 开源项目](https://github.com/rewgt/shadow-slide)   
 [shadow-bootstrap 开源项目](https://github.com/rewgt/shadow-bootstrap)
 
-[Shadow Widget 产品博客](https://rewgt.github.io/product-blogs/)
+[Shadow Widget 产品博客](https://rewgt.github.io/product-blogs/)   
+[Shadow Widget FAQ ](https://rewgt.github.io/faq-blogs/)
 
 ### 版权（BSD开源协议）
 
