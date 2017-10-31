@@ -4348,7 +4348,7 @@ function initCreator() {
   };
   
   // define action for save button
-  leftTool.querySelector('img[name="save"]').onclick = function(event) {
+  function saveBtnClick(event) {
     event.stopPropagation();
     mainMenuArea.hideMenu();
     if (!rootNode.getDocHtml) return;
@@ -4374,7 +4374,8 @@ function initCreator() {
       }
       else rootNode.instantShow('save document successful.');
     }
-  };
+  }
+  leftTool.querySelector('img[name="save"]').onclick = saveBtnClick;
   
   // define action for open button
   leftTool.querySelector('img[name="open"]').onclick = function(event) {
@@ -4533,6 +4534,12 @@ function initCreator() {
     var code = event.keyCode;
     if ((event.ctrlKey || event.metaKey) && (code == 67 || code == 86 || code == 88))
       return;  // ctrl/cmd + c/v/x    // avoid prevent default, for copy/paste/cut
+    
+    if (code == 83 && (event.ctrlKey || event.metaKey)) {  // cmd + s or ctrl + s
+      event.preventDefault(); // avoid trigger default browser's saving
+      saveBtnClick(event);
+      return;
+    }
     
     event.preventDefault();
     if (event.shiftKey) {

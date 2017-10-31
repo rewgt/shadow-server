@@ -85,7 +85,7 @@ main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // s
         if (s2) sContent += '<!-- SLIDE PAGES: PART B' + s2 + ' -->';
         htmlText = headPart + middPart + sContent + '\n\n' + tailPart;
         
-        var output = fs.createWriteStream(path.join(sBase,sCateProj,sPureName+'.zip'));
+        var output = fs.createWriteStream(path.join(sBase,sCateProj,sPureName+'.pinp.zip'));
         var archive = archiver('zip',{zlib:{level:9}});
         
         output.on('close', function() {
@@ -95,6 +95,8 @@ main.pluginServices['$zip_doc'] = [ function(req,res,sCateProj,sServPath) { // s
           res.status(500).send('write zip file failed.');
         });
         archive.pipe(output);
+        
+        archive.append('pinp 1.0',{name:'.info',store:true});
         
         archive.append(htmlText,{name:sPureName+'.html'});
         // archive.append(fs.createReadStream(sFile),{name:'md/'+sPureName+'.txt'});
