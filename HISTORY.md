@@ -19,6 +19,12 @@ v1.1.0 / 2017-09-11
     - 优化：增加 utils.update(comp,attr,modifier) 函数
     - 优化：增加 utils.waitAll(comp1,attr1, ... callback,waitCount) 函数
 
+  * v1.1.3 / 2017-12-23
+    - 优化：可视编辑器在选中任意构件后可按 cmd+s 或 ctrl+s 热键可存盘
+    - 优化：原 ex.time() 扩展规格，增加 ex.time(sId) 支持
+    - 优化：指定以 json-x 格式调用 utils.ajax() 时，改以 text 接收而非 json，避免浏览器调试报错
+    - 优化：将内置的 React 依赖库升级到最新 16.2 版本
+
 v1.0.0 / 2017-05-31
 ============
 

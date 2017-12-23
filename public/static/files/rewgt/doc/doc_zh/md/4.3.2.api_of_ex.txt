@@ -73,6 +73,8 @@
 
 > 取当前时间的整数值，相当于 `(new Date()).valueOf()`。
 
+> 如果调用 `ex.time(sId)` 则表示以 `sId` 为区分标识，对同一 `sId` 每次调用都得到逐次累加的整数值，首次返回 `1`。
+
 ##### <a name="is_false"></a>`isFalse(value)`
 
 > 用于判断 `value` 转成 boolean 后是否为 `false`，相当于 `!value`。
